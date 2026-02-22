@@ -16,13 +16,50 @@ import argparse
 import logging
 
 
+
+class ColoredFormatter(logging.Formatter):
+
+    grey = "\x1b[38;20m"
+    yellow = "\x1b[33;20m"
+    red = "\x1b[31;20m"
+    # bold_red = "\x1b[31;1m"
+    bold_red = "\x1b[1;37;41m"
+    reset = "\x1b[0m"
+    format = "%(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    # format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+
+    FORMATS = {
+        logging.DEBUG: grey + format + reset,
+        logging.INFO: grey + format + reset,
+        logging.WARNING: yellow + format + reset,
+        logging.ERROR: red + format + reset,
+        logging.CRITICAL: bold_red + format + reset
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+
 log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.basicConfig(
-    level=logging.INFO,
-    # format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-    format="%(levelname)s | %(name)s | %(message)s"
+# logging.basicConfig(
+#     level=logging.INFO,
+#     # format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+#     format="%(levelname)s | %(name)s | %(message)s"
+# )
+
+handler = logging.StreamHandler()
+handler.setFormatter(
+    ColoredFormatter("%(asctime)s - %(levelname)s - %(message)s")
 )
+
+log.addHandler(handler)
+
+
+
 
 
 yt = YTMusic()
@@ -54,7 +91,14 @@ def main():
     timer_main = time.time()
 
     # --- DOC: https://docs.python.org/3/library/argparse.html
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description='Download songs from YouTube by query, multiple queries, or playlist link.\n\n - Different types of URLs and queries can be mixed.\n - Put all inputs in brackets, URLs as well: "Artist - song".\n - Seperate multiple inputs with spaces: "Artist - song" "https://music.youtube..."\n - Downloading a full album by album name is not yet supportet')
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description="""
+Download songs from YouTube by query, multiple queries, or playlist link.
+
+ - Different types of URLs and queries can be mixed.
+ - Put all inputs in quotes, URLs as well: "Artist - song".
+ - Seperate multiple inputs with spaces: "Artist - song" "https://music.youtube..."
+ - Accepted URLs: YT-Music, YT, YT shortended URL, YT playlist. Always include the https://
+ - Downloading a full album by album name is not yet supportet""")
 
     parser.add_argument(
         "inputs",
@@ -62,19 +106,24 @@ def main():
         help="Song queries (e.g., 'Artist - Song'), YouTube URLs or playlist URLs"
     )
     parser.add_argument(
-        "-vb", "--verbose",
+        "-v", "--verbose",
         action="store_true",  # --- Flag, no value needed
         help="Verbose output"
     )
     parser.add_argument(
-        "--silent",
+        "-q", "--quiet",
         action="store_true",  # --- Flag, no value needed
-        help="Silent all info and warning output"
+        help="Silent all info and warning output. Still prints some info and all errors"
     )
     parser.add_argument(
         "--disable-download",
         action="store_true",  # --- Flag, no value needed
         help="Only for debug purposes. Skips the yt-dlp download"
+    )
+    parser.add_argument(
+        "-d", "--download-url-audio",
+        action="store_true",  # --- Flag, no value needed
+        help="Fetches metadata from youtube search but downloads the audio from the URL."
     )
     # parser.add_argument(
     #     "--download-folder",
@@ -92,6 +141,9 @@ def main():
 
     if args.disable_download:
         config["disable_download"] = True
+
+    if args.download_url_audio:
+        config["download_url_audio"] = False
 
     log.debug(f"Inputs: {args.inputs}")
     # print("Set genre:", args.set_genre)
@@ -440,6 +492,7 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
                 if mb_tags:
                     mb_highest_tag = max(mb_tags, key=lambda x: x["count"])
                     metadata["mb_genres"] = mb_highest_tag.get("name", "No MBID genre found")
+                    log.debug(f"Genre {metadata["mb_genres"]} has been added from MusicBrainz")
                 else:
                     log.warning("MusicBrainz has found no genre")
 
@@ -448,7 +501,8 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
 
 
     # === Guess album ===
-    album = yt.get_album(metadata["album_id"])
+    album_old = album = yt.get_album(metadata["album_id"])
+
     log.debug(f'Album type is: {album.get("type", "")}')
     # --- Check if the song title is the same as the album title. If yes, this may be falsly labels as a single by youtube (it does that quite often).
     # --- Crosscheck with the desired method (Genius: needs token | MusicBrainz: is probaly inaccurate)
@@ -468,6 +522,7 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
 
         if guessed_album.get("album_name"):
             #print("SEARCH QUERY: " + guessed_album["album_name"] + " " + metadata["artist_name"])
+            log.debug(f"Album guess found: '{guessed_album["album_name"]}'. Checking...")
             album_guess = yt.search(guessed_album["album_name"] + " " + metadata["artist_name"], filter="albums")
 
             if not len(album_guess) == 0:
@@ -482,15 +537,20 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
                     elif config["get_data_from_genius"]:
                         metadata["zz_Genius_album_name_guess"] = album_guess[0].get("title")
 
+                    log.debug(f"Album guess matching: '{album_guess[0].get("title")}' instead of '{metadata["album_name"]}'")
+
+                    # TODO: these get inevitably overwritten!!!!!!!! Even if the song is not found in the album by youtube!!! 
                     metadata["album_name"] =    album_guess[0].get("title")
                     metadata["album_id"] =      album_guess[0].get("browseId")
+                    log.debug(f"Found actual album: {metadata["album_name"]}")
 
                     album = yt.get_album(metadata["album_id"]) # --- get the infos from the newly set album
 
-                else: log.debug("INFO: Album-guess: Artists are not the same")
-            else: log.debug("INFO: Album-guess: YT-search delivered no results")
-        else: log.debug("INFO: Album-guess: MB-Guess or Genius delivered no results or are deactivated in the config")
-
+                else: log.debug("Album-guess: Artists are not the same")
+            else: log.debug("Album-guess: YT-search delivered no results")
+        else: log.debug("Album-guess: MB-Guess or Genius delivered no results or are deactivated in the config")
+    else:
+        log.debug("Album-guess: Entry condition not met")
 
 
 
@@ -506,6 +566,18 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
         if item.get("title") == metadata["song_title"]:
             song_index = i + 1
             break
+
+    if not song_index:
+        # --- Sometimes, Genius tells us this song is in a album, but youtube does not find that song in that album. 
+        # --- Search for index in the original album if thats the case. 
+        # --- (TODO: Implementing that it forces the cover art of the album found by genius would also be an option to implement)
+        # --- Example: https://www.youtube.com/watch?v=XfMVF-o7g1o
+        album = album_old
+        for i, item in enumerate(album.get("tracks", [])):
+            #print(item.get("title") + " | " + metadata["song_title"])
+            if item.get("title") == metadata["song_title"]:
+                song_index = i + 1
+                break
 
     metadata["track_pos_counted"] = song_index # --- This and the next should always be the same
     metadata["track_pos"] =         album.get("tracks", [])[song_index - 1].get("trackNumber", -1)
@@ -584,7 +656,7 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
     if filename:
         addMetadata(metadata, filename)
     else: 
-        log.critical("ERROR: File was not downloaded successfully")
+        log.critical("File was not downloaded successfully")
 
 
     end = time.time()
@@ -598,14 +670,14 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
 
 
 def downloadSong(videoID: str, artist: str, song: str): 
-    # TODO: Code from the ytdlp site https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#embedding-yt-dlp. Read into what options to set. 
+    # https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#embedding-yt-dlp. 
     #URLS = ['https://music.youtube.com/watch?v=hComisqDS1I']
     URLS = f'https://music.youtube.com/watch?v={videoID}'
     output_template = f'{artist} - {song}'
 
     ydl_opts = {
         'format': 'bestaudio/best',
-        "remote_components": ["ejs:github"],
+        "remote_components": ["ejs:github"], # --- https://github.com/yt-dlp/yt-dlp/wiki/EJS
         "outtmpl": output_template + '.%(ext)s',
         # See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
         'postprocessors': [{  # Extract audio using ffmpeg
@@ -1045,14 +1117,15 @@ def musicBrainzGetSongByName(artist: str, song: str):
 
         # --- This error should usually not happen. So far have only seen error response when misstyping part of the URL
         if "error" in response:
-            print("ERROR: Musicbrainz GetSongByName Request failed. No retrying for this Error. Error Message: \n", json.dumps(response, indent=4, sort_keys=True))
+            print("ERROR: Musicbrainz GetSongByName Request failed. No retrying for this Error. Please notify the program maintainer! Error Message: \n", json.dumps(response, indent=4, sort_keys=True))
             return False
         
         global_retry_counter = 0
         return response
 
     except Exception as e:
-        print("ERROR: Musicbrainz GetSongByName Request failed. Retrying after 5 seconds.", config["global_retry_max"] - global_retry_counter, "attempts left.", e)
+        # print("ERROR: Musicbrainz GetSongByName Request failed. Retrying after 5 seconds.", config["global_retry_max"] - global_retry_counter, "attempts left.", e)
+        log.error(f'Musicbrainz GetSongByName Request failed. Retrying after 5 seconds. {config["global_retry_max"] - global_retry_counter} attempts left. {e}')
         time.sleep(5)
         if global_retry_counter < config["global_retry_max"]:
             global_retry_counter = global_retry_counter + 1
