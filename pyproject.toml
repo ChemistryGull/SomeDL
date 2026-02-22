@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "app_name"
+version = "0.0.1"
+authors = [
+    {name="Simon Neumayr", email="html.gull@gmail.com"},
+]
+description = "A commandline program to download music using yt-dlp and adding metadata from various APIs"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "ytmusicapi",
+    "mutagen",
+    "yt_dlp",
+    "requests",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+]
+license = "GPL-3.0-only"
+license-files = ["LICEN[CS]E*"]
+
+[project.scripts]
+avesdl = "app_name.yttest:main"
