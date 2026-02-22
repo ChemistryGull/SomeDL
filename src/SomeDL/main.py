@@ -136,7 +136,7 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     if args.verbose:
         log.setLevel(logging.DEBUG)
 
-    if args.silent:
+    if args.quiet:
         log.setLevel(logging.ERROR)
 
     if args.disable_download:

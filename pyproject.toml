@@ -3,12 +3,12 @@ requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "app_name"
-version = "0.0.1"
+name = "SomeDL"
+version = "0.1.0"
 authors = [
-    {name="Simon Neumayr", email="html.gull@gmail.com"},
+    {name="ChemistryGull", email="html.gull@gmail.com"},
 ]
-description = "A commandline program to download music using yt-dlp and adding metadata from various APIs"
+description = "A command line utility to download songs from youtube with metadata from different APIs without the need for API-tokens or login. "
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -26,4 +26,4 @@ license = "GPL-3.0-only"
 license-files = ["LICEN[CS]E*"]
 
 [project.scripts]
-avesdl = "app_name.yttest:main"
+somedl = "SomeDL.main:main"
