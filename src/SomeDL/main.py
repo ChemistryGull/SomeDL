@@ -621,7 +621,7 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
         metadata["deezer_genres"] =         [a.get("name") for a in deezer_album_data.get("genres", {}).get("data", [])]
         metadata["deezer_album_name"] =     deezer_album_data.get("title", "No deezer album name found")
         metadata["deezer_album_id"] =       deezer_album_data.get("id", "No deezer album id found")
-        metadata["deezer_album_label"] =    deezer_album_data.get("label", "")
+        metadata["deezer_album_label"] =    deezer_album_data.get("label", None)
         metadata["deezer_artist_name"] =    deezer_album_data.get("artist", {}).get("name", "No deezer artist name found")
         metadata["deezer_isrc"] =           deezer_album_data.get("isrc", "")
 
@@ -789,7 +789,12 @@ def addMetadata(metadata: str, mp3_file: str):
     # tag['comment'] = f'https://music.youtube.com/watch?v={metadata.get("song_id", "")}'
     tag['musicbrainz_artistid'] =  metadata.get("mb_artist_mbid", "")
     tag['isrc'] =  metadata.get("deezer_isrc", "")
-    tag['copyright'] =  f'{metadata.get("date", "")} {metadata.get("deezer_album_label", "")}'
+
+    if metadata.get("date") and metadata.get("deezer_album_label"):
+        tag['copyright'] =  f'{metadata.get("date", "")} {metadata.get("deezer_album_label", "")}'
+    else:
+        log.debug("Adding no copyright info to metadata no info was found")
+
     tag.save(v2_version=3)
 
     #TODO: WOAR = https://www.artistwebsite.com ...oder... WOAR = https://musicbrainz.org/artist/<MBID>
@@ -1114,7 +1119,8 @@ def musicBrainzGetSongByName(artist: str, song: str):
     url = f'https://musicbrainz.org/ws/2/recording/?query=recording:"{song}" AND artist:"{artist}"&fmt=json'
     try: 
         response = requests.get(url, headers=musicbrainz_headers).json()
-
+        #print(json.dumps(response, indent=4, sort_keys=True))
+        #print(url)
         # --- This error should usually not happen. So far have only seen error response when misstyping part of the URL
         if "error" in response:
             print("ERROR: Musicbrainz GetSongByName Request failed. No retrying for this Error. Please notify the program maintainer! Error Message: \n", json.dumps(response, indent=4, sort_keys=True))

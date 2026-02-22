@@ -48,6 +48,8 @@
 ## List of songs that create problems
 - TEMP FIX "ghost - its a sin" https://www.youtube.com/watch?v=XfMVF-o7g1o (Genius says its in a album, but youtube does not have it in that album. Temporary fix is to download it as a single)
 - ??? t.A.T.u. - All The Things She Said (Schrödingers API - Musicbrainz API sometimes returns the wrong artist with no tags. sometimes it returns the correct artist. not much i can do there)
+- NO FIX "Delain - We are the Others" It downlaods the radio version, as this one has way more views for some reason. Querying "Delain - We are the Others Original" downloads the correct one.
+- TODO: "Lordi - Hard rock Haleluja" Youtube is the only service that lists "Hardrock" without a space in between, so Musicbrainz and Deezer do not get results. Possible workaround would be as a fallback only search via artist name. This however may lead to wrong genre data for small artist that are not returned at the top!
 
 
 ## Types of URLS
@@ -62,6 +64,8 @@
 - MUSIC_VIDEO_TYPE_UGC: User Generated Content - uploaded by regular YouTube user
 - MUSIC_VIDEO_TYPE_ATV: High quality song uploaded by original artist with cover image
 - MUSIC_VIDEO_TYPE_OFFICIAL_SOURCE_MUSIC: Official video content, but not for a single track. not seen yet
+
+
 
 ## Howto install on windows
 ### General python installation:
@@ -84,6 +88,14 @@ https://github.com/BtbN/FFmpeg-Builds/releases
 extract to C:/ffmpeg or somewhere similar. Go into the extracted folder, there into the bin folder. there should be a ffmpeg.exe among others.
 Copy the filepath of the bin folder and add it to path (like with python before)
 
+
+## Info on PyPI Upload
+- In the account settings on the PyPI website, scroll down and "Add API token"
+- Add a file in $HOME/.pypirc and add:
+[pypi]
+  username = __token__
+  password = THE_API_TOKEN
+- twine upload dist/*
 
 ## Example output:
 {
