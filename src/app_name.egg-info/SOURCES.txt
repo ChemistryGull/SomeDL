@@ -1,0 +1,11 @@
+LICENSE
+README.md
+pyproject.toml
+src/SomeDL/__init__.py
+src/SomeDL/yttest.py
+src/app_name.egg-info/PKG-INFO
+src/app_name.egg-info/SOURCES.txt
+src/app_name.egg-info/dependency_links.txt
+src/app_name.egg-info/entry_points.txt
+src/app_name.egg-info/requires.txt
+src/app_name.egg-info/top_level.txt
