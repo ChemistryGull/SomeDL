@@ -65,7 +65,7 @@ log.addHandler(handler)
 yt = YTMusic()
 
 musicbrainz_headers = {
-    "User-Agent": "gulldl/0.0.0 (html.gull@gmail.com)"
+    "User-Agent": "SomeDL/0.1.1 (html.gull@gmail.com)"
 }
 
 global_retry_counter = 0
@@ -242,7 +242,7 @@ def getSongList(input_list):
                 failed_list.append(item)
         except Exception as e:
             failed_list.append(item)
-            log.critical("An critical exception occured when trying to download song! Please notify the program maintainer. Error: ")
+            log.critical("A critical exception occured when trying to download song with yt-dlp! Do you have ffmpeg installed? If no, install it. If yes, please notify the program maintainer. Error: ")
             print(e)
         
         print()
@@ -1021,7 +1021,7 @@ def generateOverviewHTML(data, failed):
     </html>
     """
 
-    with open(f'Download Report {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}.html', "w", encoding="utf-8") as f:
+    with open(f'Download Report {time.strftime("%Y-%m-%d %H-%M-%S", time.localtime())}.html', "w", encoding="utf-8") as f:
         f.write(html_body)
 
     log.info("SUCCESS! finished creating HTML overview")
@@ -1125,7 +1125,7 @@ def musicBrainzGetSongByName(artist: str, song: str):
 
     except Exception as e:
         # print("ERROR: Musicbrainz GetSongByName Request failed. Retrying after 5 seconds.", config["global_retry_max"] - global_retry_counter, "attempts left.", e)
-        log.error(f'Musicbrainz GetSongByName Request failed. Retrying after 5 seconds. {config["global_retry_max"] - global_retry_counter} attempts left. {e}')
+        log.warning(f'Musicbrainz GetSongByName Request failed. Retrying after 5 seconds. {config["global_retry_max"] - global_retry_counter} attempts left. {e}')
         time.sleep(5)
         if global_retry_counter < config["global_retry_max"]:
             global_retry_counter = global_retry_counter + 1
@@ -1146,7 +1146,7 @@ def musicBrainzGetArtistByMBID(mbid: str,):
         global_retry_counter = 0
         return response
     except requests.exceptions.RequestException as e:
-        print("ERROR: Musicbrainz GetArtistByMBID Request failed. Retrying after 5 seconds.", config["global_retry_max"] - global_retry_counter, "attempts left.", e)
+        log.warning(f'Musicbrainz GetArtistByMBID Request failed. Retrying after 5 seconds. {config["global_retry_max"] - global_retry_counter} attempts left. {e}')
         time.sleep(5)
         if global_retry_counter < config["global_retry_max"]:
             global_retry_counter = global_retry_counter + 1

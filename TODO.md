@@ -41,7 +41,9 @@
 
 # General
 ## General info:
-How to proper changelog - https://keepachangelog.com/en/1.1.0/
+- How to proper changelog - https://keepachangelog.com/en/1.1.0/
+
+- windows vm pw = password
 
 ## List of songs that create problems
 - TEMP FIX "ghost - its a sin" https://www.youtube.com/watch?v=XfMVF-o7g1o (Genius says its in a album, but youtube does not have it in that album. Temporary fix is to download it as a single)
@@ -60,6 +62,27 @@ How to proper changelog - https://keepachangelog.com/en/1.1.0/
 - MUSIC_VIDEO_TYPE_UGC: User Generated Content - uploaded by regular YouTube user
 - MUSIC_VIDEO_TYPE_ATV: High quality song uploaded by original artist with cover image
 - MUSIC_VIDEO_TYPE_OFFICIAL_SOURCE_MUSIC: Official video content, but not for a single track. not seen yet
+
+## Howto install on windows
+### General python installation:
+- Download the installer from the website
+- Say yes to everything in the installer
+- Install via py -m pip install somedl
+- If somedl command is not recognized, add scripts folder to path (This is not a somedl problem, this is a general python issue)
+    - Typically something like C:\Users\YourName\AppData\Local\Programs\Python\pythoncore-3.14-64\Scripts depending on your python version and mode of installation
+    - Type environment variables in the search, open "Edit the system environment variables"
+    - In there, at the bottom click "Environment Variables..."
+    - Click on "Path" and then "Edit"
+    - Click "New" and then paste the path of the scripts folder in there
+    - Click OK on all windows
+
+### Install ffmepeg
+
+https://ffmpeg.org/download.html
+https://github.com/BtbN/FFmpeg-Builds/releases
+
+extract to C:/ffmpeg or somewhere similar. Go into the extracted folder, there into the bin folder. there should be a ffmpeg.exe among others.
+Copy the filepath of the bin folder and add it to path (like with python before)
 
 
 ## Example output:
