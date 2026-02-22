@@ -1,4 +1,0 @@
-ytmusicapi
-mutagen
-yt_dlp
-requests
