@@ -1,5 +1,5 @@
 # SomeDL - Song+Metadata Downloader
-This is a simple commandline program to download music with the correct metadata.
+This is a simple commandline program to download music with the correct metadata. 
 
 This project is under heavy developement, this README will be updated soon.
 
