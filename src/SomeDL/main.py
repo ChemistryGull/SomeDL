@@ -145,7 +145,7 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     if args.download_url_audio:
         config["download_url_audio"] = False
 
-    log.debug(f"Inputs: {args.inputs}")
+    log.debug(f'Inputs: {args.inputs}')
     # print("Set genre:", args.set_genre)
     # print("Download folder:", args.download_folder)
 
@@ -156,12 +156,12 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     if len(args.inputs) == 0:
         log.info("INFO: No inputs provided")
     else:
-        log.debug(f"{len(args.inputs)} inputs provided")
+        log.debug(f'{len(args.inputs)} inputs provided')
         getSongList(args.inputs)
 
     end = time.time()
     length = end - timer_main
-    print(f"TIME: The whole process took {length} seconds!")
+    print(f'TIME: The whole process took {length} seconds!')
 
 
 
@@ -224,11 +224,11 @@ def getSongList(input_list):
                 item_metadata = getSong(url = item["yt_url"], known_metadata=metadata_list, prefetched_metadata = item)
                 
             elif item.get("text_query", None):
-                log.info(f"Download by text query {item.get("text_query", None)}")
+                log.info(f'Download by text query {item.get("text_query", None)}')
                 item_metadata = getSong(query = item["text_query"], known_metadata=metadata_list, prefetched_metadata = item) # --- prefetched_metadata is needed for the original_type = "Search query" to go through
 
             elif item.get("artist_name", None) and item.get("song_title", None):
-                log.info(f"Download based on info: {item.get("artist_name", None)} - {item.get("song_title", None)}")
+                log.info(f'Download based on info: {item.get("artist_name", None)} - {item.get("song_title", None)}')
                 item_metadata = getSong(query = f'{item.get("artist_name", None)} - {item.get("song_title", None)}', known_metadata=metadata_list, prefetched_metadata = item) # --- prefetched_metadata is useless when video_type = OMV (because thei neither return album info nor a lyrics url), but when strictly searching for queries, also ATV videos get here, which do utilze prefetched_metadata
             
             else:
@@ -457,7 +457,7 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
                 metadata["mb_artist_mbid"] = d.get("mb_artist_mbid")
                 metadata["mb_artist_name"] = d.get("mb_artist_name")
                 metadata["mb_genres"] = d.get("mb_genres")
-                log.info(f"Artist {metadata["artist_name"]} MusicBrainz metadata already fetched, skipping API call")
+                log.info(f'Artist {metadata["artist_name"]} MusicBrainz metadata already fetched, skipping API call')
                 break
 
 
@@ -492,7 +492,7 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
                 if mb_tags:
                     mb_highest_tag = max(mb_tags, key=lambda x: x["count"])
                     metadata["mb_genres"] = mb_highest_tag.get("name", "No MBID genre found")
-                    log.debug(f"Genre {metadata["mb_genres"]} has been added from MusicBrainz")
+                    log.debug(f'Genre {metadata["mb_genres"]} has been added from MusicBrainz')
                 else:
                     log.warning("MusicBrainz has found no genre")
 
@@ -522,7 +522,7 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
 
         if guessed_album.get("album_name"):
             #print("SEARCH QUERY: " + guessed_album["album_name"] + " " + metadata["artist_name"])
-            log.debug(f"Album guess found: '{guessed_album["album_name"]}'. Checking...")
+            log.debug(f'Album guess found: \'{guessed_album["album_name"]}\'. Checking...')
             album_guess = yt.search(guessed_album["album_name"] + " " + metadata["artist_name"], filter="albums")
 
             if not len(album_guess) == 0:
@@ -537,12 +537,12 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
                     elif config["get_data_from_genius"]:
                         metadata["zz_Genius_album_name_guess"] = album_guess[0].get("title")
 
-                    log.debug(f"Album guess matching: '{album_guess[0].get("title")}' instead of '{metadata["album_name"]}'")
+                    log.debug(f'Album guess matching: \'{album_guess[0].get("title")}\' instead of \'{metadata["album_name"]}\'')
 
                     # TODO: these get inevitably overwritten!!!!!!!! Even if the song is not found in the album by youtube!!! 
                     metadata["album_name"] =    album_guess[0].get("title")
                     metadata["album_id"] =      album_guess[0].get("browseId")
-                    log.debug(f"Found actual album: {metadata["album_name"]}")
+                    log.debug(f'Found actual album: {metadata["album_name"]}')
 
                     album = yt.get_album(metadata["album_id"]) # --- get the infos from the newly set album
 
@@ -936,7 +936,7 @@ def generateOverviewHTML(data, failed):
     # Header
     parts.append("<thead><tr>")
     for header in relevant_keys:
-        parts.append(f"<th>{escape(str(header[0]))}</th>")
+        parts.append(f'<th>{escape(str(header[0]))}</th>')
     parts.append("</tr></thead>")
 
     # Body
@@ -960,7 +960,7 @@ def generateOverviewHTML(data, failed):
                             parts.append(f"<td>No</td>")
 
             else:
-                parts.append(f"<td>{escape(str(item.get(header[1], "~No data~")))}</td>")
+                parts.append(f'<td>{escape(str(item.get(header[1], "~No data~")))}</td>')
         parts.append("</tr>")
     parts.append("</tbody>")
 
@@ -987,11 +987,11 @@ def generateOverviewHTML(data, failed):
 
     for item in failed:
         parts.append("<tr>")
-        parts.append(f"<td>{escape(str(item.get("text_query", "-")))}</td>")
-        parts.append(f"<td>{escape(str(item.get("artist_name", "-")))}</td>")
-        parts.append(f"<td>{escape(str(item.get("song_title", "-")))}</td>")
-        parts.append(f"<td>{escape(str(item.get("video_type", "-")))}</td>")
-        parts.append(f"<td>{escape(str(item.get("yt_url", "-")))}</td>")
+        parts.append(f'<td>{escape(str(item.get("text_query", "-")))}</td>')
+        parts.append(f'<td>{escape(str(item.get("artist_name", "-")))}</td>')
+        parts.append(f'<td>{escape(str(item.get("song_title", "-")))}</td>')
+        parts.append(f'<td>{escape(str(item.get("video_type", "-")))}</td>')
+        parts.append(f'<td>{escape(str(item.get("yt_url", "-")))}</td>')
         parts.append("</tr>")
     parts.append("</tbody>")
 
@@ -1055,7 +1055,7 @@ def downloadAlbumArt(url: str):
 # === Genius API ===
 
 genius_headers = {
-    "Authorization": f"Bearer {config["genius_token"]}"
+    "Authorization": f'Bearer {config["genius_token"]}'
 }
 
 def geniusGetAlbumBySongName(artist: str, song: str):
@@ -1246,7 +1246,7 @@ def deezerGetSongByQuery(artist: str, album: str, song: str):
         #print(json.dumps(response, indent=4, sort_keys=True))
         return response
     except requests.exceptions.RequestException as e:
-        print(f"ERROR: DEEZER API - An error occurred at deezerGetSongByQuery(): {e}")
+        print(f'ERROR: DEEZER API - An error occurred at deezerGetSongByQuery(): {e}')
         return False
 
 def deezerGetAlbumByID(id: int):
@@ -1255,7 +1255,7 @@ def deezerGetAlbumByID(id: int):
         response = requests.get(url).json()
         return response
     except requests.exceptions.RequestException as e:
-        print(f"ERROR: DEEZER API - An error occurred at deezerGetAlbumByID(): {e}")
+        print(f'ERROR: DEEZER API - An error occurred at deezerGetAlbumByID(): {e}')
         return False
 
 def getDeezerAlbumData(artist: str, album: str, song: str):
