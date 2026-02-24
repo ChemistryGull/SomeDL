@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SomeDL"
-version = "0.1.2"
+version = "0.2.0"
 authors = [
     {name="ChemistryGull", email="html.gull@gmail.com"},
 ]
 description = "A command line utility to download songs from youtube with metadata from different APIs without the need for API-tokens or login. "
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "ytmusicapi",
     "mutagen",

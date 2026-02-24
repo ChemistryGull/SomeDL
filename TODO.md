@@ -14,8 +14,6 @@
 - BUG: Still have to properly implement failed_list and make try .. except for the whole getSong function in production
 - TODO: test with manufactured api results as inputs
 - Write a proper readme!!
-- Downgrade musicbrainz retry from error to warning. Only fail after all retry attempts should be a error
-- Add functionality to not show download report. Possibly make download report only generate when downloading more than one song
 
 ## Medium Priority
 - Create Flowchart
@@ -27,7 +25,6 @@
 - Enable support for shortened Youtube links like https://youtu.be/R7o_-8RSrPA?si=q-vq29lIVhjoTnMc
 - FEAT: Give an option to download an entire album (--album flag)
 - FEAT: Give an option to download everything from an artist (--artist flag)
-- FEAT: In the html overview, show how long each song lastet to download
 - Add lyrics.ovh as lyrics API if youtube fails
 
 ## Low Priority
@@ -85,8 +82,16 @@
 https://ffmpeg.org/download.html
 https://github.com/BtbN/FFmpeg-Builds/releases
 
-extract to C:/ffmpeg or somewhere similar. Go into the extracted folder, there into the bin folder. there should be a ffmpeg.exe among others.
-Copy the filepath of the bin folder and add it to path (like with python before)
+- extract to C:/ffmpeg or somewhere similar
+- Go into the extracted folder, there into the bin folder
+- there should be a ffmpeg.exe among others.
+- Copy the filepath of the bin folder and add it to path (like with python before)
+
+### Install deno
+yt-dlp needs deno to properly work (https://github.com/yt-dlp/yt-dlp/wiki/EJS). SomeDL should work without it, but yt-dlp will always print a warning. 
+- To install deno, go to https://docs.deno.com/runtime/getting_started/installation/
+- If you have npm installed, you can use npm to install deno. If not, open PowerShell (not CMD!) and execute the command provided. (This downloads and installs a script, be aware to only do this from trusted sources!)
+
 
 
 ## Info on PyPI Upload

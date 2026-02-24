@@ -14,8 +14,9 @@ from urllib.parse import urlparse, parse_qs
 from html import escape
 import argparse
 import logging
+from yt_dlp.utils import DownloadError
 
-
+VERSION = "0.2.0"
 
 class ColoredFormatter(logging.Formatter):
 
@@ -83,7 +84,8 @@ config = {
     #"url_download_mode": "adaptive", # Options: url (CAUSES PROBLEMS - DEPRECATED!! strictly download based on url, may miss metadata), query (always search again by title and artist), adaptive (default - choos query or url based on video type)
     "always_search_by_query": False, # False: default ATV videos will be downloaded via URL. True: All songs get title and artist extractet, and those are searched again
     "download_url_audio": False, # Default False. True: Only uses search by query for metadata, the audio will be downloaded from the original URL regardless
-    "disable_download": False # Default: False; True: only fetch metadata, dont actually downloa, just for Debug
+    "disable_download": False, # Default: False; True: only fetch metadata, dont actually downloa, just for Debug
+    "download_report_min_inputs": 2 # Default: 2. Minimum number of inputs required to generate download report. Set to a high number to disable download reports
 }
 
 
@@ -94,16 +96,21 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description="""
 Download songs from YouTube by query, multiple queries, or playlist link.
 
- - Different types of URLs and queries can be mixed.
  - Put all inputs in quotes, URLs as well: "Artist - song".
  - Seperate multiple inputs with spaces: "Artist - song" "https://music.youtube..."
+ - Different types of URLs and queries can be mixed.
  - Accepted URLs: YT-Music, YT, YT shortended URL, YT playlist. Always include the https://
  - Downloading a full album by album name is not yet supportet""")
 
     parser.add_argument(
         "inputs",
-        nargs="+",  # + One or more inputs | * Zero or more inputs
+        nargs="*",  # + One or more inputs | * Zero or more inputs
         help="Song queries (e.g., 'Artist - Song'), YouTube URLs or playlist URLs"
+    )
+    parser.add_argument(
+        "--version",
+        action="store_true",  # --- Flag, no value needed
+        help="Print version"
     )
     parser.add_argument(
         "-v", "--verbose",
@@ -125,6 +132,28 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         action="store_true",  # --- Flag, no value needed
         help="Fetches metadata from youtube search but downloads the audio from the URL."
     )
+    parser.add_argument(
+        "--cookies-from-browser",
+        type=str,
+        metavar="BROWSER",
+        help="To download age restricted music, use this flag and enter the name of your browser where you are logged into youtube with an age-verified account (e.g. firefox). This flag is passed to yt-dlp. More info: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp"
+    )
+    parser.add_argument(
+        "--cookies",
+        type=str,
+        metavar="FILEPATH",
+        help="Path to cookie file. Only required if you want to download age restricted songs from YouTube and the --cookies-from-browser method does not work (common in chromium based browsers like Chrome or Edge). This flag is passed to yt-dlp. More info: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp"
+    )
+    parser.add_argument(
+        "--no-musicbrainz",
+        action="store_true",
+        help="Use this flag to skip fetching data from MusicBrainz. No genre data will be added!"
+    )
+    parser.add_argument(
+        "-R","--download-report",
+        action="store_true",
+        help="Use this flag to generate a download report even if there is only one song input."
+    )
     # parser.add_argument(
     #     "--download-folder",
     #     type=str,
@@ -145,15 +174,30 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     if args.download_url_audio:
         config["download_url_audio"] = False
 
+    if args.cookies:
+        config["cookies_path"] = args.cookies
+    elif args.cookies_from_browser: # --- Only one option is acceptable
+        config["cookies_from_browser"] = args.cookies_from_browser
+
+
+    if args.no_musicbrainz:
+        config["get_data_from_musicbrainz"] = False
+
+    if args.download_report:
+        config["download_report_min_inputs"] = 1
+
+    check_latest_version(args.version)
+
+
     log.debug(f'Inputs: {args.inputs}')
     # print("Set genre:", args.set_genre)
     # print("Download folder:", args.download_folder)
 
-    #return
-    
+   
 
-
-    if len(args.inputs) == 0:
+    if len(args.inputs) == 0 and args.version:
+        return
+    elif len(args.inputs) == 0:
         log.info("INFO: No inputs provided")
     else:
         log.debug(f'{len(args.inputs)} inputs provided')
@@ -162,6 +206,28 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     end = time.time()
     length = end - timer_main
     print(f'TIME: The whole process took {length} seconds!')
+
+
+
+def check_latest_version(print_version):
+    # --- Check pypi for latest version
+    url = f"https://pypi.org/pypi/somedl/json"
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        latest_version = data["info"]["version"]
+        if not latest_version == VERSION:
+            print()
+            print(f"SomeDL v{VERSION}. A newer version is available: {latest_version}")
+        elif print_version:
+            print()
+            print(f'SomeDL v{VERSION}. You are up to date.')
+        else:
+            log.debug(f'SomeDL v{VERSION}. You are up to date.')
+    except Exception as e:
+        log.warning(f'Could not check PyPI for updates: {e}')
+
 
 
 
@@ -242,7 +308,7 @@ def getSongList(input_list):
                 failed_list.append(item)
         except Exception as e:
             failed_list.append(item)
-            log.critical("A critical exception occured when trying to download song with yt-dlp! Do you have ffmpeg installed? If no, install it. If yes, please notify the program maintainer. Error: ")
+            log.critical("A critical exception occured when trying to download song with yt-dlp! Please notify the program maintainer on https://github.com/ChemistryGull/SomeDL. Error: ")
             print(e)
         
         print()
@@ -253,7 +319,10 @@ def getSongList(input_list):
     # print("--- Failed List ---")
     # print(failed_list)
 
-    generateOverviewHTML(metadata_list, failed_list)
+    if length >= config["download_report_min_inputs"]:
+        generateOverviewHTML(metadata_list, failed_list)
+    else:
+        log.debug("No Download Report generated")
 
 def parseInput(inp):
     # --- Parses the user input and returns a object based on if its a vidoe url, playlist url or 
@@ -454,9 +523,9 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
         for i, d in enumerate(known_metadata):
             if d.get("artist_name") == metadata["artist_name"]:
                 artist_seen = i
-                metadata["mb_artist_mbid"] = d.get("mb_artist_mbid")
-                metadata["mb_artist_name"] = d.get("mb_artist_name")
-                metadata["mb_genres"] = d.get("mb_genres")
+                metadata["mb_artist_mbid"] = d.get("mb_artist_mbid", "")
+                metadata["mb_artist_name"] = d.get("mb_artist_name", "")
+                metadata["mb_genres"] = d.get("mb_genres", "")
                 log.info(f'Artist {metadata["artist_name"]} MusicBrainz metadata already fetched, skipping API call')
                 break
 
@@ -656,12 +725,14 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
     if filename:
         addMetadata(metadata, filename)
     else: 
-        log.critical("File was not downloaded successfully")
+        log.error("File was not downloaded successfully with yt-dlp")
+        return False
 
 
     end = time.time()
     length = end - start
     print("TIME: The Song download took", length, "seconds!")
+    metadata["download_time"] = f'{round(length, 1)} seconds'
 
     return metadata
 
@@ -673,6 +744,7 @@ def downloadSong(videoID: str, artist: str, song: str):
     # https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#embedding-yt-dlp. 
     #URLS = ['https://music.youtube.com/watch?v=hComisqDS1I']
     URLS = f'https://music.youtube.com/watch?v={videoID}'
+    #URLS = f'https://www.youtube.com/watch?v=-X8Olge799M'
     output_template = f'{artist} - {song}'
 
     ydl_opts = {
@@ -686,16 +758,22 @@ def downloadSong(videoID: str, artist: str, song: str):
         }]
     }
 
+    if config.get("cookies_from_browser"):
+        ydl_opts["cookiesfrombrowser"] = (config.get("cookies_from_browser"),) # --- Needs to be a tuple
+
+    if config.get("cookies_path"):
+        ydl_opts["cookiefile"] = config.get("cookies_path")
+
     try: 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             error_code = ydl.download(URLS)
         return output_template + ".mp3"
 
     except DownloadError as e:
-        log.critical(f"yt-dlp Download failed: {e}")
+        log.error(f"yt-dlp download failed. Do you have ffmpeg installed? Is the song {URLS} age restricted?: {e}")
         return False
     except Exception as e:
-        log.critical(f"Unexpected yt-dlp error: {e}")
+        log.error(f"Unexpected yt-dlp error: {e}")
         return False
     
     
@@ -930,7 +1008,8 @@ def generateOverviewHTML(data, failed):
         ["Lyrics", "!special"],
         ["Video Type", "original_type"],
         ["URL", "yt_url"],
-        ["Albumart", "!special"]
+        ["Albumart", "!special"],
+        ["Download time", "download_time"]
     ]
 
     # Header
@@ -1116,7 +1195,7 @@ def geniusGetAlbumBySongName(artist: str, song: str):
 
 def musicBrainzGetSongByName(artist: str, song: str):
     global global_retry_counter
-    url = f'https://musicbrainz.org/ws/2/recording/?query=recording:"{song}" AND artist:"{artist}"&fmt=json'
+    url = f'https://musicbrainz.org/ws/2/recording/?query=artist:"{artist}" AND recording:"{song}"&fmt=json'
     try: 
         response = requests.get(url, headers=musicbrainz_headers).json()
         #print(json.dumps(response, indent=4, sort_keys=True))
@@ -1131,8 +1210,9 @@ def musicBrainzGetSongByName(artist: str, song: str):
 
     except Exception as e:
         # print("ERROR: Musicbrainz GetSongByName Request failed. Retrying after 5 seconds.", config["global_retry_max"] - global_retry_counter, "attempts left.", e)
-        log.warning(f'Musicbrainz GetSongByName Request failed. Retrying after 5 seconds. {config["global_retry_max"] - global_retry_counter} attempts left. {e}')
-        time.sleep(5)
+        retry_timeout = 5 + global_retry_counter * global_retry_counter
+        log.warning(f'Musicbrainz GetSongByName Request failed. Retrying after {retry_timeout} seconds. {config["global_retry_max"] - global_retry_counter} attempts left. {e}')
+        time.sleep(retry_timeout)
         if global_retry_counter < config["global_retry_max"]:
             global_retry_counter = global_retry_counter + 1
             return musicBrainzGetSongByName(artist, song)
@@ -1152,8 +1232,9 @@ def musicBrainzGetArtistByMBID(mbid: str,):
         global_retry_counter = 0
         return response
     except requests.exceptions.RequestException as e:
-        log.warning(f'Musicbrainz GetArtistByMBID Request failed. Retrying after 5 seconds. {config["global_retry_max"] - global_retry_counter} attempts left. {e}')
-        time.sleep(5)
+        retry_timeout = 5 + global_retry_counter * global_retry_counter
+        log.warning(f'Musicbrainz GetArtistByMBID Request failed. Retrying after {retry_timeout} seconds. {config["global_retry_max"] - global_retry_counter} attempts left. {e}')
+        time.sleep(retry_timeout)
         if global_retry_counter < config["global_retry_max"]:
             global_retry_counter = global_retry_counter + 1
             return musicBrainzGetArtistByMBID(mbid)
