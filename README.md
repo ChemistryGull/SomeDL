@@ -6,11 +6,14 @@ This is a simple commandline program to download music with the correct metadata
 *Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. This software is developed on Linux and tested on Linux & Windows.*
 
 # Usage
-Simply type `somedl` followed by your search query in quotes. You typically find 
+Simply type `somedl` followed by your search query in quotes.
 ```
 somedl "Nirvana - Smells like teen spirit"
 ```
-You can also search by YouTube or YouTube music URL and even by YouTube playlist URL.
+You can also search by YouTube or YouTube music URL and even by YouTube playlist URL. It is also possible to download multiple songs at the same time, like this:
+```
+somedl "https://music.youtube.com/..." "Delain - Moth to a Flame" "https://music.youtube.com/playlist?list=OLAK5uy_nHlwZujC7fzEgTnKdakqBzO7MIP9sZW48"
+```
 
 # Installation
 This utility can be installed using pip. Also confirm that you meet all the installation [requirements](#requirements)!
@@ -41,16 +44,18 @@ It is also recommended to have Deno installed. yt-dlp needs deno to work properl
 - If you have npm installed, you can use npm to install deno. If not, open PowerShell (not CMD!) and execute the command provided. (This downloads and installs a script, be aware to only do this from trusted sources!)
 
 # FAQ
-## Why does it download the wrong version of the song?
+### Why is the wrong version of the song downloaded?
 Rarely a "radio version" or similar has more views than the original version, meaning it is the first result that comes up and therefore the song that gets downloaded by SomeDL. Possible ways to get the correct song:
 - Add e.g. "Original" to your search query, for example "Nirvana - Smells like teen spirit original". Sometimes this results in the correct song being downloaded. 
 - Search for the song on youtube music and download by URL. (IMPORTANT: Always use the link of the original soundtrack! Do not use the music video version, this does not have the correct metadata and audio track, so SomeDL has to search youtube again by artist name and song title, resulting in the same issue)
 
-## Why is the wrong genre/no genre set? 
+If you do not not use a non-music-video YouTube Music URL, you are always at the mercy of the youtube search algorythm. But this search is accurate over 95% of the time.
+
+### Why is the wrong genre/no genre set? 
 SomeDL gets the genre info from MusicBrainz (Neither YouTube nor Genius provide genre info via their APIs). The genre data on MusicBrainz is crowdsourced. Therefore, some artists may not have a genre set, some may have the wrong genre set. Everyone can create an account on MusicBrainz and vote for the genre (called „tags“). You are invited to do so and help make the database more complete. Please do so responsibly.
 
 *Genre info is added per artist to the song, meaning all songs of the same artist get the same genre. Music brainz does have genre tags per album and even per song, but since they are crowdsourced, they are often incomplete, so it is best to stick with the artists tags*
 
-## How do i download age restricted songs?
+### How do I download age restricted songs?
 You need to be logged into your age-verified YouTube account inside your browser. Then, append `--cookies-from-browser firefox` to your somedl command. This only works properly for non-chromium based browsers and i recommend to use firefox for this. For chromium based browsers, there is also the option of exporting a cookie file from your browser and appending that with `--cookies "/path/to/file/cookies.txt`. Only add these flags when downloading age restricted content. Heavy use of this application may lead to your account being banned when adding your browser cookies. This is a yt-dlp specific issue, visit their official documentation for more info. https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp
 
