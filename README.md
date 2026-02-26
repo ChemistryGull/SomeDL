@@ -47,7 +47,7 @@ py -m pip install somedl
 ```
 
 ## Linux
-This software is currently not packaged in any packagemanager or third party repo. Use your prefered way to install pythograms, like for example [pipx](https://pipx.pypa.io/stable/):
+This software is currently not packaged on any repo. Use your prefered way to install python programs, like for example [pipx](https://pipx.pypa.io/stable/):
 ```
 pipx install somedl
 ```
@@ -73,6 +73,7 @@ yt-dlp has the ability to add metadata and thumbnails with the flags `--embed-me
 - Often treats songs as singles, even though they are part of an album (leading to a wrong album name and a wrong thumbnail)
 - Wrong date (Often uses upload date instead of release date of the song)
 - No track number
+
 yt-dlp is not a song downloader with complete metadata support (and does not claim to be). Thats why someDL uses multiple different sources to get the most accurate metadata possible.
 
 ### Why is the wrong version of the song downloaded?
@@ -86,13 +87,13 @@ If you do not not use a non-music-video YouTube Music URL, you are always at the
 ### Why is the wrong genre/no genre set? 
 SomeDL gets the genre info from MusicBrainz (Neither YouTube nor Genius provide genre info via their APIs). The genre data on MusicBrainz is crowdsourced. Therefore, some artists may not have a genre set, some may have the wrong genre set. Everyone can create an account on MusicBrainz and vote for the genre (called „tags“). You are invited to do so and help make the database more complete. Please do so responsibly.
 
-*Genre info is added per artist to the song, meaning all songs of the same artist get the same genre. Music brainz does have genre tags per album and even per song, but since they are crowdsourced, they are often incomplete, so it is best to stick with the artists tags*
+*Genre info is added per artist to the song, meaning all songs of the same artist get the same genre. Music brainz does have genre tags per album and even per song, but since they are crowdsourced, they are often incomplete, so it is best to stick with the artists tags.*
 
 ### How do I download age restricted songs?
-You need to be logged into your age-verified YouTube account inside your browser. Then, append `--cookies-from-browser firefox` to your somedl command. This only works properly for non-chromium based browsers and i recommend to use firefox for this. For chromium based browsers, there is also the option of exporting a cookie file from your browser and appending that with `--cookies "/path/to/file/cookies.txt`. Only add these flags when downloading age restricted content. Heavy use of this application may lead to your account being banned when adding your browser cookies. This is a yt-dlp specific issue, visit their official documentation for more info. https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp
+You need to be logged into your age-verified YouTube account inside your browser. Then, append `--cookies-from-browser firefox` to your SomeDL command. This only works properly for non-chromium based browsers and I recommend to use firefox for this. For chromium based browsers, there is also the option of exporting a cookie file from your browser and appending that with `--cookies "/path/to/file/cookies.txt`. Only add these flags when downloading age restricted content. Heavy use of this application may lead to your account being banned when adding your browser cookies. This is a yt-dlp specific issue, visit their official documentation for more info. https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp
 
 ### What is that "Download Report .... .html" file?
-With every download of more than one song, a download report is created. This is a quick overview of what metadata was downloaded and gives you the ability to check if there is something wrong.
+With every download of more than one song, a download report is created. You can open it in any browser. This is a quick overview of what metadata was downloaded and gives you a fast and easy way to check if there is something wrong.
 
 ### How long does a song download take?
 Usually arount 10 seconds per song. 5-6 seconds are the yt-dlp download and conversion to mp3, 4-5 seconds are the fetching of the metadata.
@@ -121,3 +122,7 @@ WARNING - MusicBrainz has found no genre
 
 MusicBrainz does not have any genre tags for that artist. Visit [this section](#why-is-the-wrong-genreno-genre-set) on how to add this data to MusicBrainz yourself.
 
+```
+WARNING - DEEZER API returned no results. Continuing without Deezer metadata (ISRC, Label)
+```
+Deezer has not found the song. This may be because of some different spelling or other reaseons. The download will continue without ISRC and music label data.
