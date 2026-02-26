@@ -12,6 +12,7 @@ https://keepachangelog.com/en/1.1.0/
 
 ### Fixed
 - Fix bug where genius would not return any results because of empty api token, now it sends an empty header and it works again
+- Fixed deezer logging (only show not found warning when the second try has not gotten any result)
 
 
 ## [0.2.0] - 2026.02.24

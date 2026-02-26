@@ -708,12 +708,15 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
             # deezer_album_data = getDeezerAlbumData(metadata["artist_name"], metadata["album_name"], metadata["song_title"])
             deezer_album_data = getDeezerAlbumData(metadata["artist_name"], metadata["album_name"], metadata["song_title"])
             if deezer_album_data == {}:
-                log.info("Deezer song search returned no results. Trying with cleaned song title again")
+                log.debug("Deezer song search returned no results. Trying with cleaned song title again")
                 deezer_album_data = getDeezerAlbumData(metadata["artist_name"], metadata["album_name"], metadata["song_title_clean"])
-
+                
+                if deezer_album_data == {}:
+                    log.warning("DEEZER API returned no results. Continuing without Deezer metadata (ISRC, Label)")
+    
         except Exception as e:
             deezer_album_data = {}
-            log.error("Failed to fetch album data from Deezer API. No genre data will be added. Error:")
+            log.error("Failed to fetch album data from Deezer API. No ISRC and label data will be added. Error:")
             print(e)
         #print(json.dumps(deezer_album_data, indent=4, sort_keys=True))
         metadata["deezer_genres"] =         [a.get("name") for a in deezer_album_data.get("genres", {}).get("data", [])]
@@ -1385,7 +1388,7 @@ def getDeezerAlbumData(artist: str, album: str, song: str):
         return {}
     
     if deezer_album.get("total") == 0:
-        log.warning("DEEZER API returned no results:")
+        log.debug("DEEZER API returned no results (get song)")
         #print(json.dumps(deezer_album, indent=4, sort_keys=True))
         return {}
     # TODO Move these exceptions inside the getDeezerAlbumData functions
@@ -1399,7 +1402,7 @@ def getDeezerAlbumData(artist: str, album: str, song: str):
         return {}
     
     if deezer_album_data.get("total") == 0:
-        log.warning("DEEZER API returned no results (album data)")
+        log.debug("DEEZER API returned no results (album data)")
         #print(json.dumps(deezer_album_data, indent=4, sort_keys=True))
         return {}
 
