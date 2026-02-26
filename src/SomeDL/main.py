@@ -16,7 +16,7 @@ import argparse
 import logging
 from yt_dlp.utils import DownloadError
 
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 
 class ColoredFormatter(logging.Formatter):
 
@@ -77,6 +77,7 @@ config = {
     "lyrics_from_yt": True,
     "get_data_from_musicbrainz": True, # Needed for MBID and Genre
     "mb_album_guess": False, # Requires get_data_from_musicbrainz=true
+    "mb_retry_artist_name_only": True,
     "get_data_from_deezer": True, # Needed for label and irsc
     "get_data_from_genius": True,
     "genius_use_official": False, # Default: False - Uses Web API. True requires auth token Please see: https://genius.com/developers
@@ -519,9 +520,17 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
     # === Check if artist has already been seen ===
     # --- (when looking up more than one, avoid unneccessary API calls)
     artist_seen = None
-    if not known_metadata == []:
+    if not known_metadata == [] and config.get("get_data_from_musicbrainz"):
         for i, d in enumerate(known_metadata):
             if d.get("artist_name") == metadata["artist_name"]:
+                if (not d.get("mb_artist_mbid") and not config.get("mb_retry_artist_name_only")) or d.get("mb_failed_timeout"):
+                    # --- If the previous search returned no results for that artist, but it has not searched by artist name only, do not use this old metadata
+                    # --- Continue till you find an song that has the metadata, if none is found, the below code will not be executed and it will search for new metadata. 
+                    # --- In other words, if mb_retry_artist_name_only is set to true, always reuse the previous search with the 3 lines below 
+                    # --- EXCEPT if the fail was because of a timeout (As a search for the same artist will not result in a different result, except if due to a timeout)
+                    log.debug(f'Continued to the next one in "check if artist has already been seen", getting new data; mb_failed_timeout = {d.get("mb_failed_timeout")}')
+                    continue
+                log.debug(f'Stayed in "check if artist has already been seen", taking same data; mb_failed_timeout = {d.get("mb_failed_timeout")}')
                 artist_seen = i
                 metadata["mb_artist_mbid"] = d.get("mb_artist_mbid", "")
                 metadata["mb_artist_name"] = d.get("mb_artist_name", "")
@@ -532,7 +541,7 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
 
 
     # === Get Genre from MusicBrainz API ===
-    if config["get_data_from_musicbrainz"] and artist_seen == None:
+    if config.get("get_data_from_musicbrainz") and artist_seen == None:
         log.info("Call MusicBrainz API for genre and artist MBID info")
         # TODO: When searching for multiple songs in a row (playlist, multiple queries), check if MBID has already been fetched and use this data instead of making another api call
         mb_song_res = musicBrainzGetSongByName(metadata["artist_name"], metadata["song_title"])
@@ -541,8 +550,14 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
         if mb_song_res and len(mb_song_res.get("recordings", [{}])) == 0:
             # --- Musicbrainz may not return songs with names that contain e.g. "(2020 Remastered)" in them. If it found no result before, it will try again with the cleaned query
             log.info("MusicBrainz song search returned no results. Trying with cleaned song title again")
-            time.sleep(3)
+            time.sleep(2)
             mb_song_res = musicBrainzGetSongByName(metadata["artist_name"], metadata["song_title_clean"])
+
+            if mb_song_res and len(mb_song_res.get("recordings", [{}])) == 0 and config.get("mb_retry_artist_name_only"):
+                # --- Musicbrainz did not find that song by that artist. retrying by only searching the artist name. This miht lead to wrong results
+                log.info("MusicBrainz song search returned no results. Trying with artist name only")
+                time.sleep(3)
+                mb_song_res = musicBrainzGetSongByName(metadata["artist_name"], None)
 
         if mb_song_res and len(mb_song_res.get("recordings", [{}])) > 0:
 
@@ -565,8 +580,17 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
                 else:
                     log.warning("MusicBrainz has found no genre")
 
-            else: log.warning("Fetching MusicBrainz artist failed. Continuing without MusicBrainz metadata (Genre)")
-        else: log.warning("Fetching MusicBrainz song failed. Continuing without MusicBrainz metadata (MBID, Genre)")
+            else: 
+                log.warning("Fetching MusicBrainz artist failed. Continuing without MusicBrainz metadata (Genre)")
+                metadata["mb_failed_timeout"] = True # --- Signal that this fail was due to a timeout. The only reason this would fail is an error or a timeout
+        else: 
+            log.warning("Fetching MusicBrainz song failed. Continuing without MusicBrainz metadata (MBID, Genre)")
+            #print(json.dumps(mb_song_res, indent=4, sort_keys=True))
+            if mb_song_res == None:
+                metadata["mb_failed_timeout"] = True # --- Signal that this fail was due to a timeout
+                log.debug("Reason for fail: To many retries or other error")
+            else: 
+                log.debug("Reason for fail: No results")
 
 
     # === Guess album ===
@@ -575,7 +599,7 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
     log.debug(f'Album type is: {album.get("type", "")}')
     # --- Check if the song title is the same as the album title. If yes, this may be falsly labels as a single by youtube (it does that quite often).
     # --- Crosscheck with the desired method (Genius: needs token | MusicBrainz: is probaly inaccurate)
-    if metadata["song_title"] == metadata["album_name"] and (album.get("type", "") == "Single" or album.get("type", "") == "EP"):
+    if (album.get("type", "") == "Single" or album.get("type", "") == "EP"):
         if config["mb_album_guess"] and config["get_data_from_musicbrainz"] and mb_song_res:
             # --- This function should not be used
             log.debug("Song is suspected to be listet as a single. Will consult musicbrainz to make a album guess.")
@@ -681,7 +705,12 @@ def getSong(query: str = None, url: str = None, known_metadata: list = [], prefe
     # === Deezer API ====
     if config["get_data_from_deezer"]:
         try: 
+            # deezer_album_data = getDeezerAlbumData(metadata["artist_name"], metadata["album_name"], metadata["song_title"])
             deezer_album_data = getDeezerAlbumData(metadata["artist_name"], metadata["album_name"], metadata["song_title"])
+            if deezer_album_data == {}:
+                log.info("Deezer song search returned no results. Trying with cleaned song title again")
+                deezer_album_data = getDeezerAlbumData(metadata["artist_name"], metadata["album_name"], metadata["song_title_clean"])
+
         except Exception as e:
             deezer_album_data = {}
             log.error("Failed to fetch album data from Deezer API. No genre data will be added. Error:")
@@ -1144,19 +1173,22 @@ def geniusGetAlbumBySongName(artist: str, song: str):
     # --- Official API (auth): https://api.genius.com/
     if config["genius_use_official"]:
         api_base = "api.genius.com"
+        g_headers = genius_headers
     else:
         api_base = "genius.com/api"
+        g_headers = {}
 
     url = f'https://{api_base}/search?q={artist} {song}' 
-    response = requests.get(url, headers=genius_headers).json()
-    #print(json.dumps(response, indent=4, sort_keys=True))
+    response = requests.get(url).json()
+    # print(url)
+    # print(json.dumps(response, indent=4, sort_keys=True))
     
     if len(response.get("response", {}).get("hits", [{}])) == 0:
         print("WARNING: Genius returned no results. Trying again a single time. Its Schrödingers API after all.")
         time.sleep(2)
 
         url = f'https://{api_base}/search?q={artist} - {song}' # Removing that "-" causes "Kanonenfieber Heizer Tenner" to return a empty result for some reason, even tho it gets an result when looked up via the browser im logged into genius with (although it sometimes returns nothing) May be a temporary server overload https://genius.com/api/search?q=Kanonenfieber%20Heizer%20Tenner
-        response = requests.get(url, headers=genius_headers).json()
+        response = requests.get(url, headers=g_headers).json()
         #print(json.dumps(response, indent=4, sort_keys=True))
 
     if len(response.get("response", {}).get("hits", [{}])) == 0:
@@ -1168,7 +1200,7 @@ def geniusGetAlbumBySongName(artist: str, song: str):
     #print(json.dumps(response.get("response", {}).get("hits", [{}])[0], indent=4, sort_keys=True))
 
     url = f'https://{api_base}/{song_api_path}'
-    response = requests.get(url, headers=genius_headers).json()
+    response = requests.get(url, headers=g_headers).json()
     #print(json.dumps(response, indent=4, sort_keys=True))
 
     # --- The genius API lists "album": null sometimes when there is no album. Return false, the song is really a Single (example "Erlkönig - Lūcadelic")
@@ -1195,7 +1227,10 @@ def geniusGetAlbumBySongName(artist: str, song: str):
 
 def musicBrainzGetSongByName(artist: str, song: str):
     global global_retry_counter
-    url = f'https://musicbrainz.org/ws/2/recording/?query=artist:"{artist}" AND recording:"{song}"&fmt=json'
+    if song:
+        url = f'https://musicbrainz.org/ws/2/recording/?query=artist:"{artist}" AND recording:"{song}"&fmt=json'
+    else: 
+        url = f'https://musicbrainz.org/ws/2/recording/?query=artist:"{artist}"&fmt=json'
     try: 
         response = requests.get(url, headers=musicbrainz_headers).json()
         #print(json.dumps(response, indent=4, sort_keys=True))
@@ -1345,13 +1380,13 @@ def getDeezerAlbumData(artist: str, album: str, song: str):
         return {}
 
     if "error" in deezer_album:
-        print("ERROR: DEEZER API returned error:")
+        log.error("DEEZER API returned error:")
         print(json.dumps(deezer_album, indent=4, sort_keys=True))
         return {}
     
     if deezer_album.get("total") == 0:
-        print("WARNING: DEEZER API returned no results:")
-        print(json.dumps(deezer_album, indent=4, sort_keys=True))
+        log.warning("DEEZER API returned no results:")
+        #print(json.dumps(deezer_album, indent=4, sort_keys=True))
         return {}
     # TODO Move these exceptions inside the getDeezerAlbumData functions
     deezer_album_data = deezerGetAlbumByID(deezer_album.get("data", [{}])[0].get("album", {}).get("id", "No album id found"))
@@ -1359,13 +1394,13 @@ def getDeezerAlbumData(artist: str, album: str, song: str):
         return {}
 
     if "error" in deezer_album_data:
-        print("ERROR: DEEZER API returned error:")
+        log.error("DEEZER API returned error (album data):")
         print(json.dumps(deezer_album_data, indent=4, sort_keys=True))
         return {}
     
     if deezer_album_data.get("total") == 0:
-        print("WARNING: DEEZER API returned no results:")
-        print(json.dumps(deezer_album_data, indent=4, sort_keys=True))
+        log.warning("DEEZER API returned no results (album data)")
+        #print(json.dumps(deezer_album_data, indent=4, sort_keys=True))
         return {}
 
     #print(json.dumps(deezer_album_data, indent=4, sort_keys=True))
