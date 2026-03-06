@@ -31,10 +31,6 @@ This is a simple commandline program to download music with the correct metadata
 - [ ] Fallback lyrics source
 - [ ] Parallel downloads
 
-## How to propose Features?
-- Open an issue on here
-- 
-
 # Usage
 Simply type `somedl` followed by your search query in quotes.
 ```
