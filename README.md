@@ -1,7 +1,7 @@
 # SomeDL - Song+Metadata Downloader
 This is a simple commandline program to download music with the correct metadata. The audio is downloaded using yt-dlp. Metadata is fetched from YouTube, but also from different other sources, like MusicBrainz for genre, Genius for album info and Deezer for music label and isrc-codes. All these APIs work without the need for an API token, so you can use this application as is.
 
-**If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue here on GitHub. I am open to add functionality based on individual usecase.**
+**If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue here on GitHub. I am open to add functionality based on individual usecase. See [How can I give feedback or make feature requests?](#how-can-i-give-feedback-or-make-feature-requests)**
 
 *Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. This software is developed on Linux and tested on Linux & Windows.*
 
@@ -29,6 +29,10 @@ This is a simple commandline program to download music with the correct metadata
 - [ ] Set download codec/container format and audio quality (*coming soon*)
 - [ ] Fallback lyrics source
 - [ ] Parallel downloads
+
+## How to propose Features?
+- Open an issue on here
+- 
 
 # Usage
 Simply type `somedl` followed by your search query in quotes.
@@ -72,6 +76,12 @@ It is also recommended to have Deno installed. yt-dlp needs deno to work properl
 - If you have npm installed, you can use npm to install deno. If not, open PowerShell (not CMD!) and execute the command provided. (This downloads and installs a script, be aware to only do this from trusted sources!)
 
 # FAQ
+### How can I give feedback or make feature requests?
+- **Bug report**: Open an [issue](https://github.com/ChemistryGull/SomeDL/issues).
+- **Feature requests**: Open an [issue](https://github.com/ChemistryGull/SomeDL/issues) or start a discussion in the [ideas](https://github.com/ChemistryGull/SomeDL/discussions/categories/ideas) category.
+- **General feedback**: Start a discussion in the [Feedback category](https://github.com/ChemistryGull/SomeDL/discussions/categories/feedback).
+- **General question**: Read the [FAQ](#faq) or ask in the [Q&A](https://github.com/ChemistryGull/SomeDL/discussions/categories/q-a) category.
+- **Anything else**: Start a discussion in the [general](https://github.com/ChemistryGull/SomeDL/discussions/categories/general) category.
 
 ### Why should I use SomeDL over yt-dlp?
 yt-dlp has the ability to add metadata and thumbnails with the flags `--embed-metadata` and `--embed-thumbnail`. However, this data is incomplete and a often mess. Examples:
