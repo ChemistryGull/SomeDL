@@ -1,4 +1,4 @@
-# Quick guide on how to install python on Linux
+# Quick guide on how to install ffmpeg on Linux
 FFmpeg should be available on all linux distros via the package manager. Example:
 ### Arch Linux
 ```
