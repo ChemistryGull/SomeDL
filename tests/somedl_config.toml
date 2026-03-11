@@ -1,0 +1,119 @@
+
+[metadata]
+
+# Enable or disable individual metadata fields.
+# Changes apply to all songs downloaded after saving this file.
+lyrics = true
+copyright = false
+isrc = true
+genre = false
+
+
+[download]
+
+# Set the downloaded file extention
+# Default: "mp3"
+# Recommended: "best", "best/opus", "best/m4a", "opus" or "m4a"
+#
+# Options: 
+#   "best"        Let yt-dlp download the highest quality format and extract it without reencoding (usually opus, sometimes m4a)
+#   "best/opus"   Same as best, but prefere opus (if opus is not available, it will opt for other formats, mostly m4a)
+#   "best/m4a"    Same as best, but preferes m4a
+#   "opus"        Tries to download opus. If opus is not available, download the next best format and transcode it to opus
+#   "m4a"         Tries to download m4a. If m4a is not available, download the next best format and transcode it to m4a
+#   "mp3"         Downloads the best format and transcodes it to mp3
+#   "vorbis"      Downloads the best format and transcodes it to ogg
+#   "flac"        Downloads the best format and transcodes it to flac
+#
+# General info about the available formats:
+# Youtube serves opus and m4a files. Usually there is no transcoding needed, so there is no quality loss. If you can, use one of them (best, best/opus, best/m4a, opus, m4a). 
+#   opus:           Are supported by many modern Audio players. Usually no quality loss.
+#   m4a:            Are supported by most modern Audio players. Usually no quality loss. (Codec usually AAC-LC)
+#   mp3:            Best compatability, but it requires transcoding, so there is quality loss
+#   ogg/vorbis:     Only use ogg if you have a reason to. It requires transcoding, so there is a quality loss.
+#   flac:           Not recommended! You are limited to the quality youtube provides, reencoding to flac just results in huge file sizes (10x) with no benefits! If you want the best quality available, choose best, best/opus, best/m4a, opus or m4a.
+format = "best"
+
+# Set the transcoding quality. Integer between 0-9.
+# Default = 5
+#
+# Only affects formats that need to be transcoded (mp3, ogg/vorbis, flac. opus and m4a only when transcoded)
+# Best = 0      Larger file size
+# Worst = 9     Smaller file size, noticable bad quality
+# Medium = 5    About the same file size, sensible yt-dlp default
+quality = 5
+
+# Set the id3_version (ID3v2.x)
+# Default = 3 (for best compatability)
+# If you do not know the implications, leaf the default value.
+# Options:
+#  3    Best compatability
+#  4    Newer standard, Not properly supported by some music players, e.g Samsung Music (fully supported by VLC)
+id3_version = 3
+
+# Directory to save downloaded songs to.
+# Default: "." (folder the command is called from)
+output_dir = "."
+
+# File naming template for downloaded songs.
+#
+# Default: "{artist} - {title}"
+#
+# Use forward slashes to sort songs into subfolders.
+# Example: "{artist}/{year} - {album}/{track_pos} - {song}"
+#
+# Required placeholders:
+#  {artist}      Song artist, performer or band
+#  {song}        Song title
+#
+# Optional additional placeholders:
+#  {album}       Album title
+#  {year}        Release date of the song in YYYY
+#  {track_pos}   Track position of this song
+#  {track_count} Number of tracks in album
+output = "{artist} - {title}"
+
+# Path to a cookies file, or browser to pull cookies from.
+# Needed for age-restricted content.
+# See https://github.com/ChemistryGull/SomeDL for details.
+# It is not recommended to permanently set this settings.
+# I recommend to log into youtube with an age verified account on firefox (works best) 
+# and use the "--cookies-from-browser firefox" flag when downloading age restrictet songs.
+cookies_path = ""
+cookies_from_browser = ""
+
+
+[api]
+
+max_retry = 3   # Default = 3
+
+# Disabeling one of the following APIs will result in missing metadata!
+musicbrainz = true       # Default = true  | Needed for genre and artist MBID
+genius = true            # Default = true  | Needed for album info for certain songs
+deezer = true            # Default = true  | Needed for music label (copyright) and ISRC
+
+# Additional API settings
+# YouTube lists many songs as singles even if they belong to an album.
+# When enabled, SomeDL queries the Genius API for the actual album name, which
+# is then used by ytmusicapi to fetch correct album metadata and cover art.
+# Default = true; 
+genius_album_check = true   
+
+
+[logging]
+
+# Logging level
+# Default = "INFO"; 
+# Options: 
+# "WARNING" or "ERROR" to reduce the console logs
+# "DEBUG" to show all logs (same as --verbose flag)
+# "INFO" to show some information
+level = "INFO"
+
+# Default = 2; 
+# Minimum number of downloaded inputs required to generate a download report.
+# To disable download report generation entirely, set this to a large value, (e.g. 1000000).
+download_report = 2
+
+# DO NOT CHANGE THE VALUE BELOW!
+config_version = 2

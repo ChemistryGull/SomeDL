@@ -1,15 +1,24 @@
-
 # Todo
-## Next to do
-- Clean up logging, make verbose flag, add verbosity levels
+**This is a messy notes file for me, it is not always up to date**
 
 ## Immediate Priority
 
 ## High Priority 
-- Inside album guess the album name gets inevitably overwritten!!!!!!!! Even if the song is not found in the album by youtube!!! This must be fixed, if yt does not find it, either leaf the track number blank but use the albums art and name, OR treat it as a single. NOT BOTH
 - Create this list
 - TODO: test with manufactured api results as inputs
-- Enable support for other formats like flac
+- Enable support to keep original audio and not to convert to mp3. This results in a higher quality for less space for most music (e.g. the one in the opus format). Just remux it to a .opus or .ogg (check compatability!!) (*Enable support for other formats like flac*)
+- Implement musicbrainz cache
+- Easy playlist synchronisation (somedl --sync), with config: sync_targets = [list of playlists]
+- Musicbrainz:
+    - Now switched to grouping with brackets over strict search with quotes. This should now make all the musicbrainz new searches with musicbrainz obsolete. Observe if this results in more false matches
+    - (*switch to 'https://musicbrainz.org/ws/2/artist/?query={artist}&fmt=json', because the current one is not getting the correct results most of the time. also have to rewrite the functions after that because the result will be different*)
+
+- Add info about deno errors to the readme
+- PUT BACK TRY EXCEPT IN processSongList()
+- Write CHANGELOG
+- Check and test for prints
+- Check if config is really correct
+
 
 ## Medium Priority
 - Create Flowchart
@@ -20,6 +29,11 @@
 - FEAT: Give an option to download an entire album (--album flag)
 - FEAT: Give an option to download everything from an artist (--artist flag)
 - Add lyrics.ovh as lyrics API if youtube fails
+- Add functionality to stopp all possible metadata from being added
+
+- Add update metadata functionality. 
+    - Example somedl --update -o /path/to/folder --recursive --to-update "Album_artist, genre, ..." --naming-sceme "{artist} - {song} [{sth else...}]"
+    - Maybe some warning system, like checking the amount of files 
 
 ## Low Priority
 - Create an option that song names are always cleard of everything within a bracked e.g. "(2020 Remastered)"
@@ -40,21 +54,55 @@
 - TEMP FIX "ghost - its a sin" https://www.youtube.com/watch?v=XfMVF-o7g1o (Genius says its in a album, but youtube does not have it in that album. Temporary fix is to download it as a single)
 - ??? t.A.T.u. - All The Things She Said (Schrödingers API - Musicbrainz API sometimes returns the wrong artist with no tags. sometimes it returns the correct artist. not much i can do there)
 - NO FIX "Delain - We are the Others" It downlaods the radio version, as this one has way more views for some reason. Querying "Delain - We are the Others Original" downloads the correct one.
-- TODO: "Lordi - Hard rock Haleluja" Youtube is the only service that lists "Hardrock" without a space in between, so Musicbrainz and Deezer do not get results. Possible workaround would be as a fallback only search via artist name. This however may lead to wrong genre data for small artist that are not returned at the top!
+- FIXED: "Lordi - Hard rock Haleluja" Youtube is the only service that lists "Hardrock" without a space in between, so Musicbrainz and Deezer do not get results. Possible workaround would be as a fallback only search via artist name. This however may lead to wrong genre data for small artist that are not returned at the top!
+- TODO: "LAVINA - Kraj Mene" - MusicBrainz only knows the artist in lowercase.
+
+## General bugs:
+This happend once, an youtube proceeded to download the mp4 version instead of the webm. Cannot reproduce. Happens more often now. hope that yt-dlp fixes this soon.
+WARNING: [youtube] hlRm3aUzl74: Some android_vr client https formats have been skipped as they are missing a URL. YouTube may have enabled the SABR-only streaming experiment for the current session. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
+
 
 
 ## Types of URLS
-- SUPPORTET     YT-music              https://music.youtube.com/watch?v=MdqaAXrcBv4
-- SUPPORTET     YT                    https://www.youtube.com/watch?v=I0WzT0OJ-E0
-- SUPPORTET     YT-Shortened          https://youtu.be/I0WzT0OJ-E0?si=miZyWqXVH_IgjkHL
-- SUPPORTET     YT-Music-Shortened    Same as yt-music
-- SUPPORTET     Playlist              https://www.youtube.com/watch?v=D44vQCTY4Qw&list=RDGMEM_v2KDBP3d4f8uT-ilrs8fQ
+- SUPPORTED     YT-music              https://music.youtube.com/watch?v=MdqaAXrcBv4
+- SUPPORTED     YT                    https://www.youtube.com/watch?v=I0WzT0OJ-E0
+- SUPPORTED     YT-Shortened          https://youtu.be/I0WzT0OJ-E0?si=miZyWqXVH_IgjkHL
+- SUPPORTED     YT-Music-Shortened    Same as yt-music
+- SUPPORTED     Playlist              https://www.youtube.com/watch?v=D44vQCTY4Qw&list=RDGMEM_v2KDBP3d4f8uT-ilrs8fQ
 
 ## Video types
 - MUSIC_VIDEO_TYPE_OMV: Original Music Video - uploaded by original artist with actual video content
 - MUSIC_VIDEO_TYPE_UGC: User Generated Content - uploaded by regular YouTube user
 - MUSIC_VIDEO_TYPE_ATV: High quality song uploaded by original artist with cover image
 - MUSIC_VIDEO_TYPE_OFFICIAL_SOURCE_MUSIC: Official video content, but not for a single track. not seen yet
+
+# List of relevant APIs i found
+## Lyrics
+- The yt api itself: Free | No auth | Has most lyrics, but no genre info
+- Musixmatch: Paid only
+- lyrics.ovh: Free | No auth | Only lyrics
+
+# Misc:
+#downloadAlbumArt("https://lh3.googleusercontent.com/QTZ68wH7z9K_jOxagJVEgHTG5N9xyb2YMfVITqiceixstw5tXQS6gZHPhZ8-9nUr6OfHOE-bI9Sy0pE=w544-h544-l90-rj")
+
+#getSong("Sabaton - Defence of Moscow")
+#getSong("Nirvana smells like teen spirit")
+#getSong("Castle rat - wizzard") # It only gets the single version for this one, not the one in the album. The one in the album is a music video anyways, which is bad.
+#getSong("In flames trigger") # wrong genre
+#getSong("Delain - Moth to a flame") # It only gets the single version for this one too
+#getSong("Green day - American idiot") # FIXED: checks on yt if type is album first. Genius makes an "American Idiot (20th Anniversary Deluxe Edition)" out of it sadly. BC of that, deezer does not find anything.
+#getSong("Delain invictus")
+#getSong("Mushroomhead - Empty Spaces")
+#getSong(url="https://music.youtube.com/watch?v=Bsh5NuCI-pM")
+
+#getSong(url="https://www.youtube.com/watch?v=bx9AUS4Titw") # --- Example of non-yt-music song video of type MUSIC_VIDEO_TYPE_OMV. Exceptions have to be made to avoid errors.
+#getSong(url="https://www.youtube.com/watch?v=Kyfv-_qMi5Y") # --- Example of normal yt video of type MUSIC_VIDEO_TYPE_UGC. Exceptions have to be made to avoid errors.
+#getSong(url="https://www.youtube.com/watch?v=S7LJcjjq6kQ&list=PLZtI2cMRFDYPmT-kL4R-5zf-zL92b2Un_&index=2")
+#getSong("TBS - Ü30") # --- Investigate: Genius album guess does not work for this one
+
+#getSong(url="https://music.youtube.com/watch?v=6ZQiyztHzdc")
+#getSong("Delain invictus", known_metadata=[dummy_metadata])
+#getSong("Delain - Moth to a Flame")
 
 
 

@@ -1,6 +1,44 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
+
+## [1.0.0] - 11.03.2026
+
+This is the first major version of SomeDL. Having all the neccessary core fuctionality, this is a great foundation for future features.
+
+In this update the codebase was refactored, a configuration system was added and support for different codecs/formats was added.
+
+### Added
+- Dependency: `tomlkit`
+- Setting minimum version of `yt-dlp` to `>=2026.3.3`, as there was a important bugfix in that version. https://github.com/yt-dlp/yt-dlp/issues/16118
+- User configuration file:
+    - Set a download template
+    - Set a default download folder
+    - Set default output format
+    - Set default logging level
+    - Option to change ID3v2.x version.
+    - And more
+- Support for different codecs (m4a/aac, opus, ogg/vorbis, flac) in addition to mp3
+- Add `--disable-report` flag to permanently disable download report
+
+### Fixed
+- MusicBrainz now returns results, even if the title doesn't completely match ("Hard rock Hallelujah" vs "Hardrock Hallelujah")
+- Fix bug where download would fail if yt returns `None` as lyrics instead of valid lyrics or `""`. (Happens with some instrumental-only songs)
+- Fix bug where the date would not show up on some music players (Samsung music player), because it was in the ID3v2.4 version.
+- Fix incorrect metadata when yt doesn't find the song in the album genius proposed.
+
+### Changed
+- Refactoring of codebase, splitting into specific moduels
+- Change `--disable-download` flag to `--no-download`
+- Show download duration in min and sec when over 60 seconds
+- Hide yt-dlp output in INFO log mode (visible via DEBUG)
+- Add additional info to download report, including codec/format info
+- Sorted cli options into different categories
+
+### Removed
+- Remove musicbrainz album guess function. Its inaccurate, is not used and would just create problems in refactoring. (musicbrainz is still needed for genre and mbid data)
+
+
 ## [0.2.2] - 2026.03.02
 
 ### Fixed
