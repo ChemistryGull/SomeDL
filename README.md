@@ -1,9 +1,36 @@
+<div align="center">
+    
 # SomeDL - Song+Metadata Downloader
-This is a simple commandline program to download music with the correct metadata. The audio is downloaded using yt-dlp. Metadata is fetched from YouTube, but also from different other sources, like MusicBrainz for genre, Genius for album info and Deezer for music label and isrc-codes. All these APIs work without the need for an API token, so you can use this application as is.
 
-**If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue here on GitHub. I am open to add functionality based on individual usecase. See [How can I give feedback or make feature requests?](#how-can-i-give-feedback-or-make-feature-requests)**
+**SomeDL** is a easy to use command-line tool for downloading music with accurate metadata - simple installation and no login or API tokens required!
 
-*Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. This software is developed on Linux and tested on Linux & Windows.*
+
+![SomeDL usage gif](https://github.com/ChemistryGull/SomeDL/blob/main/docs/images/somedl_usage_cut.gif)
+
+
+The audio is downloaded using yt-dlp, SomeDL accepts text queries, YouTube URLs and YouTube playlist URLs. Metadata is fetched from YouTube, MusicBrainz for genre, Genius and Deezer. No API tokens required, it works out of the box.
+
+</div>
+
+> [!TIP]
+> If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue here on GitHub. I am open to add functionality based on individual usecase. See [How can I give feedback or make feature requests?](#how-can-i-give-feedback-or-make-feature-requests)
+
+> *Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. SomeDL is developed on Linux and tested on Linux & Windows. This project is was not "vibecoded".*
+
+
+# Usage
+Simply type `somedl` followed by your search query in quotes.
+```
+somedl "Nirvana - Smells like teen spirit"
+```
+
+You can also search by YouTube or YouTube music URL and even by YouTube playlist URL. Search for multiple songs at once by seperating them with spaces.
+
+```
+somedl "https://music.youtube.com/watch?v=W0Wo5zhgvpM" "https://music.youtube.com/playlist?list=OLAK5uy_mHURRD4wyePH5Kl8wQkgyfFhbvmK2pYk4" "Iron maiden - run to the hills"
+
+```
+Run `somedl -h` to get more information for the different configuration options.
 
 # Features
 - Simple usage
@@ -27,18 +54,6 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 - [ ] Update metadata in existing files
 - [ ] Parallel downloads
 
-# Usage
-Simply type `somedl` followed by your search query in quotes.
-```
-somedl "Nirvana - Smells like teen spirit"
-```
-
-You can also search by YouTube or YouTube music URL and even by YouTube playlist URL. Search for multiple songs at once by seperating them with spaces.
-
-```
-somedl "https://music.youtube.com/watch?v=W0Wo5zhgvpM" "https://music.youtube.com/playlist?list=OLAK5uy_mHURRD4wyePH5Kl8wQkgyfFhbvmK2pYk4" "Iron maiden - run to the hills"
-
-```
 
 # Installation
 This utility can be installed using pip. Also confirm that you meet all the installation [requirements](#requirements)!
@@ -50,6 +65,8 @@ or
 ```
 py -m pip install somedl
 ```
+To update an existing SomeDL installation, add the `--upgrade` flag tho the command above.
+
 
 ## Linux
 This software is currently not packaged on any repo. Use your prefered way to install python programs, like for example [pipx](https://pipx.pypa.io/stable/):
