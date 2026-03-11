@@ -2,8 +2,15 @@
     
 # SomeDL - Song+Metadata Downloader
 
+
 **SomeDL** is a easy to use command-line tool for downloading music with accurate metadata - simple installation and no login or API tokens required!
 
+
+[![PyPI version](https://img.shields.io/pypi/pyversions/somedl)](https://pypi.org/project/somedl/)
+[![PyPi downloads](https://img.shields.io/pypi/dw/somedl)](https://pypi.org/project/somedl/)
+[![PyPI - Version](https://img.shields.io/pypi/v/somedl)](https://pypi.org/project/somedl/)
+[![GitHub stars](https://img.shields.io/github/stars/chemistrygull/somedl?style=flat)](https://github.com/ChemistryGull/SomeDL)
+[![Last commit](https://img.shields.io/github/last-commit/chemistrygull/somedl)](https://github.com/ChemistryGull/SomeDL)
 
 ![SomeDL usage gif](https://github.com/ChemistryGull/SomeDL/blob/main/docs/images/somedl_usage_cut.gif)
 
