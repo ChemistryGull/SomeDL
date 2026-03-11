@@ -30,12 +30,12 @@ winget install ffmpeg
 ![winget install ffmpeg](images/ffmpeg/winget_install_ffmpeg.png)
 
 
-- After installation, PowerShell (!) and type `ffmpeg`. If there is an output containing information about ffmpeg, the install was successful. If it still says that ffmpeg is not a known/valid command, the installation did not succeed.
+- After installation, **restart PowerShell** and type `ffmpeg`. If there is an output containing information about ffmpeg, the install was successful. If it still says that ffmpeg is not a known/valid command, the installation did not succeed.
 
-Successful install:
+*Successful installation:*
 ![winget install ffmpeg](images/ffmpeg/winget_success.png)
 
-Unsuccessful install:
+*Unsuccessful installation:*
 ![winget install ffmpeg](images/ffmpeg/winget_ffmpeg_not_found.png)
 
 
