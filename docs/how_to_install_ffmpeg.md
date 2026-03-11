@@ -19,7 +19,18 @@ sudo zypper install ffmpeg
 
 
 # Quick guide on how to install ffmpeg on Windows
-You can either install ffmpeg via [winget](https://www.gyan.dev/ffmpeg/builds/), or follow this instruction for a manual install:
+You can either install ffmpeg via [winget](https://www.gyan.dev/ffmpeg/builds/), or follow the instructions for a manual install
+## Install with Winget (easiest)
+- Open PowerShell
+- Install ffmpeg with:
+```
+winget install ffmpeg
+```
+- Restart PowerShell (!) and type `ffmpeg`. If there is an output containing information about ffmpeg, the install was successful. If it still says that ffmpeg is not a known/valid command, the installation did not succeed. 
+
+## Install manually
+If the installation via winget does not work, or you prefere manual installation, follow this quick guide. (There is a similar guide available [here](https://www.realityframeworks.com/how-to-install-ffmpeg-for-yt-dlp/). Follow whichever guide you prefere)
+
 
 
 - Go to the ffmpeg website: https://ffmpeg.org/download.html
