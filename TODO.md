@@ -27,7 +27,7 @@ FOR NEXT VERSION:
 
 
 ### Docs:
-- Not working after update? Install the latest workin version with pip install package_name==version_number.
+- Not working after update? Install the latest workin version with pip install somedl==version_number. You may need to recreate the packa
 
 ### UI/UX
 - Add information on ~what~ song is downloaded. probably either by adding query or by adding the fetched metadata

@@ -66,39 +66,39 @@ def processSongList(songs_list):
         index += 1
         print(f"Downloading song: {index}/{length}")
         print()
-        # try:
-        if not item.get("song_id", None) and not item.get("text_query", None):
-            # --- Regular videos typically do not show a video ID when in a playlist for some reason. We dont want those anyways, so skip this entry
-            log.warning(f'Video "{item.get("song_title", "no name provided"):}" is likely not a song. Skipping')
+        try:
+            if not item.get("song_id", None) and not item.get("text_query", None):
+                # --- Regular videos typically do not show a video ID when in a playlist for some reason. We dont want those anyways, so skip this entry
+                log.warning(f'Video "{item.get("song_title", "no name provided"):}" is likely not a song. Skipping')
+                failed_list.append(item)
+                print()
+                continue
+            # elif item.get("yt_url", None) and (config["url_download_mode"] == "url" or (item.get("video_type", None) == "MUSIC_VIDEO_TYPE_ATV" and not config["url_download_mode"] == "query")):
+            elif item.get("yt_url") and not config["download"]["always_search_by_query"] and item.get("video_type", None) == "MUSIC_VIDEO_TYPE_ATV":
+                log.info("Download by url")
+                item_metadata = fetchMetadata(url = item["yt_url"], known_metadata=metadata_list, prefetched_metadata = item)
+
+            elif item.get("text_query", None):
+                log.info(f'Download by text query {item.get("text_query", None)}')
+                item_metadata = fetchMetadata(query = item["text_query"], known_metadata=metadata_list, prefetched_metadata = item) # --- prefetched_metadata is needed for the original_type = "Search query" to go through
+
+            elif item.get("artist_name", None) and item.get("song_title", None):
+                log.info(f'Download based on info: {item.get("artist_name", None)} - {item.get("song_title", None)}')
+                item_metadata = fetchMetadata(query = f'{item.get("artist_name", None)} - {item.get("song_title", None)}', known_metadata=metadata_list, prefetched_metadata = item) # --- prefetched_metadata is useless when video_type = OMV (because thei neither return album info nor a lyrics url), but when strictly searching for queries, also ATV videos get here, which do utilze prefetched_metadata
+
+            else:
+                print("DEBUG WARNING: uncaught exception happened in getSongList()!!!")
+
+            if item_metadata:
+                log.debug("Successfully added Song to metadata list")
+                metadata_list.append(item_metadata)
+            else:
+                log.warning("Song was not downloaded properly (or file does already exist)")
+                failed_list.append(item)
+        except Exception as e:
             failed_list.append(item)
-            print()
-            continue
-        # elif item.get("yt_url", None) and (config["url_download_mode"] == "url" or (item.get("video_type", None) == "MUSIC_VIDEO_TYPE_ATV" and not config["url_download_mode"] == "query")):
-        elif item.get("yt_url") and not config["download"]["always_search_by_query"] and item.get("video_type", None) == "MUSIC_VIDEO_TYPE_ATV":
-            log.info("Download by url")
-            item_metadata = fetchMetadata(url = item["yt_url"], known_metadata=metadata_list, prefetched_metadata = item)
-
-        elif item.get("text_query", None):
-            log.info(f'Download by text query {item.get("text_query", None)}')
-            item_metadata = fetchMetadata(query = item["text_query"], known_metadata=metadata_list, prefetched_metadata = item) # --- prefetched_metadata is needed for the original_type = "Search query" to go through
-
-        elif item.get("artist_name", None) and item.get("song_title", None):
-            log.info(f'Download based on info: {item.get("artist_name", None)} - {item.get("song_title", None)}')
-            item_metadata = fetchMetadata(query = f'{item.get("artist_name", None)} - {item.get("song_title", None)}', known_metadata=metadata_list, prefetched_metadata = item) # --- prefetched_metadata is useless when video_type = OMV (because thei neither return album info nor a lyrics url), but when strictly searching for queries, also ATV videos get here, which do utilze prefetched_metadata
-
-        else:
-            print("DEBUG WARNING: uncaught exception happened in getSongList()!!!")
-
-        if item_metadata:
-            log.debug("Successfully added Song to metadata list")
-            metadata_list.append(item_metadata)
-        else:
-            log.warning("Song was not downloaded properly (or file does already exist)")
-            failed_list.append(item)
-        # except Exception as e:
-        #     failed_list.append(item)
-        #     log.critical("A critical exception occured when trying to download song with yt-dlp! Please notify the program maintainer on https://github.com/ChemistryGull/SomeDL. Error: ")
-        #     print(e)
+            log.critical("A critical exception occured when trying to download song with yt-dlp! Please notify the program maintainer on https://github.com/ChemistryGull/SomeDL. Error: ")
+            print(e)
         
         print()
 
