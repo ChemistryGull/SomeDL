@@ -9,7 +9,7 @@ from importlib.resources import files
 
 from SomeDL.utils.logging import log, printj
 
-CONFIG_VERSION = 1
+CONFIG_VERSION = 2
 
 default_config = {
     "metadata": {
@@ -17,6 +17,11 @@ default_config = {
         "genre": (True, bool, None),
         "lyrics": (True, bool, None),
         "isrc": (True, bool, None),
+        "album_artist": (True, bool, None),
+        "multiple_artists": (False, bool, None),
+        "artist_separator": ("; ", str, None),
+        "ffmpeg_metadata": (False, bool, None),
+        "cover_art_file": (False, bool, None),
     },
     "download": {
         "format": ("mp3", str, ["best", "best/opus", "best/m4a", "opus", "m4a", "mp3", "vorbis", "flac"]),
@@ -69,7 +74,7 @@ CONFIG_PATH = (get_config_dir("SomeDL"))
 # === Load data ===
 
 def load_config():
-    with open(CONFIG_PATH, "r") as f:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return tomlkit.parse(f.read())
 
 
@@ -129,7 +134,7 @@ def change_configs(config_list):
     if not check_if_config_exists():
         generate_config()
 
-    with open(CONFIG_PATH, "r") as f:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         loaded_config = tomlkit.load(f)
         
     for conf in config_list:
@@ -144,7 +149,7 @@ def change_configs(config_list):
     # save_config(loaded_config)
 
 
-    with open(CONFIG_PATH, "w") as f:
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         tomlkit.dump(loaded_config, f)
 
 
@@ -163,7 +168,7 @@ def generate_config():
 
     print(f'Generating config in {CONFIG_PATH}')
 
-    with open(CONFIG_PATH, "w") as f:
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         f.write(new_config)
 
 
@@ -182,11 +187,6 @@ def update_config():
             new_config_data[section][key] = old_config.get(section, {}).get(key, new_value)
 
 
-    # updated_config = tomlkit.dumps(new_config_data)
-
-    # with open(CONFIG_PATH, "w") as f:
-    #     f.write(updated_config)
-
     save_config(new_config_data)
     
     
@@ -194,7 +194,7 @@ def update_config():
 # === Save data ===
 
 def save_config(config):
-    with open(CONFIG_PATH, "w") as f:
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         f.write(tomlkit.dumps(config))
 
 

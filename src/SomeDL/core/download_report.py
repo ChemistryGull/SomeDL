@@ -7,7 +7,7 @@ from SomeDL.utils.logging import log, printj
 from SomeDL.utils.config import config
 
 def generateDownloadReport(data, failed):
-    # with open('getPlaylist_data_3.json', 'r') as file:
+    # with open('getPlaylist_data_3.json', 'r', encoding="utf-8") as file:
     #     data = json.load(file)
 
     #print(json.dumps(data, indent=4, sort_keys=True))

@@ -13,17 +13,27 @@
     - Now switched to grouping with brackets over strict search with quotes. This should now make all the musicbrainz new searches with musicbrainz obsolete. Observe if this results in more false matches
     - (*switch to 'https://musicbrainz.org/ws/2/artist/?query={artist}&fmt=json', because the current one is not getting the correct results most of the time. also have to rewrite the functions after that because the result will be different*)
 
-- Add info about deno errors to the readme
-- PUT BACK TRY EXCEPT IN processSongList()
-- Write CHANGELOG
-- Check and test for prints
-- Check if config is really correct
 
+### Acutally for next version:
+- Show config flag that prints path and config options to the commandline (in json)
+- Make a new SUCCESS debug value or sth like that, thats green. should appear if a song has already been downloaded instead of a warning?
+- Add a check to checkIfFileExists if {song} and ({aritst} or {album_artist}) are present in template, warn if not.
+
+FOR NEXT VERSION:
+- Update config for the new metadata configs
+- Check if config is really correct
+- Add lrclib support
+- add video_id as viable tag
+
+
+### Docs:
+- Not working after update? Install the latest workin version with pip install package_name==version_number.
+
+### UI/UX
+- Add information on ~what~ song is downloaded. probably either by adding query or by adding the fetched metadata
 
 ## Medium Priority
 - Create Flowchart
-- Metadata: Add Album Artist
-- Metadata: Add Encoding stuff maybe
 - Metadata: Add WOAR. Artist website or the streaming websites. MusicBrainz webiste seems to have links, havent found in the api response yet, gotta look
 - User configurable id3 version
 - FEAT: Give an option to download an entire album (--album flag)
@@ -33,7 +43,10 @@
 
 - Add update metadata functionality. 
     - Example somedl --update -o /path/to/folder --recursive --to-update "Album_artist, genre, ..." --naming-sceme "{artist} - {song} [{sth else...}]"
-    - Maybe some warning system, like checking the amount of files 
+    - Maybe some warning system, like checking the amount of files
+    - some sort of interactive CLI for the update process, where you can select the path, what metadata to change, and the type of search - by yt-dlp video id, a certain output template or by reading youtube urls from the metadata (spotDL adds them into `comment` and SomeDL uses `source` on vorbis & m4a and `WWW Audio Source` on mp3 to store youtube music URLs)
+        - This would require the option to toggle every single metadata
+        - This would also require to look up which APIs are needed for what info, so skip them if they are not needed (`doMusicBrainz = False or False or True or False`)
 
 ## Low Priority
 - Create an option that song names are always cleard of everything within a bracked e.g. "(2020 Remastered)"

@@ -8,18 +8,25 @@
 # Like SomeDL? Leave a star on my GitHub repo!
 #
 # Want to revert to default configs? Regenerate config with somedl --generate-config. If config regeneration fails, try to delete this old config before trying again.
+# This config file is auto-updated when SomeDL is updated. Your settings will be preserverd, but any comments and restructuring done by you will be undone.
 #
 
 [metadata]
 
-# Default = true (for all)
 # Enable or disable individual metadata fields.
 # Changes apply to all songs downloaded after saving this file.
-lyrics = true
-copyright = true
-isrc = true
-genre = true
+lyrics = true               # Default = true
+copyright = true            # Default = true
+isrc = true                 # Default = true
+genre = true                # Default = true
 
+album_artist = true         # Default = true
+multiple_artists = false    # Default = false   | Puts all involved artists/bands in the artist data field. The "artist" name in the output template will still only contain the primary artist.
+artist_separator = "; "     # Default = "; "    | Separator used to join multiple artists in a single metadata field. Only applies to mp3 and m4a. Opus, ogg and Flac support multiple artist fields.
+
+ffmpeg_metadata =  false    # Default = false   | Set to true to keep the metadata set by ffmpeg (usually just some encoding infromation, not used by music players)
+
+cover_art_file = false      # Default = false   | Set to true to download a cover.jpg file in the same folder as the song (only one cover is created per folder, seperation by album is recommended if you want to use this setting)
 
 [download]
 
@@ -61,7 +68,7 @@ quality = 5
 # If you are not sure what this means, leave the default value.
 #
 # Options:
-#  3    Best compatibility — works with pretty much all music players
+#  3    Best compatibility - works with pretty much all music players
 #  4    Newer standard, Not properly supported by some music players, e.g Samsung Music (fully supported by VLC)
 id3_version = 3
 
@@ -77,12 +84,13 @@ output_dir = "."
 #
 # Use forward slashes to sort songs into subfolders (Do not use backslashes!).
 # Example:  "{artist}/{year} - {album}/{track_pos} - {song}"
-# Example:  "{artist}/{album}/{artist} - {song}"
-# Example:  "{artist}/{artist} - {song}"
+# Example:  "{album_artist}/{album}/{artist} - {song}"
+# Example:  "{album_artist}/{artist} - {song}"
 #
 # Required placeholders (must be included!):
-#  {artist}      Song artist, performer or band
-#  {song}        Song title
+#  {artist} or {album_artist}   Song artist, performer or band. 
+#                               -> Use {album_artist} if you only want to avoid songs with featuring artist being split up into different folders
+#  {song}                       Song title
 #
 # Optional additional placeholders:
 #  {album}       Album title
@@ -145,4 +153,4 @@ level = "INFO"
 download_report = 2
 
 # DO NOT CHANGE THE VALUE BELOW!
-config_version = 1
+config_version = 2

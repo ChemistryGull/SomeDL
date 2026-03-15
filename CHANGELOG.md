@@ -2,6 +2,25 @@
 https://keepachangelog.com/en/1.1.0/
 
 
+## [1.1.0] - 15.03.2026
+
+### Added
+- Add `album_artist` to metadata, extracted from the youtubemusicapi album information
+- Add information on how to update with pip when update is available.
+- Add optional feature to download 
+- Add several new metadata settings in the config file `album_artist`, `multiple_artists`, `artist_seperator`, `ffmpeg_metadata` and `cover_art_file`
+
+### Changed
+- Make keeping the ffmpeg generated metadata opt-in
+- Change m4a tag isrc to ISRC
+- MusicBrainz now finds the genre for even more songs, as the data is now fetched by album artist instead of the primary artist IF the album artist is in the songs primary artist. This avoids not finding a genre for songs that contain multiple artists as the primary artist (mistake in the youtube metadata), while still finding the correct artist for songs that have a different primary artist than the album artist
+- Add zero-padding to track_pos in the filename
+- Add config `cover_art_file` to download the cover art as a jpeg in the same folder as the downloaded audio file.
+
+### Removed
+- Remove old_addMetadata function. It was replaced by a new multi-format tagging system in v1.0.0.
+
+
 ## [1.0.0] - 11.03.2026
 
 This is the first major version of SomeDL. Having all the neccessary core fuctionality, this is a great foundation for future features.

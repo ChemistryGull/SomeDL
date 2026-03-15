@@ -1,11 +1,12 @@
 import json
 import base64
-
+import re
+from pathlib import Path
 #from mutagen.id3 import ID3, TIT2, TPE1, TALB, TDRC, TRCK, ID3NoHeaderError
 #import mutagen
 import  mutagen
 from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3, USLT, WOAS, WOAR, APIC, TYER, TDRC
+from mutagen.id3 import ID3, USLT, WOAS, WOAR, APIC, TYER, TDRC, SYLT
 from mutagen.oggopus import OggOpus
 from mutagen.oggvorbis import OggVorbis
 from mutagen.mp4 import MP4, MP4Cover, MP4FreeForm, AtomDataType
@@ -20,212 +21,6 @@ from SomeDL.api.web_requests import downloadAlbumArt
 
 EasyID3.RegisterTextKey('comment', 'COMM')
 EasyID3.RegisterTextKey('audio_source', 'WOAS')
-
-def addMetadata_old(metadata: str, mp3_file: str):
-    #print(json.dumps(metadata, indent=4, sort_keys=True))
-
-    #print(mutagen.File("Delain - Moth to a Flame.mp3").keys())
-    
-    # dict_keys(['TIT2', 'TPE1', 'TRCK', 'TALB', 'TPOS', 'TDRC', 'TCON', 'POPM:', 'TPE2', 'TSRC', 'TSSE', 'WOAS', 'TENC', 'TCOP', 'COMM::XXX', 'APIC:Cover'])
-    # TIT2: Breathe on Me
-    # TPE1: Delain
-    # TRCK: 1/13
-    # TALB: Interlude
-    # TPOS: 1/1 TODO (will not be included)
-    # TDRC: 2013-08-01
-    # TCON: Dutch Metal 
-    # POPM:: POPM(email='', rating=58) TODO (Popularimeter, i dont think that needs adding)
-    # TPE2: Delain TODO (Album artist)
-    # TSRC: ATN261348301
-    # TSSE: Lavf58.45.100 TODO (Software/Encoder Settings)
-    # TENC: Napalm Records TODO (Encoded by (should be the software like ffmpeg))
-    # WOAS: https://open.spotify.com/track/0tGynvJ7MK9hTin02ztQYN
-    # TCOP: (C) 2013 Napalm Records Handels GmbH
-    # COMM::XXX: https://music.youtube.com/watch?v=sXYPcm3LsLM
-    # USLT::XXX: Breathe on me...
-    # Breathe on me...
-
-    # A stranger's face that I have never seen
-    # But on photographs...
-    # ...[Chorus]
-    # And call me the wild rose...
-
-    # [Chorus]
-    # APIC:Cover: APIC(encoding=<Encoding.UTF16: 1>, mime='image/jpeg', type=<PictureType.COVER_FRONT: 3>, desc='Cover', data=b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x02\x00v\x00v\x00\x00\xff\xdb\x00C\x00\x03\x02\x02\x03\x02\x02\x03\x03\x03\x03\x04\x03\x03\x04\x05\x08\x05\x05\x04\x04\x05\n\x07\x07\x06\x08\x0c\n\x0c\x0c\x0b\n\x0b\x0b\r\x0e\x12\x10\r\x0e\x11\x0e\x0b\x0b\x10\x16\x10\x11\x13\x14\x15\x15\x15\x0c\x0f\x17\x18\x16\x14\x18\x12
-
-
-    # audio = ID3("Delain - Breathe on Me.mp3")
-
-    # # Get all unsynchronised lyrics frames
-    # uslt_frames = audio.getall("USLT")
-    # print(audio)
-    # for frame in uslt_frames:
-    #     print("Language:", frame.lang)
-    #     print("Description:", frame.desc)
-    #     print("Lyrics:\n", frame.text)
-    #     print("-" * 40)
-    
-    # audio = ID3("Delain - Breathe on Me.mp3")
-    # for key, value in audio.items():
-    #     print(f"{key}: {value}")
-    
-    # return
-    #mp3_file = "I Miss the Misery [hComisqDS1I].mp3"
-    # mp3_file = "Invictus (feat. Marko Hietala & Paolo Ribaldini) [3J8VwHPRyN8].mp3"
-
-    if not len(metadata.get("album_art", [{}])) == 0:
-        album_art_url = metadata.get("album_art", [{}])[-1].get("url")
-        log.debug(f'Album art size: {metadata.get("album_art", [{}])[-1].get("height")} x {metadata.get("album_art", [{}])[-1].get("width")}')
-    else:
-        album_art_url = None
-    
-    if album_art_url:
-        log.debug("Downloading Album Artwork...")
-        album_art_data = downloadAlbumArt(album_art_url)
-    else: 
-        album_art_data = None
-
-
-    try:
-        tag = EasyID3(mp3_file)
-    except:
-        tag = mutagen.File(mp3_file, easy=True)
-        tag.add_tags()
-        log.error("EasyID3 exception occured")
-
-    tag.delete()
-    tag['artist'] = metadata.get("artist_name", "")
-    tag['title'] = metadata.get("song_title", "")
-    # tag['date'] = metadata.get("date", "") # --- Have to manually set
-    tag['album'] = metadata.get("album_name", "")
-    tag['genre'] = metadata.get("mb_genres", "")
-    #tag['albumartist'] = 'myalbumartist'
-    tag['tracknumber'] = f'{metadata.get("track_pos", "")}/{metadata.get("track_count", "")}'
-    #tag['discnumber'] = 'mydiscnumber'
-    # tag['audio_source'] = f'https://music.youtube.com/watch?v={metadata.get("song_id", "")}'
-    # tag['comment'] = f'https://music.youtube.com/watch?v={metadata.get("song_id", "")}'
-    tag['musicbrainz_artistid'] =  metadata.get("mb_artist_mbid", "")
-    tag['isrc'] =  metadata.get("deezer_isrc", "")
-
-    if metadata.get("date") and metadata.get("deezer_album_label"):
-        tag['copyright'] =  f'{metadata.get("date", "")} {metadata.get("deezer_album_label", "")}'
-    else:
-        log.debug("Adding no copyright info to metadata no info was found")
-
-    tag.save(v2_version=4)
-
-    #TODO: WOAR = https://www.artistwebsite.com ...oder... WOAR = https://musicbrainz.org/artist/<MBID>
-    #TODO: genre: add multiple genres. Seperated by a / on v2.3 (tho not exactly supportet i guess) or a \0 on v2.4. Just a guess to
-
-
-    # Source: https://stackoverflow.com/questions/42231932/writing-id3-tags-using-easyid3
-
-
-    id3 = ID3(mp3_file)
-
-    id3.delall("USLT")
-    id3.delall("WOAS")
-    id3.delall("WOAR")
-    id3.delall("APIC")
-
-
-    # Add TYER (year only) v2.3
-    # id3.add(TYER(encoding=3, text="1999"))
-
-    # Add TDRC (recording time) v2.4
-    id3.add(TDRC(encoding=3, text="2001"))
-
-    if metadata.get("lyrics") and config["metadata"]["lyrics"]:
-        id3.add(USLT(
-            encoding=3,
-            lang = "XXX",
-            desc = "",
-            text = metadata.get("lyrics", {}).get("lyrics", "")
-        ))
-    
-    id3.add(WOAS(
-        url=f'https://music.youtube.com/watch?v={metadata.get("song_id", "")}'
-    ))
-    # TODO: Add urls to the artist website or the streaming websites. Multiple WOAR tags can be added (appear as "website" on kid3)
-    # id3.add(WOAR(
-    #     encoding=3,
-    #     url='https://music.youtube.com/watch?v=text',
-    #     content="xxx"
-    # ))
-
-    if album_art_data:
-        id3.add(APIC(
-            encoding=1,  # (Same as spotdl)
-            mime='image/jpeg',  # or 'image/png' depending on the image type
-            type=3,  # Cover (front); (same as spotld)
-            desc='Cover',
-            data=album_art_data
-        ))
-
-    id3.save(v2_version=4)
-
-
-
-    log.info("Successfully added metadata")
-
-    # print("INFO: Added the following metadata:")
-    # audio = ID3(mp3_file)
-    # for key, value in audio.items():
-    #     print(f"{key}: {value}"[:300])
-
-
-    return
-
-    mp3_file = "Invictus (feat. Marko Hietala & Paolo Ribaldini) [3J8VwHPRyN8].mp3"
-
-    try:
-        audio = ID3(mp3_file)
-    except ID3NoHeaderError:
-        audio = ID3()
-
-    # Encoding=3 means utf8 (i think)
-    audio["TIT2"] = TIT2(encoding=3, text=metadata.get("song_title", ""))
-    audio["TPE1"] = TPE1(encoding=3, text=metadata.get("artist_name", "")) # ARTIST
-    audio["TALB"] = TALB(encoding=3, text=metadata.get("album_name", "")) # ALBUM
-    audio["TRCK"] = TRCK(encoding=3, text="1")
-    audio["TCON"] = TCON(encoding=3, text=metadata.get("mb_genres", "")) # GENRE
-
-    #audio["TYER"] = TYER(encoding=3, text="2026") # YEAR ID3v2.3
-    #audio["TDRC"] = TDRC(encoding=3, text="2026") # YEAR ID3v2.4
-
-    #audio["COMM"] = TRCK(encoding=3, text="1") # COMMENT
-    #audio["TPE2"] = TRCK(encoding=3, text="") # ALBUMARTIST
-    #audio["TCOP"] = TRCK(encoding=3, text="") # COPYRIGHT
-    #audio["TDAT"] = TDRC(encoding=3, text="2026") # DATE ID3v2.3
-    #audio["TXXX:DATE"] = TDRC(encoding=3, text="2026") # DATE ID3v2.4
-    #audio["TSRC"] = TRCK(encoding=3, text="") # ISRC
-    #audio["TXXX:MusicBrainz Album Artist Id"] = TRCK(encoding=3, text="") # MUSICBRAINZ_ALBUMARTISTID
-    #audio["TXXX:MusicBrainz Album Id"] = TRCK(encoding=3, text="") # MUSICBRAINZ_ALBUMID
-    #audio["TXXX:MusicBrainz Album Release Country"] = TRCK(encoding=3, text="") # MUSICBRAINZ_ALBUMRELEASECOUNTRY
-    #audio["TXXX:MusicBrainz Album Status"] = TRCK(encoding=3, text="") # MUSICBRAINZ_ALBUMSTATUS
-    #audio["TXXX:MusicBrainz Album Type"] = TRCK(encoding=3, text="") # MUSICBRAINZ_ALBUMTYPE
-    #audio["TXXX:MusicBrainz Artist Id"] = TRCK(encoding=3, text="") # MUSICBRAINZ_ARTISTID
-    #audio["TXXX:MusicBrainz Disc Id"] = TRCK(encoding=3, text="") # MUSICBRAINZ_DISCID
-    #audio["TXXX:MusicBrainz Original Album Id"] = TRCK(encoding=3, text="") # MUSICBRAINZ_ORIGINALALBUMID
-    #audio["TXXX:MusicBrainz Original Artist Id"] = TRCK(encoding=3, text="") # MUSICBRAINZ_ORIGINALARTISTID
-    #audio["TXXX:MusicBrainz Release Group Id"] = TRCK(encoding=3, text="") # MUSICBRAINZ_RELEASEGROUPID
-    #audio["TXXX:MusicBrainz Release Track Id"] = TRCK(encoding=3, text="") # MUSICBRAINZ_RELEASETRACKID
-    #audio["UFID:http://musicbrainz.org"] = TRCK(encoding=3, text="") # MUSICBRAINZ_TRACKID
-    #audio["TXXX:MusicBrainz TRM Id"] = TRCK(encoding=3, text="") # MUSICBRAINZ_TRMID
-    #audio["TXXX:MusicBrainz Work Id"] = TRCK(encoding=3, text="") # MUSICBRAINZ_WORKID
-
-    #audio["TPUB"] = TRCK(encoding=3, text="") # PUBLISHER
-    #audio["USLT"] = TRCK(encoding=3, text="") # UNSYNCEDLYRICS
-    #audio[""] = TRCK(encoding=3, text="") # 
-    #audio[""] = TRCK(encoding=3, text="") # 
-    #audio[""] = TRCK(encoding=3, text="") # 
-    #audio[""] = TRCK(encoding=3, text="") # 
-
-
-
-
-    audio.save(mp3_file)
-    print("ee")
 
 
 # def addMetadata(metadata: str, mp3_file: str):
@@ -242,6 +37,14 @@ def addMetadata(metadata, path):
         album_art_data = downloadAlbumArt(album_art_url)
     else: 
         album_art_data = None
+
+
+    # === Download cover art as .jpg if wanted ===
+    if config["metadata"]["cover_art_file"] and album_art_data:
+        jpg_path = Path(path).parent / "cover.jpg"
+        if not jpg_path.exists():
+            with open(jpg_path, "wb") as f:
+                f.write(album_art_data)
 
 
     try:
@@ -311,10 +114,16 @@ def tag_mp3(path, metadata, album_art_data):
         tag.add_tags()
         log.debug("EasyID3 adding new tags")
 
-    # tag.delete()
-    tag['artist'] = metadata.get("artist_name", "")
+    if not config["metadata"]["ffmpeg_metadata"]:
+        tag.delete()
+
+    if config["metadata"]["multiple_artists"]:
+        tag['artist'] = config["metadata"]["artist_separator"].join(metadata.get("artist_all_names", ""))
+    else:
+        tag['artist'] = metadata.get("artist_name", "")
+    
     tag['title'] = metadata.get("song_title", "")
-    # tag['date'] = metadata.get("date", "")
+    # tag['date'] = metadata.get("date", "") # --- will be added directly according to the version
     tag['album'] = metadata.get("album_name", "")
     tag['genre'] = metadata.get("mb_genres", "")
 
@@ -328,7 +137,9 @@ def tag_mp3(path, metadata, album_art_data):
         else:
             tag["tracknumber"] = str(track_pos)
 
-    #tag['albumartist'] = 'myalbumartist'
+    if metadata.get("album_artist") and config["metadata"]["album_artist"]:
+        tag['albumartist'] = metadata.get("album_artist", "")
+
     #tag['discnumber'] = 'mydiscnumber'
     # tag['audio_source'] = f'https://music.youtube.com/watch?v={metadata.get("song_id", "")}'
     # tag['comment'] = f'https://music.youtube.com/watch?v={metadata.get("song_id", "")}'
@@ -377,6 +188,14 @@ def tag_mp3(path, metadata, album_art_data):
             desc = "",
             text = metadata.get("lyrics", {}).get("lyrics", "")
         ))
+
+    # if metadata.get("synced_lyrics"):
+    #     id3.add(SYLT(
+    #         encoding=3,
+    #         lang = "XXX",
+    #         desc = "",
+    #         text = conv_lrc_to_sylt(metadata.get("synced_lyrics", ""))
+    #     ))
     
     id3.add(WOAS(
         url=f'https://music.youtube.com/watch?v={metadata.get("song_id", "")}'
@@ -400,16 +219,50 @@ def tag_mp3(path, metadata, album_art_data):
     id3.save(v2_version=3)
 
 
-def tag_vorbis(audio, path, metadata):
-    # audio.delete()
+def conv_lrc_to_sylt(synced_lyrics):
+    synced = []
+    plain_lines = []
 
-    audio["artist"]       = [metadata.get("artist_name", "")]
+
+    for line in synced_lyrics.split("\n"):
+        print(line)
+        m = re.compile(r"\[(\d+):(\d+(?:\.\d+)?)\](.*)").match(line.strip())
+        if not m:
+            continue
+
+        minutes = int(m.group(1))
+        seconds = float(m.group(2))
+        text = m.group(3).strip()
+
+        ms = int((minutes * 60 + seconds) * 1000)
+
+        synced.append((text, ms))
+        plain_lines.append(text)
+
+    print(" -- -- -- ")
+    print(synced)
+    # print(plain_lines)
+    return synced
+
+
+def tag_vorbis(audio, path, metadata):
+    if not config["metadata"]["ffmpeg_metadata"]:
+        audio.delete()
+
+    if config["metadata"]["multiple_artists"]:
+        audio["artist"]   = metadata.get("artist_all_names", "")
+    else:
+        audio["artist"]   = [metadata.get("artist_name", "")]
+    
     audio["title"]        = [metadata.get("song_title", "")]
     audio["date"]         = [metadata.get("date", "")]
     audio["album"]        = [metadata.get("album_name", "")]
     audio["genre"]        = [metadata.get("mb_genres", "")]
-    audio['tracknumber'] = str(metadata.get("track_pos", ""))
-    audio['tracktotal'] = str(metadata.get("track_count", ""))
+    audio['tracknumber']  = str(metadata.get("track_pos", ""))
+    audio['tracktotal']   = str(metadata.get("track_count", ""))
+
+    if metadata.get("album_artist") and config["metadata"]["album_artist"]:
+        audio["albumartist"] = metadata.get("album_artist", "")
 
     if metadata.get("mb_artist_mbid", ""):
         audio['musicbrainz_artistid'] = [metadata.get("mb_artist_mbid", "")]
@@ -428,18 +281,23 @@ def tag_vorbis(audio, path, metadata):
         audio['lyrics'] = [metadata.get("lyrics", {}).get("lyrics", "")]
 
 
-    # audio["albumartist"]  = "Album Artist"
+    
     # audio["comment"]      = "Some comment"
     # audio["composer"]     = "Composer Name"
     # audio["discnumber"]   = "1" 
 
 
 def tag_m4a(audio, path, metadata, album_art_data):
-    #audio.delete()
+    if not config["metadata"]["ffmpeg_metadata"]:
+        audio.delete()
 
     # Source: https://mutagen.readthedocs.io/en/latest/api/mp4.html#mutagen.mp4.MP4Tags
 
-    audio["\xa9ART"] = [metadata.get("artist_name", "")]        # artist
+    if config["metadata"]["multiple_artists"]:
+        audio["\xa9ART"] = [config["metadata"]["artist_separator"].join(metadata.get("artist_all_names", ""))]   
+    else:
+        audio["\xa9ART"] = [metadata.get("artist_name", "")]        # artist
+
     audio["\xa9nam"] = [metadata.get("song_title", "")]         # title
     audio["\xa9day"] = [metadata.get("date", "")]               # date
     audio["\xa9alb"] = [metadata.get("album_name", "")]         # album
@@ -451,11 +309,14 @@ def tag_m4a(audio, path, metadata, album_art_data):
     audio["trkn"] = [(int(track_pos) if track_pos else 0, int(track_count) if track_count else 0)]
 
 
+    if metadata.get("album_artist") and config["metadata"]["album_artist"]:
+        audio["aART"] = metadata.get("album_artist", "")
+
     if metadata.get("mb_artist_mbid", ""):
         audio[f"----:com.apple.iTunes:musicbrainz_artistid"] = [MP4FreeForm(metadata.get("mb_artist_mbid", "").encode("utf-8"), AtomDataType.UTF8)]
     
     if metadata.get("deezer_isrc", "") and config["metadata"]["isrc"]:
-        audio[f"----:com.apple.iTunes:isrc"] = [MP4FreeForm(metadata.get("deezer_isrc", "").encode("utf-8"), AtomDataType.UTF8)]
+        audio[f"----:com.apple.iTunes:ISRC"] = [MP4FreeForm(metadata.get("deezer_isrc", "").encode("utf-8"), AtomDataType.UTF8)]
 
     if metadata.get("date") and metadata.get("deezer_album_label") and config["metadata"]["copyright"]:
         audio['cprt'] = [f'{metadata.get("date", "")} {metadata.get("deezer_album_label", "")}']
@@ -552,6 +413,7 @@ dummy_metadata = {
 #addMetadata("/home/chemgull/Documents/Coding/Python/SomeDL/downloads/downloads/Delain/2020 - Apocalypse & Chill/Creatures.flac", dummy_metadata)
 #addMetadata("/home/chemgull/Documents/Coding/Python/SomeDL/downloads/downloads/Delain/2020 - Apocalypse & Chill/Creatures.m4a", dummy_metadata)
 #addMetadata("/home/chemgull/Documents/Coding/Python/SomeDL/downloads/downloads/Delain/2020 - Apocalypse & Chill/Creatures.mp3", dummy_metadata)
+#addMetadata(dummy_metadata, "/home/chemgull/Documents/Coding/Python/SomeDL/downloads/downloads/Bad Omens - THE DRAIN.m4a")
 
 
 

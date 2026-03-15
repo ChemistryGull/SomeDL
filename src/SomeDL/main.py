@@ -13,6 +13,7 @@ from SomeDL.api.deezer import deezerGetSongByQuery, deezerGetAlbumByID, getDeeze
 from SomeDL.api.musicbrainz import musicBrainzGetSongByName, musicBrainzGetArtistByMBID
 from SomeDL.api.genius import geniusGetAlbumBySongName
 from SomeDL.api.ytmusic import yt
+from SomeDL.api.lrclib import lrclib_get_lyrics
 from SomeDL.core.input_parser import generateSongList
 from SomeDL.core.cli_parser import parseCliArgs
 from SomeDL.core.downloader import downloadSong
@@ -65,39 +66,39 @@ def processSongList(songs_list):
         index += 1
         print(f"Downloading song: {index}/{length}")
         print()
-        try:
-            if not item.get("song_id", None) and not item.get("text_query", None):
-                # --- Regular videos typically do not show a video ID when in a playlist for some reason. We dont want those anyways, so skip this entry
-                log.warning(f'Video "{item.get("song_title", "no name provided"):}" is likely not a song. Skipping')
-                failed_list.append(item)
-                print()
-                continue
-            # elif item.get("yt_url", None) and (config["url_download_mode"] == "url" or (item.get("video_type", None) == "MUSIC_VIDEO_TYPE_ATV" and not config["url_download_mode"] == "query")):
-            elif item.get("yt_url") and not config["download"]["always_search_by_query"] and item.get("video_type", None) == "MUSIC_VIDEO_TYPE_ATV":
-                log.info("Download by url")
-                item_metadata = fetchMetadata(url = item["yt_url"], known_metadata=metadata_list, prefetched_metadata = item)
-
-            elif item.get("text_query", None):
-                log.info(f'Download by text query {item.get("text_query", None)}')
-                item_metadata = fetchMetadata(query = item["text_query"], known_metadata=metadata_list, prefetched_metadata = item) # --- prefetched_metadata is needed for the original_type = "Search query" to go through
-
-            elif item.get("artist_name", None) and item.get("song_title", None):
-                log.info(f'Download based on info: {item.get("artist_name", None)} - {item.get("song_title", None)}')
-                item_metadata = fetchMetadata(query = f'{item.get("artist_name", None)} - {item.get("song_title", None)}', known_metadata=metadata_list, prefetched_metadata = item) # --- prefetched_metadata is useless when video_type = OMV (because thei neither return album info nor a lyrics url), but when strictly searching for queries, also ATV videos get here, which do utilze prefetched_metadata
-
-            else:
-                print("DEBUG WARNING: uncaught exception happened in getSongList()!!!")
-
-            if item_metadata:
-                log.debug("Successfully added Song to metadata list")
-                metadata_list.append(item_metadata)
-            else:
-                log.warning("Song was not downloaded properly (or file does already exist)")
-                failed_list.append(item)
-        except Exception as e:
+        # try:
+        if not item.get("song_id", None) and not item.get("text_query", None):
+            # --- Regular videos typically do not show a video ID when in a playlist for some reason. We dont want those anyways, so skip this entry
+            log.warning(f'Video "{item.get("song_title", "no name provided"):}" is likely not a song. Skipping')
             failed_list.append(item)
-            log.critical("A critical exception occured when trying to download song with yt-dlp! Please notify the program maintainer on https://github.com/ChemistryGull/SomeDL. Error: ")
-            print(e)
+            print()
+            continue
+        # elif item.get("yt_url", None) and (config["url_download_mode"] == "url" or (item.get("video_type", None) == "MUSIC_VIDEO_TYPE_ATV" and not config["url_download_mode"] == "query")):
+        elif item.get("yt_url") and not config["download"]["always_search_by_query"] and item.get("video_type", None) == "MUSIC_VIDEO_TYPE_ATV":
+            log.info("Download by url")
+            item_metadata = fetchMetadata(url = item["yt_url"], known_metadata=metadata_list, prefetched_metadata = item)
+
+        elif item.get("text_query", None):
+            log.info(f'Download by text query {item.get("text_query", None)}')
+            item_metadata = fetchMetadata(query = item["text_query"], known_metadata=metadata_list, prefetched_metadata = item) # --- prefetched_metadata is needed for the original_type = "Search query" to go through
+
+        elif item.get("artist_name", None) and item.get("song_title", None):
+            log.info(f'Download based on info: {item.get("artist_name", None)} - {item.get("song_title", None)}')
+            item_metadata = fetchMetadata(query = f'{item.get("artist_name", None)} - {item.get("song_title", None)}', known_metadata=metadata_list, prefetched_metadata = item) # --- prefetched_metadata is useless when video_type = OMV (because thei neither return album info nor a lyrics url), but when strictly searching for queries, also ATV videos get here, which do utilze prefetched_metadata
+
+        else:
+            print("DEBUG WARNING: uncaught exception happened in getSongList()!!!")
+
+        if item_metadata:
+            log.debug("Successfully added Song to metadata list")
+            metadata_list.append(item_metadata)
+        else:
+            log.warning("Song was not downloaded properly (or file does already exist)")
+            failed_list.append(item)
+        # except Exception as e:
+        #     failed_list.append(item)
+        #     log.critical("A critical exception occured when trying to download song with yt-dlp! Please notify the program maintainer on https://github.com/ChemistryGull/SomeDL. Error: ")
+        #     print(e)
         
         print()
 
@@ -163,22 +164,21 @@ def fetchMetadata(query: str = None, url: str = None, known_metadata: list = [],
             log.error("Neither query nor url provided")
             return
 
-
         metadata = {"query": query}
 
         metadata["album_name"] =        search_results.get("album", {}).get("name")
         metadata["album_id"] =          search_results.get("album", {}).get("id")
-        metadata["artist_name"] =       search_results.get("artists", [])[0].get("name")
-        metadata["artist_id"] =         search_results.get("artists", [])[0].get("id")
+        metadata["artist_name"] =       search_results.get("artists", [{}])[0].get("name")
+        metadata["artist_id"] =         search_results.get("artists", [{}])[0].get("id")
         metadata["artist_all_names"] =  [a.get("name") for a in search_results.get("artists", [])]
         metadata["song_title"] =        search_results.get("title", "No title found")
         # metadata["song_title"] =  re.sub(r"\(.*?\)", "", search_results.get("title", "No title found")).rstrip() # --- Remove mentions like (2020 Remastered). Used to get proper from Musicbrainz and Deezer
         metadata["song_id"] =           search_results.get("videoId", "No title id found")
         metadata["video_type"] =        search_results.get("videoType",  "No video type found") # --- ("MUSIC_VIDEO_TYPE_ATV" - official audio | "MUSIC_VIDEO_TYPE_OMV" - official music video)
         metadata["yt_url"] =            f'https://music.youtube.com/watch?v={metadata["song_id"]}'
-
+        # metadata["duration"] =          search_results.get("duration_seconds")
     # timerend("Initial_fetch")
-
+    # return
 
     if checkIfFileExists(metadata["artist_name"], metadata["song_title"]):
         log.warning(f'Song does already exist. Skipping download')
@@ -228,7 +228,7 @@ def fetchMetadata(query: str = None, url: str = None, known_metadata: list = [],
 
                 # --- Check if the artist from the album is still the same as the original one
                 #print(album_guess[0].get("artists", [])[0].get("name"), " == ", metadata["artist_name"])
-                if album_guess[0].get("artists", [])[0].get("name") == metadata["artist_name"]:
+                if album_guess[0].get("artists", [{}])[0].get("name") == metadata["artist_name"]:
                     metadata["zz_OLD_album_name"] = metadata["album_name"]
                     metadata["zz_Genius_album_name_guess"] = album_guess[0].get("title")
 
@@ -286,14 +286,64 @@ def fetchMetadata(query: str = None, url: str = None, known_metadata: list = [],
     metadata["album_art"] =         album.get("thumbnails", [])
     metadata["date"] =              album.get("year", "No date found")
     metadata["type"] =              album.get("type", "No type found")
+    metadata["album_artist"] =      album.get("artists", [{}])[0].get("name")
+    metadata["duration"] =          album.get("tracks", [])[song_index - 1].get("duration_seconds")
+
+
+
+    if checkIfFileExists(metadata["artist_name"], metadata["song_title"], metadata["album_artist"]):
+        # --- Second check, neccessary if only album_artist is set
+        log.warning(f'Song does already exist. Skipping download. (2)')
+        return None
+
 
     # timerend("get_album_data")
 
     # timerstart("get_lyrics")
+    #
+    # Configs:
+    # plain_lyrics
+    # synced_lyrics
+    # synced_lyrics_with_fallback (different name?)  # --- Use synced lyrics, but use plain lyrics as fallback
+    #
+    # Sceme:
+    # get lrclib
+    # if not lrclib
+    # get
+    #
+    # config["metadata"]["plain_lyrics"] or (not metadata["synced_lyrics"] and config["metadata"]["plain_lyrics_fallback"]):
+    #
 
+    # config["metadata"]["plain_lyrics"] = True
+    # config["metadata"]["synced_lyrics"] = True
+    # config["metadata"]["plain_lyrics_fallback"] = True
+    # config["api"]["lrclib"] = True
+    # config["api"]["youtube_lyrics"] = True
+    # # config["metadata"]["lyrics_source"] = "all"
+
+    # if config["api"]["lrclib"]:
+    #     lrclib_lyrics = lrclib_get_lyrics(metadata.get("artist_name", ""), metadata.get("song_title"), duration=metadata.get("duration"))
+    #     printj(lrclib_lyrics)
+    #     metadata["synced_lyrics"] = lrclib_lyrics.get("syncedLyrics")
+    #     metadata["plain_lyrics"] = lrclib_lyrics.get("plainLyrics")
+
+
+
+    # printj(metadata)
+    # return
     # === Get lyrics from YT API ===
+    # not config["api"]["lrclib"]
 
+    # yt_fallback_synced = config["metadata"]["plain_lyrics_fallback"] and not metadata.get("synced_lyrics") and not metadata.get("plain_lyrics")
+    # yt_fallback_plain = not metadata.get("plain_lyrics")
+
+    # log.debug(f'Got SYNCED lyrics from lrclib: {not metadata["synced_lyrics"] == None}')
+    # log.debug(f'Got PLAIN lyrics from lrclib: {not metadata["plain_lyrics"] == None}')
+    
+    # timerstart("get_lyrics")
+    # if config["api"]["youtube_lyrics"] and (yt_fallback_synced or yt_fallback_plain):
     if config["metadata"]["lyrics"]:
+        # log.debug("Getting lyrics from youtube api")
         if metadata.get("lyrics_id"): # --- if input is a song URL of type ATV is inserted, this data was already fetched and is reused, saves
             lyrics_id = metadata.get("lyrics_id")
         else:
@@ -347,7 +397,15 @@ def fetchMetadata(query: str = None, url: str = None, known_metadata: list = [],
     if config["api"]["musicbrainz"] and config["metadata"]["genre"] and artist_seen == None:
         log.info("Call MusicBrainz API for genre and artist MBID info")
         # TODO: When searching for multiple songs in a row (playlist, multiple queries), check if MBID has already been fetched and use this data instead of making another api call
-        mb_song_res = musicBrainzGetSongByName(metadata["artist_name"], metadata["song_title"])
+        if metadata["album_artist"].lower() in metadata["artist_name"].lower():
+            # --- If album artist is in artist, its a high chance that the original artist is a feat. or collab in the same artist field.
+            # print("Musicbrainz search by album_artist")
+            mb_song_res = musicBrainzGetSongByName(metadata["album_artist"], metadata["song_title"])
+        else:
+            # --- If album artist is NOT in artist, the album artist is likley not the songs artist (multiple artist collab album)
+            # print("Musicbrainz search by song artist_name")
+            mb_song_res = musicBrainzGetSongByName(metadata["artist_name"], metadata["song_title"])
+
         #print(json.dumps(mb_song_res, indent=4, sort_keys=True))
         
         if False and mb_song_res and len(mb_song_res.get("recordings", [{}])) == 0 and not metadata["song_title_clean"] == metadata["song_title"].rstrip():
@@ -423,8 +481,6 @@ def fetchMetadata(query: str = None, url: str = None, known_metadata: list = [],
         metadata["deezer_artist_name"] =    deezer_album_data.get("artist", {}).get("name", "No deezer artist name found")
         metadata["deezer_isrc"] =           deezer_album_data.get("isrc", "")
 
-        # TODO: when implementing multiple song search, test if deezer_album_id has already be seen, if yes, get the data from that entry instead of making a new API call
-        # TODO: Maybe add isrc? They would kinda break the above proposed implementation tho
 
 
     #print(json.dumps(metadata, indent=4, sort_keys=True))
@@ -450,10 +506,9 @@ def fetchMetadata(query: str = None, url: str = None, known_metadata: list = [],
 
     if config["download"]["strict_url_download"] and metadata.get("original_url_id"):
         log.info(f'INFO: Downloading audio from original URL as download_url_audio is set: {metadata["original_url_id"]}')
-        filename = downloadSong(metadata["original_url_id"], metadata["artist_name"], metadata["song_title"], metadata["album_name"], metadata["date"], metadata["track_pos"], metadata["track_count"])
-        metadata["filetype"] = filename.rsplit(".", 1)[-1]
+        filename = downloadSong(metadata["original_url_id"], metadata["artist_name"], metadata["album_artist"], metadata["song_title"], metadata["album_name"], metadata["date"], metadata["track_pos"], metadata["track_count"])
     else: 
-        filename = downloadSong(metadata["song_id"], metadata["artist_name"], metadata["song_title"], metadata["album_name"], metadata["date"], metadata["track_pos"], metadata["track_count"])
+        filename = downloadSong(metadata["song_id"], metadata["artist_name"], metadata["album_artist"], metadata["song_title"], metadata["album_name"], metadata["date"], metadata["track_pos"], metadata["track_count"])
     if filename:
         addMetadata(metadata, filename)
         metadata["filetype"] = filename.rsplit(".", 1)[-1]

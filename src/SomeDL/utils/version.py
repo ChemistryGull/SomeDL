@@ -2,7 +2,7 @@ import requests
 
 from SomeDL.utils.logging import log
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 def check_latest_version(print_version):
     # --- Check pypi for latest version
@@ -15,6 +15,8 @@ def check_latest_version(print_version):
         if not latest_version == VERSION:
             print()
             print(f"SomeDL v{VERSION}. A newer version is available: {latest_version}")
+            print("If you installed SomeDL with pip, run the following command to update:")
+            print("  python -m pip install --upgrade somedl")
         elif print_version:
             print()
             print(f'SomeDL v{VERSION}. You are up to date.')

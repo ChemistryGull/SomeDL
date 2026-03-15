@@ -3,8 +3,8 @@ import json
 import argparse
 from pathlib import Path
 
-from SomeDL.utils.logging import log, logging
-from SomeDL.utils.config import config, generate_config, change_configs, CONFIG_PATH
+from SomeDL.utils.logging import log, logging, printj
+from SomeDL.utils.config import config, generate_config, change_configs, CONFIG_PATH, check_if_config_exists
 from SomeDL.utils.version import VERSION, check_latest_version
 
 def parseCliArgs():
@@ -37,6 +37,11 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         "--generate-config",
         action="store_true",
         help=f'Generate a config file to "{CONFIG_PATH}". Use this config to set format, output folder, output template and more.'
+    )
+    parser.add_argument(
+        "--show-config",
+        action="store_true",
+        help=f'Show the current config options'
     )
 
     download_group = parser.add_argument_group("Download")
@@ -179,6 +184,25 @@ Download songs from YouTube by query, multiple queries, or playlist link.
 
     if args.generate_config:
         generate_config()
+
+    if args.show_config:
+        if check_if_config_exists():
+            print(f'Config saved at: "{CONFIG_PATH}"')
+            print("Current config:")
+            printj(config)
+            print()
+        else:
+            print("No configuragtion file set.")
+            print("To generate a config file, run \"somedl --generate-config\"")
+            print("The config file will then be available at:")
+            print(CONFIG_PATH)
+            print()
+            print("Default confiurations apply:")
+            printj(config)
+            print()
+        return False
+
+
 
     #print(args.format)
 
