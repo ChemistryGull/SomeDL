@@ -50,15 +50,18 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 ```
 - Different output formats: `opus, m4a, mp3, ogg`
 - Sort downloads automatically into folders according to a template if desired
-    - For example: `{artist}/{artist} - {song}`
-    - Or more complex: `{artist}/{year} - {album}/{track_pos} - {song}`
+    - For example: `{album_artist}/{artist} - {song}`
+    - Or more complex: `{album_artist}/{year} - {album}/{track_pos} - {song}`
 - User configuration file
 - Download report - get a quick overview over the downloaded songs, including their metadata.
+- And much more!
 
 ## Proposed Features
 - [ ] Give option to download every song from an album automatically. (*coming soon*)
-- [ ] Fallback lyrics source
-- [ ] Update metadata in existing files
+- [ ] Fallback lyrics source (*planned soon*)
+- [ ] Update metadata in existing files (*planned soon*)
+- [ ] Import songs from different folder structures and optionally update metadata (*planned soon*)
+- [ ] Web-UI
 - [ ] Parallel downloads
 
 
@@ -91,6 +94,16 @@ This program uses yt-dlp, which needs [ffmpeg](https://ffmpeg.org/) in order to 
 It is also recommended to have Deno installed. yt-dlp needs deno to work properly (https://github.com/yt-dlp/yt-dlp/wiki/EJS). SomeDL should work without it, but yt-dlp will always print a warning.
 - To install deno, go to https://docs.deno.com/runtime/getting_started/installation/
 - If you have npm installed, you can use npm to install deno. If not, open PowerShell (not CMD!) and execute the command provided. (This downloads and installs a script, be aware to only do this from trusted sources!)
+
+# How-To
+### How can I change configurations?
+Generate a SomeDL-config file with
+```
+somedl --generate-config
+```
+Then edit the `somedl_config.toml` file on the path it prints out. Inside this configurations, there are comments that explain each setting.
+
+
 
 # FAQ
 ### How can I give feedback or make feature requests?
