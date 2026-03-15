@@ -2,6 +2,11 @@
 https://keepachangelog.com/en/1.1.0/
 
 
+## [1.1.1] - 15.03.2026
+
+### Changed
+- Add the try...except that was removed in dev
+
 ## [1.1.0] - 15.03.2026
 
 ### Added
