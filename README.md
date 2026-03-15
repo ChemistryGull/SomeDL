@@ -3,7 +3,7 @@
 # SomeDL - Song+Metadata Downloader
 
 
-**SomeDL** is a easy to use command-line tool for downloading music with accurate metadata - simple installation and no login or API tokens required!
+**SomeDL** is a easy-to-use command-line tool for downloading music with accurate metadata - simple installation and no login or API tokens required!
 
 
 [![PyPI version](https://img.shields.io/pypi/pyversions/somedl)](https://pypi.org/project/somedl/)
@@ -22,7 +22,7 @@ The audio is downloaded using yt-dlp, SomeDL accepts text queries, YouTube URLs 
 > [!TIP]
 > If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue here on GitHub. I am open to add functionality based on individual usecase. See [How can I give feedback or make feature requests?](#how-can-i-give-feedback-or-make-feature-requests)
 
-> *Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. SomeDL is developed on Linux and tested on Linux & Windows. This project is was not "vibecoded".*
+> *Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. SomeDL is developed on Linux and tested on Linux & Windows. This project is not vibecoded.*
 
 
 # Usage
