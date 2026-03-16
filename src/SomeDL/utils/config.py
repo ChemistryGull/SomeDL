@@ -36,6 +36,7 @@ default_config = {
         "always_search_by_query": (False, bool, None),
         "cookies_path": ("", str, None),
         "cookies_from_browser": ("", str, None), # Maybe add guards there, only certain browsers
+        "fetch_album": (False, bool, None),
     },
     "api": {
         "deezer": (True, bool, None),

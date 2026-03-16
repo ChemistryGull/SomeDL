@@ -14,17 +14,14 @@
     - (*switch to 'https://musicbrainz.org/ws/2/artist/?query={artist}&fmt=json', because the current one is not getting the correct results most of the time. also have to rewrite the functions after that because the result will be different*)
 
 
-### Acutally for next version:
-- Show config flag that prints path and config options to the commandline (in json)
 - Make a new SUCCESS debug value or sth like that, thats green. should appear if a song has already been downloaded instead of a warning?
 - Add a check to checkIfFileExists if {song} and ({aritst} or {album_artist}) are present in template, warn if not.
 
-FOR NEXT VERSION:
-- Update config for the new metadata configs
-- Check if config is really correct
 - Add lrclib support
-- add video_id as viable tag
+- add video_id as viable tag ? (probably not to avoid breaking functionality for future alternative downloads)
 
+
+- When imput type is album, do not refetch stuff that has already been fetched. In general, refetching album for every song is wastefull time loss. Will change that after refactoring
 
 ### Docs:
 - Not working after update? Install the latest workin version with pip install somedl==version_number. You may need to recreate the packa

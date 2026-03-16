@@ -203,6 +203,8 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         return False
 
 
+    # if args.fetch_album:
+    #     config["download"]["fetch_album"] = True
 
     #print(args.format)
 

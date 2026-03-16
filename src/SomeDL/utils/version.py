@@ -2,7 +2,7 @@ import requests
 
 from SomeDL.utils.logging import log
 
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 
 def check_latest_version(print_version):
     # --- Check pypi for latest version

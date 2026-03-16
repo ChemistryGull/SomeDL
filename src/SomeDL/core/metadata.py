@@ -20,7 +20,6 @@ from SomeDL.api.web_requests import downloadAlbumArt
 
 
 EasyID3.RegisterTextKey('comment', 'COMM')
-EasyID3.RegisterTextKey('audio_source', 'WOAS')
 
 
 # def addMetadata(metadata: str, mp3_file: str):

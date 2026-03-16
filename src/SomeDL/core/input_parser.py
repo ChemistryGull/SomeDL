@@ -14,7 +14,14 @@ def generateSongList(input_list):
     for item in input_list:
         item_parsed = parseInput(item)
 
-        if item_parsed["inp_type"] == "playlist" and item_parsed.get("playlist_id", None):
+        if item_parsed["inp_type"] == "album" and item_parsed.get("album_id", None):
+            album = parseAlbum(item_parsed["album_id"])
+            if album:
+                songs_list.extend(album)
+            else:
+                log.error(f"Album skipped: {item}")
+
+        elif item_parsed["inp_type"] == "playlist" and item_parsed.get("playlist_id", None):
             playlist = parsePlaylist(item_parsed["playlist_id"])
             if playlist:
                 songs_list.extend(playlist)
@@ -47,8 +54,29 @@ def parseInput(inp):
     parsed_url = urlparse(inp)
     url_queries = parse_qs(parsed_url.query)
 
+    path_parts = [p for p in parsed_url.path.split("/") if p]
+
+
     if parsed_url.scheme == "https":
-        if url_queries.get("list", None):
+        if len(path_parts) > 1 and path_parts[0] == "browse":
+            if path_parts[1].startswith("MPREb_"):
+                log.debug(f"Input is browse URL album: {inp}")
+                out["inp_type"] = "album"
+                out["album_id"] = path_parts[1]
+            elif path_parts[1].startswith("RDCLAK"):
+                log.debug(f"Input is browse URL playlist: {inp}")
+                out["inp_type"] = "playlist"
+                out["playlist_id"] = path_parts[1]
+            elif path_parts[1].startswith("UC"):
+                log.warning(f"Downloading the entire discography of an artist is not yet supported (but will soon be): {inp}")
+            else:
+                log.warning(f"Input is not a known type of URL: {inp}")
+                out["inp_type"] = None
+
+        elif len(path_parts) > 1 and path_parts[0] == "channel":
+            log.warning(f"Downloading the entire discography of an artist is not yet supported (but soon will be): {inp}")
+
+        elif url_queries.get("list", None):
             # --- like https://www.youtube.com/watch?v=D44vQCTY4Qw&list=RDGMEM_v2KDBP3d4f8uT-ilrs8fQ
             log.debug(f"Input is Playlist: {inp}")
             out["inp_type"] = "playlist"
@@ -71,14 +99,49 @@ def parseInput(inp):
         log.debug(f"Input is query: {inp}")
         out["inp_type"] = "query"
         out["query"] = inp
-    
+
     return out
 
+
+def parseAlbum(album_id: str):
+
+    try:
+        album_result = yt.get_album(album_id)
+    except Exception as e:
+        log.error("Album search returned no results. Skipping this album. Error info:")
+        print(e)
+        return None
+
+    #print(json.dumps(playlist_result, indent=4, sort_keys=True))
+    
+    album = []
+
+    # TODO: Add duration, album_artist etc
+    # === Extract information from playlist, track by track ===
+    for item in album_result.get("tracks", []):
+        item_data = {
+            "album_name": item.get("album"),
+            "artist_id": item.get("artists", [{}])[0].get("id", ""),
+            "artist_name": item.get("artists", [{}])[0].get("name", ""),
+            "artist_all_names": [a.get("name") for a in item.get("artists", [])],
+            "is_Explicit": item.get("isExplicit"),
+            "song_title": item.get("title"),
+            "song_id": item.get("videoId"),
+            "video_type": item.get("videoType"),
+            "original_type": item.get("videoType"),
+            "yt_url": f'https://www.youtube.com/watch?v={item.get("videoId")}'
+        }
+        if item_data.get("song_id"):
+            item_data["original_url_id"] = item_data.get("song_id")
+
+        album.append(item_data)
+
+    return album
 
 def parsePlaylist(playlist_id: str):
 
     try:
-        playlist_result = yt.get_playlist(playlist_id)
+        playlist_result = yt.get_playlist(playlist_id, limit=None)
     except Exception as e:
         log.error("Playlist search returned no results. Skipping this playlist. Error info:")
         print(e)

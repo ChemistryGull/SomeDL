@@ -2,6 +2,17 @@
 https://keepachangelog.com/en/1.1.0/
 
 
+## [1.1.2] - 16.03.2026
+
+### Added
+- Add support for `/browse/` url - containting playlists and albums. The latter got its own fetching function
+
+### Fixed
+- Playlists of any sized can now be processed, as the limit of 200 (or 100 according to docs) tracs has been removed by adding `limit=None`.
+- Add Python 3.14 to the classifies. I forgot it with the addition of the version classifiers.
+
+
+
 ## [1.1.1] - 15.03.2026
 
 ### Changed
