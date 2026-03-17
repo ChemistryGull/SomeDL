@@ -2,6 +2,17 @@
 https://keepachangelog.com/en/1.1.0/
 
 
+## [1.1.3] - 17.03.2026
+
+### Changed
+- When a URL contains both song (v=) and playlist (list=) IDs, now only the song is downloaded, not the whole list by default
+    - Added a user info prompt when this case appears.
+    - Why song only as default? For these types of URLs, its not always clear what the user preferes. Just downloading one song is less bad when its the wrong desicion than downloading the whole playlist would be. 
+- Add `--get-song` and `--get-playlist` flags for the above change.
+- Add `prefer_playlist` config (default false)
+- Changed `Song does already exist. Skipping download` Warning to Info and colored green. Temporary until i implement a better return value.
+
+
 ## [1.1.2] - 16.03.2026
 
 ### Added

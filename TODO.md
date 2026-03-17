@@ -23,6 +23,8 @@
 
 - When imput type is album, do not refetch stuff that has already been fetched. In general, refetching album for every song is wastefull time loss. Will change that after refactoring
 
+- Create exception for ConnectionError for the ytmusicapi calls (not connected to internet)
+
 ### Docs:
 - Not working after update? Install the latest workin version with pip install somedl==version_number. You may need to recreate the packa
 

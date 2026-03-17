@@ -97,7 +97,7 @@ def processSongList(songs_list):
                 failed_list.append(item)
         except Exception as e:
             failed_list.append(item)
-            log.critical("A critical exception occured when trying to download song with yt-dlp! Please notify the program maintainer on https://github.com/ChemistryGull/SomeDL. Error: ")
+            log.critical("A critical exception occured when trying to download song with yt-dlp! If retrying does not help, please notify the program maintainer on https://github.com/ChemistryGull/SomeDL. Error: ")
             print(e)
         
         print()
@@ -181,7 +181,8 @@ def fetchMetadata(query: str = None, url: str = None, known_metadata: list = [],
     # return
 
     if checkIfFileExists(metadata["artist_name"], metadata["song_title"]):
-        log.warning(f'Song does already exist. Skipping download')
+        log.info(f'\033[32mSong does already exist. Skipping download.\033[32m')
+        # --- TODO Add proper return so that the warnig does not appear!!
         return None
 
 

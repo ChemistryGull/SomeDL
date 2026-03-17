@@ -43,8 +43,16 @@ def generateSongList(input_list):
             })
 
         # --- If none of these types, the input was not valid so it was ignored
+
+    if alert_list_and_v:
+        # --- To warn the user that only a song will be downloaded. Remove in the future. Also remove the aprt inside the parseInput function
+        log.info("URL contains both song (v=) and playlist (list=) IDs. Only the song is downloaded. To download the album, add the '--get-playlist' flag or change the 'prefer_playlist' config.")
+
     log.debug("Finished input parsing")
     return songs_list
+
+
+alert_list_and_v = False
 
 def parseInput(inp):
     # --- Parses the user input and returns a object based on if its a vidoe url, playlist url or 
@@ -76,16 +84,29 @@ def parseInput(inp):
         elif len(path_parts) > 1 and path_parts[0] == "channel":
             log.warning(f"Downloading the entire discography of an artist is not yet supported (but soon will be): {inp}")
 
+        elif not config["download"]["prefer_playlist"] and url_queries.get("v", None):
+            # --- If the user does not want to download a full playlist when bot "v" and "list" are in the URL, only download the video
+            # --- like https://music.youtube.com/watch?v=MdqaAXrcBv4 or https://www.youtube.com/watch?v=I0WzT0OJ-E0
+            log.debug(f"Input is URL: {inp}")
+            out["inp_type"] = "url"
+            out["video_id"] = url_queries["v"][0]
+            if url_queries.get("list", None):
+                # --- To warn the user that only a song will be downloaded. Remove in the future
+                global alert_list_and_v
+                alert_list_and_v = True
+
         elif url_queries.get("list", None):
             # --- like https://www.youtube.com/watch?v=D44vQCTY4Qw&list=RDGMEM_v2KDBP3d4f8uT-ilrs8fQ
             log.debug(f"Input is Playlist: {inp}")
             out["inp_type"] = "playlist"
             out["playlist_id"] = url_queries["list"][0]
+
         elif url_queries.get("v", None):
             # --- like https://music.youtube.com/watch?v=MdqaAXrcBv4 or https://www.youtube.com/watch?v=I0WzT0OJ-E0
             log.debug(f"Input is URL: {inp}")
             out["inp_type"] = "url"
             out["video_id"] = url_queries["v"][0]
+
         elif parsed_url.netloc == "youtu.be":
             # --- like https://youtu.be/I0WzT0OJ-E0?si=miZyWqXVH_IgjkHL
             log.debug(f"Input is shortened URL: {inp}")

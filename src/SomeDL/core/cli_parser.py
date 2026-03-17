@@ -68,6 +68,16 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         action="store_true",
         help="Fetches metadata from youtube search but strictly downloads the audio from the given URL (useful when downloading a specific live video or similar)."
     )
+    download_group.add_argument(
+        "--get-song",
+        action="store_true",
+        help=f'When the url contains both playlist and song ID, only download the current song. {"" if not config["download"]["prefer_playlist"] else "(Default)"}'
+    )
+    download_group.add_argument(
+        "--get-playlist",
+        action="store_true",
+        help=f'When the url contains both playlist and song ID, download the entire playlist. {"" if config["download"]["prefer_playlist"] else "(Default)"}'
+    )
 
 
     logging_group = parser.add_argument_group("Logging and debug")
@@ -202,6 +212,11 @@ Download songs from YouTube by query, multiple queries, or playlist link.
             print()
         return False
 
+
+    if args.get_playlist:
+        config["download"]["prefer_playlist"] = True
+    if args.get_song:
+        config["download"]["prefer_playlist"] = False
 
     # if args.fetch_album:
     #     config["download"]["fetch_album"] = True

@@ -31,3 +31,13 @@ yt = YTMusic()
 
 
 # timerend("YT")
+
+
+
+# from requests.exceptions import ConnectionError
+
+# try:
+#     result = yt.search("Delain - we are the others")
+#     print("success!")
+# except ConnectionError:
+#     print("No connection - retry later")

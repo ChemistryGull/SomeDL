@@ -9,7 +9,7 @@ from importlib.resources import files
 
 from SomeDL.utils.logging import log, printj
 
-CONFIG_VERSION = 2
+CONFIG_VERSION = 3
 
 default_config = {
     "metadata": {
@@ -36,6 +36,7 @@ default_config = {
         "always_search_by_query": (False, bool, None),
         "cookies_path": ("", str, None),
         "cookies_from_browser": ("", str, None), # Maybe add guards there, only certain browsers
+        "prefer_playlist": (False, bool, None),
         "fetch_album": (False, bool, None),
     },
     "api": {

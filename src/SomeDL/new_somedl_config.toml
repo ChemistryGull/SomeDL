@@ -105,7 +105,7 @@ output = "{artist} - {song}"
 #
 # It is not recommended to permanently set this option here.
 # Instead, use the "--cookies-from-browser firefox" flag when downloading age-restricted songs.
-# (Logging into YouTube with an age-verified Firefox account works best.)
+# (Logging into YouTube with an age-verified account on Firefox works best.)
 #
 # Examples:
 #   cookies_path = "/home/user/cookies.txt"
@@ -113,9 +113,15 @@ output = "{artist} - {song}"
 cookies_path = ""
 cookies_from_browser = ""
 
+# When a URL contains both song (v=) and playlist (list=) IDs, should SomeDL download the full playlist or only the single video?
+# prefer_playlist = false -> Only download song
+# prefer_playlist = true -> Download full playlist
+#
+# Default = false
+prefer_playlist = false
+
 
 [api]
-
 
 # Disabling one of the following APIs will result in missing metadata!
 musicbrainz = true       # Default = true  | Needed for genre and artist MBID
@@ -153,4 +159,4 @@ level = "INFO"
 download_report = 2
 
 # DO NOT CHANGE THE VALUE BELOW!
-config_version = 2
+config_version = 3
