@@ -57,12 +57,14 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 - And much more!
 
 ## Proposed Features
-- [ ] Give option to download every song from an album automatically. (*coming soon*)
-- [ ] Fallback lyrics source (*planned soon*)
-- [ ] Update metadata in existing files (*planned soon*)
-- [ ] Import songs from different folder structures and optionally update metadata (*planned soon*)
+- [ ] Option to download the entire album for a given song automatically. (*finished, release in next version*)
+- [ ] Fallback lyrics source (*finished, release in next version*)
+- [ ] Synchronized lyrics (*finished, release in next version*)
+- [ ] Import songs from different folder structures and update metadata in existing files (*finished, release in next version*)
+- [ ] Easy utility to change output template for existing library (*finished, release in next version*)
+- [ ] Parallel downloads (*woring on*)
 - [ ] Web-UI
-- [ ] Parallel downloads
+
 
 
 # Installation
