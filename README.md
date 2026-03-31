@@ -98,12 +98,37 @@ It is also recommended to have Deno installed. yt-dlp needs deno to work properl
 - If you have npm installed, you can use npm to install deno. If not, open PowerShell (not CMD!) and execute the command provided. (This downloads and installs a script, be aware to only do this from trusted sources!)
 
 # How-To
+### Whats the way to get the best metadata?
+If you want the most accurate metadata, especially album name, it is best practice to download songs with YouTube Muisc album URLs, or by using the `--fetch-album` flag. Downloading an entire album this way ensures that all songs in that album get the same album name, and the songs are not split between the regular version "extended editon" and "deluxe edition" variations.
+
+### How can i download an entire album with just a search query?
+You can use the `--fetch-album` flag. With this flag set, SomeDL downloads the entire album of every song in the download queue. 
+
 ### How can I change configurations?
 Generate a SomeDL-config file with
 ```
 somedl --generate-config
 ```
 Then edit the `somedl_config.toml` file on the path it prints out. Inside this configurations, there are comments that explain each setting.
+
+### How can i change the output template for already downloaded files?
+You can type `somedl new-template` into the terminal. It will ask you to provide the path to your files and the path to a new folder. You will also have to provide the new output template. You can choose between moving the files (less SSD writes) and copying files (safer in case something goes wrong). You can also merge different storage template in this way. 
+
+### How can i add metadata to already downloaded files?
+If you already have a library of songs downloaded with yt-dlp or other downloaders, you can use the `somedl import` utility. It will ask you to provide the path to your files and the path to a new folder, or your SomeDL library. You will also have to provide the new output template, and what import mode you want to choose. Import modes are:
+- copy: Oiginal files are left in place (Recommended unless you have a backup and know what you are doing)
+- move: original files are deleted after import
+- update: Just update the metadata of the original files. This will neither change the filename nor move the file, but change the original file metadata itself. Use copy if you want to keep the original files.
+
+Then you will have to choose the mode of metadata detection. SomeDL has to figure out what each song is. There are different strategies to do so:
+
+- A) YouTube video ID in the filename (e.g. The Cold [xI91NneSY5Y].mp3)
+- B) A "Artist - Song" file naming scheme
+- C) Infering from existing metadata.
+
+Choose the mode that fits best for your usecase. Do you have many songs downloaded with yt-dlp and still have the 11-digit Video ID [xI91NneSY5Y]? Type yes for option A. Do all your files follow a "Artist - Song" file naming scheme? Type yes for option B. Do you know your files have valid metadata (only Artist name and Song name are needed)? Choose option C. You can also combine options, like A and C or A and B. You cannot combine B with C!
+
+After that, you can start with the import. It is best to first test the import on a smaller folder.
 
 
 
@@ -146,65 +171,43 @@ You need to be logged into your age-verified YouTube account inside your browser
 With every download of more than one song, a download report is created. You can open it in any browser. This is a quick overview of what metadata was downloaded and gives you a fast and easy way to check if there is something wrong.
 
 ### How long does a song download take?
-Usually arount 10 seconds per song. 5-6 seconds are the yt-dlp download and conversion to mp3, 4-5 seconds are the fetching of the metadata.
+Usually arount 3-4 seconds per song when downloading a list of 10+ songs at the same time with default concurrency. It takes 8-10 seconds to download a single song. If you increase concurrency, you can increase the speed to up to 2 seconds per song, but do so cautiously as youtube might get your IP rate restricted or temporarily banned if you abuse fast downloads with large lists of songs. 
 
 ### What does the error message/warning ... mean?
 ```
-WARNING - Video "TITLE OF THE VIDEO" is likely not a song. Skipping
+WARNING - Video has no song ID - this might be a regular YouTube video, not a song.
 ```
 This video is not listed as a song on youtube. This is the case for most regular videos on youtube. There is no metadata to fetch. It may be a song that has been uploaded by a very small creator (e.g. a fan song), in which case you will have to download the song using yt-dlp and add the metadata manually. 
 
 
-```
-WARNING - Musicbrainz GetSongByName Request failed. Retrying after 5 seconds. 3 attempts left. ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer')) 
-```
-MusicBrainz limits the rate at which apps like SomeDL can access their servers. If there are to many requests in a short time, some are denied. Usually a retry 5-10 seconds later will be successful and the download can continue.
-
-```
-WARNING - Fetching MusicBrainz song failed. Continuing without MusicBrainz metadata (MBID, Genre)
-```
-
-If MusicBrainz cannot find that artist, this warning appears. No genre data is added.
-
-```
-WARNING - This artist does not have any genre set on MusicBrainz
-```
-
-MusicBrainz does not have any genre tags for that artist. Visit [this section](#why-is-the-wrong-genreno-genre-set) on how to add this data to MusicBrainz yourself.
-
-```
-WARNING - DEEZER API returned no results. Continuing without Deezer metadata (ISRC, Label)
-```
-Deezer has not found the song. This may be because of some different spelling or other reaseons. The download will continue without ISRC and music label data.
-
 #### YT-DLP specific warnigs:
 
 ```
-WARNING: [youtube] No supported JavaScript runtime could be found. Only deno is enabled by default; to use another runtime add –js-runtimes RUNTIME[:PATH] to your command/config. YouTube extraction without a JS runtime has been deprecated, and some formats may be missing. See https://github.com/yt-dlp/yt-dlp/wiki/EJS for details on installing one
+WARNING - >_yt-dlp: [youtube] No supported JavaScript runtime could be found. Only deno is enabled by default; to use another runtime add –js-runtimes RUNTIME[:PATH] to your command/config. YouTube extraction without a JS runtime has been deprecated, and some formats may be missing. See https://github.com/yt-dlp/yt-dlp/wiki/EJS for details on installing one
 ```
 This warning appears if Deno is not installed properly. Visit [this section](#deno) on how to install deno. 
 
 ```
-WARNING: [youtube] xHcPUTfPuk0: Some android_vr client https formats have been skipped as they are missing a URL. YouTube may have enabled the SABR-only streaming experiment for the current session. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
+WARNING - >_yt-dlp: [youtube] xHcPUTfPuk0: Some android_vr client https formats have been skipped as they are missing a URL. YouTube may have enabled the SABR-only streaming experiment for the current session. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
 ```
 YouTube is experimenting with different streaming URLs. Random sessions seem to be picked for these experiments, which leads to this warning. This results in no audio-only file being provided, so yt-dlp has to download the video version and extract the audio. Because of the larger file size (15-35 MiB instad of 3-6 MiB), the download will take a bit longer for that song. But besides that, the song will still be downloaded normally.
 
 ```
-ERROR: Did not get any data blocks
+ERROR - >_yt-dlp: Did not get any data blocks
 ```
 Sometimes following the warning above. yt-dlp fixes such data issues automatically in most cases, so the song will still be downloaded as normal. 
 
 ```
-WARNING: [youtube] [jsc] JS Challenge Provider "deno" returned an invalid response:         response = JsChallengeProviderResponse(request=JsChallengeRequest(type=<JsChallengeType.N: 'n'>, input=NChallengeInput(player_url='https://www.youtube.com/s/player/44899b31/tv-player-ias.vflset/tv-player-ias.js', challenges=['14UbMsOV98OEGPIp1T', '4pHgHqt9lVyQYPVlqs', 'eiQkCMjDm5lNTLFEjf']), video_id='kpxfGeyma1E'), response=None, error='no solutions')
+WARNING - >_yt-dlp: [youtube] [jsc] JS Challenge Provider "deno" returned an invalid response:         response = JsChallengeProviderResponse(request=JsChallengeRequest(type=<JsChallengeType.N: 'n'>, input=NChallengeInput(player_url='https://www.youtube.com/s/player/44899b31/tv-player-ias.vflset/tv-player-ias.js', challenges=['14UbMsOV98OEGPIp1T', '4pHgHqt9lVyQYPVlqs', 'eiQkCMjDm5lNTLFEjf']), video_id='kpxfGeyma1E'), response=None, error='no solutions')
          Please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U
 ```
 This and similar warnings are usually caused by canges by YouTube. The yt-dlp team deals with these problems, updating to the newest yt-dlp version may fix these problems. Usually this will not significally affect song download.
 
 ```
-ERROR: [youtube] G0rQKudItF4: Sign in to confirm your age. This video may be inappropriate for some users. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
-ERROR - yt-dlp download failed. Do you have ffmpeg installed? Is the song https://music.youtube.com/watch?v=G0rQKudItF4 age restricted?: ERROR: [youtube] G0rQKudItF4: Sign in to confirm your age. This video may be inappropriate for some users. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
-ERROR - File was not downloaded successfully with yt-dlp
-WARNING - Song was not downloaded properly (or file does already exist)
+ERROR - >_yt-dlp: [youtube] G0rQKudItF4: Sign in to confirm your age. This video may be inappropriate for some users. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+ERROR - >_yt-dlp: yt-dlp download failed. Do you have ffmpeg installed? Is the song https://music.youtube.com/watch?v=G0rQKudItF4 age restricted?: ERROR: [youtube] G0rQKudItF4: Sign in to confirm your age. This video may be inappropriate for some users. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+ERROR - >_yt-dlp: File was not downloaded successfully with yt-dlp
+WARNING - Song was not downloaded properly
 ```
 Like mentioned in the error message, this song is age-restricted. Visit [How do I download age restricted songs?](#how-do-i-download-age-restricted-songs) on how to download age-restricted content.
 
