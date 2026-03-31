@@ -2,6 +2,11 @@
 https://keepachangelog.com/en/1.1.0/
 
 
+## [1.2.3] - 31.03.2026
+
+### Fixed
+- Fixed issue where it would always download .lrc file, even if `lrc_file` is set `false`
+
 
 ## [1.2.2] - 31.03.2026
 

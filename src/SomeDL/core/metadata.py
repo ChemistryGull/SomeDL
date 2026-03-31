@@ -60,7 +60,7 @@ def addMetadata(metadata, path, label = None):
 
 
     # === Add .lrc file if wanted ===
-    if config["metadata"]["synced_lyrics_metadata"] and metadata.get("lyrics_synced") and config["metadata"]["synced_lyrics_metadata"] and config["metadata"]["lyrics_type"] in ["synced", "both", "synced_if_available"]:
+    if metadata.get("lyrics_synced") and config["metadata"]["lrc_file"]:
         console.info("Saving synced lyrics to .lrc file", label)
         with open(Path(path).with_suffix(".lrc"), "w", encoding="utf-8") as f:
             f.write(metadata.get("lyrics_synced"))

@@ -8,7 +8,7 @@ import requests
 import SomeDL.utils.console as console
 from SomeDL.utils.config import CONFIG_PATH
 
-VERSION = "1.2.2"
+VERSION = "1.2.3"
 CACHE_TTL_HOURS = 24
 VERSION_CACHE_PATH = Path(CONFIG_PATH).with_name("somedl_version_cache.json")
 
