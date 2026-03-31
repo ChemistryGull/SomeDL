@@ -1,8 +1,7 @@
-
 import re
 import requests
 
-from SomeDL.utils.logging import log, printj, timerstart, timerend
+import SomeDL.utils.console as console
 from SomeDL.utils.config import config
 from SomeDL.utils.version import VERSION
 
@@ -11,21 +10,26 @@ lrclib_headers = {
     "User-Agent": f"SomeDL/{VERSION} (https://github.com/ChemistryGull/SomeDL)"
 }
 
-def lrclib_get_lyrics(artist: str, song: str, album: str = None, duration: int = None):
-    timerstart("lrclib")
-    URL = "https://lrclib.net/api/get"
-    params = {
-        "artist_name": artist,
-        "track_name": song,
-    }
+def lrclib_get_lyrics(artist: str, song: str, album: str = None, duration: int = None, label: str = None):
+    # timerstart("lrclib")
+
+    URL = f'https://lrclib.net/api/get?artist_name={artist}&track_name={song}'
     if album:
-        params["album_name"] = album
+        URL += f'&album_name={album}'
     if duration:
-        params["duration"] = duration
+        URL += f'&duration={duration}'
 
-    response = requests.get(URL, params=params, headers=lrclib_headers)
 
-    timerend("lrclib")
+    try:
+        response = requests.get(URL, headers=lrclib_headers)
+    except Exception as e:
+        console.error("Lyrics: Error while trying to reach lrclib.net. Error:", label)
+        console.error(e, label)
+        console.update(label, "get_lyrics", console.Status.FAILED)
+        return False
+
+
+    # timerend("lrclib")
     # printj(response.json())
     if response.status_code == 200:
         
@@ -36,9 +40,11 @@ def lrclib_get_lyrics(artist: str, song: str, album: str = None, duration: int =
         #     "synced": data.get("syncedLyrics"),
         # }
     elif response.status_code == 404:
-        log.debug("lrclib lyrics not found.")
+        console.debug("lrclib lyrics not found.", label)
     else:
-        log.debug(f"lrclib error: {response.status_code}")
+        console.error(f"Lyrics: lrclib error: {response.status_code}")
+        console.update(label, "get_lyrics", console.Status.FAILED)
+        return False
     return {}
 
 # timerstart("lrclib")

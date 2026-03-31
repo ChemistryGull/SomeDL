@@ -1,4 +1,4 @@
-
+# !!! DEPRECATED !!!
 import logging
 import json
 import time
@@ -45,15 +45,3 @@ handler.setFormatter(
 
 log.addHandler(handler)
 
-def printj(dic, sort_keys = True):
-    print(json.dumps(dic, indent=4, sort_keys=sort_keys))
-
-
-timers = {}
-
-def timerstart(name = "default"):
-    timers[name] = time.time()
-
-def timerend(name = "default"):
-    now = time.time()
-    log.debug(f'\033[94mTIMER {name} = {now - timers.get(name, 0)} s\033[0m')

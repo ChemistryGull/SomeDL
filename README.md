@@ -7,20 +7,20 @@
 
 
 [![PyPI version](https://img.shields.io/pypi/pyversions/somedl)](https://pypi.org/project/somedl/)
-[![PyPi downloads](https://img.shields.io/pypi/dw/somedl)](https://pypi.org/project/somedl/)
-[![PyPI - Version](https://img.shields.io/pypi/v/somedl)](https://pypi.org/project/somedl/)
+[![PyPI downloads](https://img.shields.io/pypi/dw/somedl)](https://pypistats.org/packages/somedl)
+[![PyPI Version](https://img.shields.io/pypi/v/somedl)](https://pypi.org/project/somedl/)
 [![GitHub stars](https://img.shields.io/github/stars/chemistrygull/somedl?style=flat)](https://github.com/ChemistryGull/SomeDL)
 [![Last commit](https://img.shields.io/github/last-commit/chemistrygull/somedl)](https://github.com/ChemistryGull/SomeDL)
 
 ![SomeDL usage gif](https://github.com/ChemistryGull/SomeDL/blob/main/docs/images/somedl_usage_cut.gif)
 
 
-The audio is downloaded using yt-dlp, SomeDL accepts text queries, YouTube URLs and YouTube playlist URLs. Metadata is fetched from YouTube, MusicBrainz for genre, Genius and Deezer. No API tokens required, it works out of the box.
+The audio is downloaded using yt-dlp. SomeDL accepts text queries, YouTube URLs and YouTube playlist URLs. Metadata is fetched from YouTube, MusicBrainz, Genius and Deezer. No API tokens required for any of these services, it works out of the box.
 
 </div>
 
 > [!TIP]
-> If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue here on GitHub. I am open to add functionality based on individual usecase. See [How can I give feedback or make feature requests?](#how-can-i-give-feedback-or-make-feature-requests)
+> If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue here on GitHub. I am open to add functionality based on individual usecases. See [How can I give feedback or make feature requests?](#how-can-i-give-feedback-or-make-feature-requests)
 
 > *Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. SomeDL is developed on Linux and tested on Linux & Windows. This project is not vibecoded.*
 
@@ -46,26 +46,26 @@ Run `somedl -h` to get more information for the different configuration options.
 - No login or API tokens required
 - Complete metadata - way better than just relying on yt-dlp (see [here](#why-should-i-use-somedl-over-yt-dlp) why)
 ``` 
-Song title | Artist name | Album name | High quality cover art (544x544) | Release date (Year) | Track number | Genre | Lyrics | Copyright/Label | ISRC | MusicBrainz artist ID (MBID)
+Song title | Artist name | Album name | High quality cover art (544x544) | Release date (Year) | Track number | Genre | Lyrics sycned and plain | Copyright/Label | ISRC | MusicBrainz artist ID (MBID)
 ```
 - Different output formats: `opus, m4a, mp3, ogg`
 - Sort downloads automatically into folders according to a template if desired
     - For example: `{album_artist}/{artist} - {song}`
     - Or more complex: `{album_artist}/{year} - {album}/{track_pos} - {song}`
-- User configuration file
+    - You can always change your storage template later with `somedl new-template`
+- Add missing metadata to existing music files with `somedl import`
 - Download report - get a quick overview over the downloaded songs, including their metadata.
 - And much more!
 
 ## Proposed Features
-- [ ] Option to download the entire album for a given song automatically. (*finished, release in next version*)
-- [ ] Fallback lyrics source (*finished, release in next version*)
-- [ ] Synchronized lyrics (*finished, release in next version*)
-- [ ] Import songs from different folder structures and update metadata in existing files (*finished, release in next version*)
-- [ ] Easy utility to change output template for existing library (*finished, release in next version*)
-- [ ] Parallel downloads (*woring on*)
+- [x] Option to download the entire album for a given song automatically. (*New in v1.2.0!*)
+- [x] Fallback lyrics source (*New in v1.2.0!*)
+- [x] Synchronized lyrics (*New in v1.2.0!*)
+- [x] Import songs from different folder structures and update metadata in existing files (*New in v1.2.0!*)
+- [x] Easy utility to change output template for existing library (*New in v1.2.0!*)
+- [x] Parallel downloads (*New in v1.2.0!*)
 - [ ] Web-UI
-
-
+- [ ] Download songs based on concert setlists
 
 # Installation
 This utility can be installed using pip. Also confirm that you meet all the installation [requirements](#requirements)!
@@ -81,16 +81,16 @@ To update an existing SomeDL installation, add the `--upgrade` flag tho the comm
 
 
 ## Linux
-This software is currently not packaged on any repo. Use your prefered way to install python programs, like for example [pipx](https://pipx.pypa.io/stable/):
+This software is currently not packaged in any repository. Install it using your preferred Python package manager, such as [pipx](https://pipx.pypa.io/stable/):
 ```
 pipx install somedl
 ```
 ## Requirements
 ### Python (REQUIRED)
-This program is developed and testet on the newest version of Python (currently 3.14). This program requires Python 3.10 or newer, but Python 3.14 is recommended. Visit [How to install python](docs/how_to_install_python.md) for a short guide.
+SomeDL is developed and tested on the newest version of Python (currently 3.14). Python 3.10 is required. Visit [How to install python](docs/how_to_install_python.md) for a short guide.
 
 ### FFmpeg (REQUIRED)
-This program uses yt-dlp, which needs [ffmpeg](https://ffmpeg.org/) in order to convert the downloaded audio file to mp3. Visit [How to install ffmpeg](docs/how_to_install_ffmpeg.md) for a short guide.
+SomeDL uses yt-dlp, which needs [ffmpeg](https://ffmpeg.org/) in order to convert the downloaded audio file to mp3. Visit [How to install ffmpeg](docs/how_to_install_ffmpeg.md) for a short guide.
 
 ### Deno
 It is also recommended to have Deno installed. yt-dlp needs deno to work properly (https://github.com/yt-dlp/yt-dlp/wiki/EJS). SomeDL should work without it, but yt-dlp will always print a warning.

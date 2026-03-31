@@ -7,9 +7,9 @@ import tomlkit
 from pathlib import Path
 from importlib.resources import files
 
-from SomeDL.utils.logging import log, printj
+import SomeDL.utils.console as console
 
-CONFIG_VERSION = 3
+CONFIG_VERSION = 4
 
 default_config = {
     "metadata": {
@@ -19,9 +19,15 @@ default_config = {
         "isrc": (True, bool, None),
         "album_artist": (True, bool, None),
         "multiple_artists": (False, bool, None),
-        "artist_separator": ("; ", str, None),
+        "artist_separator": ("; ", str, [";", "; ", " ;", " ; ", "/", "/ ", " /", " / "]),
         "ffmpeg_metadata": (False, bool, None),
         "cover_art_file": (False, bool, None),
+        "lyrics_type": ("plain", str, ["synced", "plain", "both", "synced_if_available", "none"]),
+        "synced_lyrics_metadata": (True, bool, None),
+        "lrc_file": (False, bool, None),
+        "lyrics_id3_synced_uslt_fallback": (False, bool, None),
+        "lyrics_source": ("lrclib", str, ["lrclib", "youtube"]),
+        "lyrics_fallback_source": ("youtube", str, ["lrclib", "youtube", "none"])
     },
     "download": {
         "format": ("mp3", str, ["best", "best/opus", "best/m4a", "opus", "m4a", "mp3", "vorbis", "flac"]),
@@ -37,7 +43,10 @@ default_config = {
         "cookies_path": ("", str, None),
         "cookies_from_browser": ("", str, None), # Maybe add guards there, only certain browsers
         "prefer_playlist": (False, bool, None),
-        "fetch_album": (False, bool, None),
+        "fetch_albums": (False, bool, None), # todo
+        "check_if_file_exists": (True, bool, None),
+        "number_downloaders": (2, int, range(1, 11)),
+        "queue_size": (2, int, range(0, 11)),
     },
     "api": {
         "deezer": (True, bool, None),
@@ -52,7 +61,8 @@ default_config = {
     "logging": {
         "download_report": (2, int, None),
         "level": ("INFO", str, ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
-        "config_version": (0, int, None), # If this value is ever lost, reset it
+        "log_level": (4, int, range(0, 8)),
+        "config_version": (4, int, None), # If this value is ever lost, reset it
     }
 }
 
@@ -85,7 +95,7 @@ def load_new_config():
 
 
 def load_and_verify_config():
-    # log.debug("Loading and verifying config.")
+    # console.debug("Loading and verifying config.")
     config = {
         "metadata": {},
         "download": {},
@@ -95,10 +105,10 @@ def load_and_verify_config():
 
     if not check_if_config_exists():
         loaded_config = config
-        # log.debug("There is no existing config")
+        # console.debug("There is no existing config")
     else:
         loaded_config = load_config()
-        # log.debug(f'Config found (Version {loaded_config.get("logging", {}).get("config_version")})')
+        # console.debug(f'Config found (Version {loaded_config.get("logging", {}).get("config_version")})')
 
     
     
@@ -118,7 +128,7 @@ def load_and_verify_config():
                 errors.append(f"{section}.{key}: '{value}' not in {list(valid_values)}")
     
     if errors:
-        log.error("Invalid config:\n" + "\n".join(errors) + "\nPlease check your config\nIf you can't resolve the issue, delete the config file and regenerate it with somedl --generate-config.") # TODO or regenerate it with flag!!
+        console.error("Invalid config:\n" + "\n".join(errors) + "\nPlease check your config\nIf you can't resolve the issue, delete the config file and regenerate it with somedl --generate-config.") # TODO or regenerate it with flag!!
         print()
         raise ValueError("Invalid config file!")
 
@@ -141,10 +151,10 @@ def change_configs(config_list):
         
     for conf in config_list:
         if conf[0] not in loaded_config:
-            log.error(f'Config section {conf[0]} is not defined.')
+            console.error(f'Config section {conf[0]} is not defined.')
             return
         if conf[1] not in loaded_config.get(conf[0], {}):
-            log.error(f'Config {conf[0]}.{conf[1]} is not defined.')
+            console.error(f'Config {conf[0]}.{conf[1]} is not defined.')
             return
         loaded_config[conf[0]][conf[1]] = conf[2]
 
@@ -176,7 +186,7 @@ def generate_config():
 
 
 def update_config():
-    log.info(f'Updating config to version {CONFIG_VERSION}.')
+    print(f'Updating config to version {CONFIG_VERSION}.')
     new_config = load_new_config()
     new_config_data = tomlkit.parse(new_config)
     old_config = load_and_verify_config()
@@ -212,13 +222,13 @@ def check_if_config_exists():
 def check_config_updates(preloaded_config):
     if not preloaded_config["logging"]["config_version"] == CONFIG_VERSION:
         # --- if config is out of date - update it
-        # log.debug("Updating config")
+        # console.debug("Updating config")
         update_config()
         new_config = load_and_verify_config()
         change_configs([["logging", "config_version", CONFIG_VERSION]])
         return new_config
     else:
-        # log.debug("Config is up-to-date")
+        # console.debug("Config is up-to-date")
         return preloaded_config
         
 

@@ -3,23 +3,25 @@ import json
 import argparse
 from pathlib import Path
 
-from SomeDL.utils.logging import log, logging, printj
+import SomeDL.utils.console as console
 from SomeDL.utils.config import config, generate_config, change_configs, CONFIG_PATH, check_if_config_exists
 from SomeDL.utils.version import VERSION, check_latest_version
 
 def parseCliArgs():
-      # --- DOC: https://docs.python.org/3/library/argparse.html
+    # --- DOC: https://docs.python.org/3/library/argparse.html
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description="""
 Download songs from YouTube by query, multiple queries, or playlist link.
 
- - Put all inputs in quotes, URLs as well: somedl "Artist - song".
- - Seperate multiple inputs with spaces: somedl "Artist - song" "https://music.youtube..."
+ - Put all inputs in quotes, URLs as well:  somedl "Artist - song"
+ - Seperate multiple inputs with spaces:    somedl "Artist - song" "https://music.youtube..." "https://youtube.com/..."
  - Different types of URLs and queries can be mixed.
- - Accepted URLs: YT-Music, YT, YT shortened URL, YT playlist. Always include the https://
  - For advanced configuration, use the config file (somedl --generate-config)
- - Downloading a full album by album name is not yet supported""")
+ - Special utilities (in beta):
+ - somedl import        Import songs downloaded with other tools, or update the metadata of your existing library.
+ - somedl new-template  Move or copy your existing library to a new output template""")
 
 
+    # === Main Parser ===
     parser.add_argument(
         "inputs",
         nargs="*",  # + One or more inputs | * Zero or more inputs
@@ -41,7 +43,7 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     parser.add_argument(
         "--show-config",
         action="store_true",
-        help=f'Show the current config options'
+        help=f'Show the current configurations.'
     )
 
     download_group = parser.add_argument_group("Download")
@@ -71,20 +73,26 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     download_group.add_argument(
         "--get-song",
         action="store_true",
-        help=f'When the url contains both playlist and song ID, only download the current song. {"" if not config["download"]["prefer_playlist"] else "(Default)"}'
+        help=f'When the url contains both playlist and song ID, only download the current song. {"" if config["download"]["prefer_playlist"] else "(Default)"}'
     )
     download_group.add_argument(
         "--get-playlist",
         action="store_true",
-        help=f'When the url contains both playlist and song ID, download the entire playlist. {"" if config["download"]["prefer_playlist"] else "(Default)"}'
+        help=f'When the url contains both playlist and song ID, download the entire playlist. {"" if not config["download"]["prefer_playlist"] else "(Default)"}'
+    )
+    download_group.add_argument(
+        "--fetch-albums",
+        action="store_true",
+        help="Download the entire albums from all requested songs, even from within playlists."
     )
 
 
     logging_group = parser.add_argument_group("Logging and debug")
     logging_group.add_argument(
         "-v", "--verbose",
-        action="store_true",  # --- Flag, no value needed
-        help="Verbose output"
+        action="count",
+        default=0,
+        help="Verbose output, -vv and -vvv for even more verbose output"
     )
     logging_group.add_argument(
         "-q", "--quiet",
@@ -125,7 +133,12 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     metadata_auth_group.add_argument(
         "--no-musicbrainz",
         action="store_true",
-        help="Use this flag to skip fetching data from MusicBrainz. No genre data will be added!"
+        help="Skip fetching data from MusicBrainz. No genre data will be added!"
+    )
+    metadata_auth_group.add_argument(
+        "--no-album-check",
+        action="store_true",
+        help="Always use the metadata provided by YouTube without cross-checking it against Genius. This will cause some songs to be downloaded as singles instead of as part of an album."
     )
 
 
@@ -137,25 +150,13 @@ Download songs from YouTube by query, multiple queries, or playlist link.
 
     args = parser.parse_args()
     
-    if args.verbose:
-        config["logging"]["level"] = "DEBUG"
+    config["logging"]["log_level"] = 4 + args.verbose # --- Default 4, increase with every -v flag
+    console.update_log_level(4 + args.verbose)
 
     if args.quiet:
-        config["logging"]["level"] = "ERROR"
+        config["logging"]["log_level"] = 2
+        console.update_log_level(2)
 
-    match config["logging"]["level"].lower():
-        case "debug":
-            log.setLevel(logging.DEBUG)
-        case "info":
-            log.setLevel(logging.INFO)
-        case "warning":
-            log.setLevel(logging.WARNING)
-        case "error":
-            log.setLevel(logging.ERROR)
-        case "critical":
-            log.setLevel(logging.CRITICAL)
-        case _:
-            log.setLevel(logging.INFO)
 
     if args.no_download:
         config["download"]["disable_download"] = True
@@ -171,9 +172,12 @@ Download songs from YouTube by query, multiple queries, or playlist link.
 
     if args.no_musicbrainz:
         config["api"]["musicbrainz"] = False
+    if args.no_album_check:
+        config["api"]["genius_album_check"] = False
+
 
     if args.download_report:
-        config["logging"]["download_report"] = 1
+        config["logging"]["download_report"] = 0
 
     if args.disable_report:
         config["logging"]["download_report"] = 1000000
@@ -199,7 +203,7 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         if check_if_config_exists():
             print(f'Config saved at: "{CONFIG_PATH}"')
             print("Current config:")
-            printj(config)
+            console.printj(config)
             print()
         else:
             print("No configuragtion file set.")
@@ -208,7 +212,7 @@ Download songs from YouTube by query, multiple queries, or playlist link.
             print(CONFIG_PATH)
             print()
             print("Default confiurations apply:")
-            printj(config)
+            console.printj(config)
             print()
         return False
 
@@ -217,6 +221,10 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         config["download"]["prefer_playlist"] = True
     if args.get_song:
         config["download"]["prefer_playlist"] = False
+
+    if args.fetch_albums:
+        config["download"]["fetch_albums"] = True
+
 
     # if args.fetch_album:
     #     config["download"]["fetch_album"] = True
@@ -227,7 +235,7 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     check_latest_version(args.version)
 
 
-    log.debug(f'Inputs: {args.inputs}')
+    console.debug(f'Inputs: {args.inputs}')
     # print("Set genre:", args.set_genre)
     # print("Download folder:", args.download_folder)
 
@@ -236,8 +244,8 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     if len(args.inputs) == 0 and args.version:
         return False
     elif len(args.inputs) == 0:
-        log.warning("No inputs provided")
+        console.warning("No inputs provided")
         return False
     else:
-        log.debug(f'{len(args.inputs)} inputs provided')
+        console.debug(f'{len(args.inputs)} inputs provided')
         return args.inputs

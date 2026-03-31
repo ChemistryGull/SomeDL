@@ -4,17 +4,13 @@
 ## Immediate Priority
 
 ## High Priority 
-- Create this list
-- TODO: test with manufactured api results as inputs
-- Enable support to keep original audio and not to convert to mp3. This results in a higher quality for less space for most music (e.g. the one in the opus format). Just remux it to a .opus or .ogg (check compatability!!) (*Enable support for other formats like flac*)
-- Implement musicbrainz cache
+- Implement musicbrainz cache?
 - Easy playlist synchronisation (somedl --sync), with config: sync_targets = [list of playlists]
 - Musicbrainz:
     - Now switched to grouping with brackets over strict search with quotes. This should now make all the musicbrainz new searches with musicbrainz obsolete. Observe if this results in more false matches
     - (*switch to 'https://musicbrainz.org/ws/2/artist/?query={artist}&fmt=json', because the current one is not getting the correct results most of the time. also have to rewrite the functions after that because the result will be different*)
 
 
-- Make a new SUCCESS debug value or sth like that, thats green. should appear if a song has already been downloaded instead of a warning?
 - Add a check to checkIfFileExists if {song} and ({aritst} or {album_artist}) are present in template, warn if not.
 
 - Add lrclib support
@@ -25,20 +21,43 @@
 
 - Create exception for ConnectionError for the ytmusicapi calls (not connected to internet)
 
+- Deal with two artists having the same name?! (in utils and in musicbrainz checkifartisthasbeenseen)
+    - also deal with songs that contain square brackets in their names (this should never happen tho, so probably ignore)
+    - Maybe use square brackets as a way to add additional info?
+
+- Config: Give a warning when lyrics_source = yt and lyrics_type is synced, as this makes no sense (youtube has no synced lyrics)
+    - add the new configs to new_somedl_config!!!!!
+    - remove metadata.lyrics?
+
+- Rework Deezer metadata_get_label_isrc function
+
+- Build notification that RD (AMVM) playlists are not supported
+    - e.g.: https://music.youtube.com/watch?v=b0YtimkUxwY&list=RDAMVMb0YtimkUxwY
+
+
+- README: Add information on what type of search is fastest:
+    - Fastest and most accurate is fetching a full album with `/browse/` url (dragging the album into the terminal)
+
+- somedl sync feature
+    - Create a sync file
+    - In there you can set any settings that you would normally set, that then overwrite the original sync
+    - also have sync_target setting thats a list of urls to sync
+    in the main config, there should be a sync_files list were all the paths of the files are stored in (relative to the config folder)
+
+
+
+
 ### Docs:
 - Not working after update? Install the latest workin version with pip install somedl==version_number. You may need to recreate the packa
 
 ### UI/UX
-- Add information on ~what~ song is downloaded. probably either by adding query or by adding the fetched metadata
+
 
 ## Medium Priority
 - Create Flowchart
 - Metadata: Add WOAR. Artist website or the streaming websites. MusicBrainz webiste seems to have links, havent found in the api response yet, gotta look
-- User configurable id3 version
 - FEAT: Give an option to download an entire album (--album flag)
 - FEAT: Give an option to download everything from an artist (--artist flag)
-- Add lyrics.ovh as lyrics API if youtube fails
-- Add functionality to stopp all possible metadata from being added
 
 - Add update metadata functionality. 
     - Example somedl --update -o /path/to/folder --recursive --to-update "Album_artist, genre, ..." --naming-sceme "{artist} - {song} [{sth else...}]"
@@ -46,6 +65,15 @@
     - some sort of interactive CLI for the update process, where you can select the path, what metadata to change, and the type of search - by yt-dlp video id, a certain output template or by reading youtube urls from the metadata (spotDL adds them into `comment` and SomeDL uses `source` on vorbis & m4a and `WWW Audio Source` on mp3 to store youtube music URLs)
         - This would require the option to toggle every single metadata
         - This would also require to look up which APIs are needed for what info, so skip them if they are not needed (`doMusicBrainz = False or False or True or False`)
+
+
+- Unnused placeholder (should better not get implemented:)
+ {placeholder}    Optional placeholder for when you want to add extra information to a folder without breaking the album check
+                  Example: "{album_artist}{placeholder}/{artist} - {song}" sorts your song into "Linkin Park/Linkin Park - Two Faced.mp3"
+                  If you want to add additional information to that artist folder later on, you can do that in the place of that spaceholder:
+                   Correct -> "Linkin Park (US Band)/Linkin Park - Two Faced.mp3"
+                    Not Correct -> "(US Band)Linkin Park/Linkin Park - Two Faced.mp3" (you would need to put a placeholder in front of the band
+
 
 ## Low Priority
 - Create an option that song names are always cleard of everything within a bracked e.g. "(2020 Remastered)"
@@ -70,7 +98,7 @@
 - TODO: "LAVINA - Kraj Mene" - MusicBrainz only knows the artist in lowercase.
 
 ## General bugs:
-This happend once, an youtube proceeded to download the mp4 version instead of the webm. Cannot reproduce. Happens more often now. hope that yt-dlp fixes this soon.
+This happend once, an youtube proceeded to download the mp4 version instead of the webm. Happens more often now. hope that yt-dlp fixes this soon.
 WARNING: [youtube] hlRm3aUzl74: Some android_vr client https formats have been skipped as they are missing a URL. YouTube may have enabled the SABR-only streaming experiment for the current session. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
 
 

@@ -20,13 +20,48 @@ copyright = true            # Default = true
 isrc = true                 # Default = true
 genre = true                # Default = true
 
-album_artist = true         # Default = true
+album_artist = true         # Default = true    | You should not set this value to false.
 multiple_artists = false    # Default = false   | Puts all involved artists/bands in the artist data field. The "artist" name in the output template will still only contain the primary artist.
-artist_separator = "; "     # Default = "; "    | Separator used to join multiple artists in a single metadata field. Only applies to mp3 and m4a. Opus, ogg and Flac support multiple artist fields.
+artist_separator = "; "     # Default = "; "    | Options: ";" or "/". Do not use "+" or "&" or "|". Separator used to join multiple artists in a single metadata field. Only applies to mp3 and m4a. Opus, ogg and Flac support multiple artist fields.
 
 ffmpeg_metadata =  false    # Default = false   | Set to true to keep the metadata set by ffmpeg (usually just some encoding infromation, not used by music players)
 
 cover_art_file = false      # Default = false   | Set to true to download a cover.jpg file in the same folder as the song (only one cover is created per folder, seperation by album is recommended if you want to use this setting)
+
+
+# Lyrics:
+
+# Default: "plain"
+# Options: "synced", "plain", "both", "synced_if_available", "none"
+# (synced_if_available means synced, but plain, unsynced lyrics as fallback)
+lyrics_type = "plain"
+
+# Store synced lyrics in metadata
+# Default: true
+synced_lyrics_metadata = true
+
+# .lrc sidecar file
+# Default: false
+# Set true if you want to genreate a .lrc file containing the synced lyrics for each song.
+lrc_file = false
+
+# Default: false
+# Writes synced lyrics into unsynced lyrics field for mp3.
+# Workaround to make synced lyrics work for mp3 in some media players
+# Only used for mp3, does not affect other formats
+lyrics_id3_synced_uslt_fallback = false
+
+# Set the lyrics source
+# Options:
+#  "lrclib"         Great free source for lyrics. Has synced lyrics for many songs
+#  "youtube"        Youtube provides some lyris. Does not have synced lyrics.
+#  "none"           Only none as fallback source if you dont want to wait the extra second for the other service to look for lyrics
+#                   none should also be used when only wanting synced lyrics
+# 
+# Do not use the same source twice.
+lyrics_source = "lrclib"                # Default = "lrclib" (keep this if you need synced lyrics!)
+lyrics_fallback_source = "youtube"      # Default = "youtube"
+
 
 [download]
 
@@ -83,7 +118,7 @@ output_dir = "."
 # Default: "{artist} - {song}"
 #
 # Use forward slashes to sort songs into subfolders (Do not use backslashes!).
-# Example:  "{artist}/{year} - {album}/{track_pos} - {song}"
+# Example:  "{album_artist}/{year} - {album}/{track_pos} - {song}"
 # Example:  "{album_artist}/{album}/{artist} - {song}"
 # Example:  "{album_artist}/{artist} - {song}"
 #
@@ -93,11 +128,30 @@ output_dir = "."
 #  {song}                       Song title
 #
 # Optional additional placeholders:
-#  {album}       Album title
-#  {year}        Release date of the song in YYYY
-#  {track_pos}   Track position within the album
-#  {track_count} Total number of tracks in the album
+#  {album}          Album title
+#  {year}           Release date of the song in YYYY
+#  {track_pos}      Track position within the album
+#  {track_count}    Total number of tracks in the album
 output = "{artist} - {song}"
+
+# Number of concurrent yt-dlp downloaders
+# Default = 2
+# Options: 1-10
+# 
+# Too many concurrent downloaders when downloading large libraries may cause problems.
+# (Getting your requests rate limited, your account banned if using cookies or your IP temporarily blocked)
+# For downloading small playlists (10-50 Songs), an increased number of downloaders should be fine, but use at your own risk.
+# For very large downloads, keep the number of downloaders low (1-2)
+number_downloaders = 2
+
+# Size of the queue containing prefetched metadata waiting for downloading
+# Default = 2
+# Options: 0-10
+#
+# The total number of songs that appear in the downloader window at the same time is:
+# queue_size + number_downloaders + 1 (currently processed song)
+# Setting this number to something higher than the number of downloaders will likely not improve download speed.
+queue_size = 2
 
 # Path to a cookies file, or browser to pull cookies from.
 # Needed for age-restricted content.
@@ -142,14 +196,22 @@ genius_album_check = true
 
 [logging]
 
-# Logging level
-# Default = "INFO"
+# Logging level (since 1.2.0)
+# Default = 4
+#
+# Servity loosely inspired by Syslog.
+# All messages with a equal or lower log_level will be displayed.
 #
 # Options:
-#   "WARNING" or "ERROR"   Reduce console output, only show problems
-#   "INFO"                 Show general progress information (recommended)
-#   "DEBUG"                Show all logs, same as using the --verbose flag
-level = "INFO"
+# EMERGENCY 0   Currently unused
+# ALERT     1   Currently unused
+# CRITICAL  2   Critical conditions     (Unhandled exceptions)
+# ERROR     3   Error conditions        (e.g Network errors)
+# WARNING   4   Important warnings      (DEFAULT e.g. YT-DLP warnings, invalid video ids, ...)
+# NOTICE    5   Secondary warnings      (e.g some metadata not being found)
+# INFO      6   Informational messages  (e.g successful fetching of genre data)
+# DEBUG     7   Debug-level messages    (Shows all messages)
+log_level = 4
 
 # Minimum number of songs in a download session before a download report is generated.
 # Default = 2;
@@ -159,4 +221,4 @@ level = "INFO"
 download_report = 2
 
 # DO NOT CHANGE THE VALUE BELOW!
-config_version = 3
+config_version = 4

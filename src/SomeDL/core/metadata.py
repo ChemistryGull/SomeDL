@@ -6,14 +6,16 @@ from pathlib import Path
 #import mutagen
 import  mutagen
 from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3, USLT, WOAS, WOAR, APIC, TYER, TDRC, SYLT
+from mutagen.id3 import ID3, USLT, WOAS, WOAR, APIC, TYER, TDRC, SYLT, ID3NoHeaderError
+from mutagen.mp3 import MP3
 from mutagen.oggopus import OggOpus
 from mutagen.oggvorbis import OggVorbis
 from mutagen.mp4 import MP4, MP4Cover, MP4FreeForm, AtomDataType
 from mutagen.flac import FLAC, Picture
 from mutagen import File
 
-from SomeDL.utils.logging import log, printj
+import SomeDL.utils.console as console
+
 from SomeDL.utils.config import config
 from SomeDL.api.web_requests import downloadAlbumArt
 
@@ -23,19 +25,30 @@ EasyID3.RegisterTextKey('comment', 'COMM')
 
 
 # def addMetadata(metadata: str, mp3_file: str):
-def addMetadata(metadata, path):
+def addMetadata(metadata, path, label = None):
+    
+    console.update(label, "albumart", console.Status.ACTIVE, "Downloading album art")
 
     if not len(metadata.get("album_art", [])) == 0:
         album_art_url = metadata.get("album_art", [{}])[-1].get("url")
-        log.debug(f'Album art size: {metadata.get("album_art", [{}])[-1].get("height")} x {metadata.get("album_art", [{}])[-1].get("width")}')
+        console.debug(f'Album art size: {metadata.get("album_art", [{}])[-1].get("height")} x {metadata.get("album_art", [{}])[-1].get("width")}', label)
     else:
         album_art_url = None
     
     if album_art_url:
-        log.debug("Downloading Album Artwork...")
+        console.debug("Downloading Album Artwork", label)
         album_art_data = downloadAlbumArt(album_art_url)
     else: 
         album_art_data = None
+
+    if album_art_data:
+        console.info("Successfully downloaded album art", label)
+        console.update(label, "albumart", console.Status.SUCCESS)
+    else:
+        console.error("Could not find album art!", label)
+        console.update(label, "albumart", console.Status.FAILED)
+
+    console.update(label, "addmetadata", console.Status.ACTIVE, "Adding metadata")
 
 
     # === Download cover art as .jpg if wanted ===
@@ -46,20 +59,29 @@ def addMetadata(metadata, path):
                 f.write(album_art_data)
 
 
+    # === Add .lrc file if wanted ===
+    if config["metadata"]["synced_lyrics_metadata"] and metadata.get("lyrics_synced") and config["metadata"]["synced_lyrics_metadata"] and config["metadata"]["lyrics_type"] in ["synced", "both", "synced_if_available"]:
+        console.info("Saving synced lyrics to .lrc file", label)
+        with open(Path(path).with_suffix(".lrc"), "w", encoding="utf-8") as f:
+            f.write(metadata.get("lyrics_synced"))
+
+
     try:
         audio = File(path, easy=False)
         if audio is None:
             # Format not recognised at all
-            log.error(f'File "{path}" is not a in valid format')
+            console.error(f'File "{path}" is not a in valid format', label)
+            console.update(label, "addmetadata", console.Status.FAILED)
             return False
         audio_type = audio.__class__.__name__.lower()
     except Exception as e:
         # Truncated files, permission errors, etc.
-        log.error(f'Could not add metadata')
+        console.error(f'Could not add metadata', label)
+        console.update(label, "addmetadata", console.Status.FAILED)
         return False
 
 
-    log.debug(f'Audio type: {audio_type}')
+    console.info(f'Audio type: {audio_type}', label)
 
     match audio_type:
         case "oggopus" | "oggvorbis":
@@ -99,8 +121,11 @@ def addMetadata(metadata, path):
             
 
         case _:
-            log.error(f'Audio type "{audio_type}" is not supported. Proceeding without adding metadata')
+            console.update(label, "addmetadata", console.Status.FAILED)
+            console.error(f'Audio type "{audio_type}" is not supported. Proceeding without adding metadata', label)
+            return
 
+    console.update(label, "addmetadata", console.Status.SUCCESS)
 
 
 
@@ -111,7 +136,7 @@ def tag_mp3(path, metadata, album_art_data):
     except:
         tag = mutagen.File(path, easy=True)
         tag.add_tags()
-        log.debug("EasyID3 adding new tags")
+        # console.debug("EasyID3 adding new tags")
 
     if not config["metadata"]["ffmpeg_metadata"]:
         tag.delete()
@@ -151,8 +176,7 @@ def tag_mp3(path, metadata, album_art_data):
 
     if metadata.get("date") and metadata.get("deezer_album_label") and config["metadata"]["copyright"]:
         tag['copyright'] =  f'{metadata.get("date", "")} {metadata.get("deezer_album_label", "")}'
-    else:
-        log.debug("Adding no copyright info to metadata as some info is missing")
+
 
     tag.save(v2_version=config["download"]["id3_version"])
 
@@ -180,21 +204,37 @@ def tag_mp3(path, metadata, album_art_data):
         id3.add(TYER(encoding=3, text=metadata.get("date", "")))
 
 
-    if metadata.get("lyrics") and config["metadata"]["lyrics"]:
-        id3.add(USLT(
-            encoding=3,
-            lang = "XXX",
-            desc = "",
-            text = metadata.get("lyrics", {}).get("lyrics", "")
-        ))
 
-    # if metadata.get("synced_lyrics"):
-    #     id3.add(SYLT(
-    #         encoding=3,
-    #         lang = "XXX",
-    #         desc = "",
-    #         text = conv_lrc_to_sylt(metadata.get("synced_lyrics", ""))
-    #     ))
+    if config["metadata"]["lyrics"]:
+        if metadata.get("lyrics_synced") and config["metadata"]["synced_lyrics_metadata"] and config["metadata"]["lyrics_type"] in ["synced", "both", "synced_if_available"]:
+            # print("starting to SYLT")
+            id3.add(SYLT(
+                encoding=3,
+                lang = "XXX",
+                desc = "",
+                format = 2, # milliseconds
+                type = 1, # lyrics
+                text = conv_lrc_to_sylt(metadata.get("lyrics_synced", ""))
+            ))
+
+            if config["metadata"]["lyrics_id3_synced_uslt_fallback"]:
+                id3.add(USLT(
+                    encoding=3,
+                    lang = "XXX",
+                    desc = "",
+                    text = metadata.get("lyrics_synced", "")
+                ))
+
+
+        if metadata.get("lyrics_plain") and (config["metadata"]["lyrics_type"] in ["plain", "both"] or (not metadata.get("lyrics_synced") and config["metadata"]["lyrics_type"] == "synced_if_available")) and not config["metadata"]["lyrics_id3_synced_uslt_fallback"]:
+            id3.add(USLT(
+                encoding=3,
+                lang = "XXX",
+                desc = "",
+                text = metadata.get("lyrics_plain", "")
+            ))
+
+    
     
     id3.add(WOAS(
         url=f'https://music.youtube.com/watch?v={metadata.get("song_id", "")}'
@@ -215,16 +255,16 @@ def tag_mp3(path, metadata, album_art_data):
             data=album_art_data
         ))
 
-    id3.save(v2_version=3)
+    id3.save(v2_version=config["download"]["id3_version"])
 
 
-def conv_lrc_to_sylt(synced_lyrics):
+def conv_lrc_to_sylt(lyrics_synced):
     synced = []
     plain_lines = []
 
 
-    for line in synced_lyrics.split("\n"):
-        print(line)
+    for line in lyrics_synced.split("\n"):
+        # print(line)
         m = re.compile(r"\[(\d+):(\d+(?:\.\d+)?)\](.*)").match(line.strip())
         if not m:
             continue
@@ -238,8 +278,8 @@ def conv_lrc_to_sylt(synced_lyrics):
         synced.append((text, ms))
         plain_lines.append(text)
 
-    print(" -- -- -- ")
-    print(synced)
+    # print(" -- -- -- ")
+    # print(synced)
     # print(plain_lines)
     return synced
 
@@ -271,14 +311,14 @@ def tag_vorbis(audio, path, metadata):
 
     if metadata.get("date") and metadata.get("deezer_album_label") and config["metadata"]["copyright"]:
         audio['copyright'] = [f'{metadata.get("date", "")} {metadata.get("deezer_album_label", "")}']
-    else:
-        log.debug("Adding no copyright info to metadata as some info is missing")
 
     audio['source'] = [f'https://music.youtube.com/watch?v={metadata.get("song_id", "")}']
 
-    if metadata.get("lyrics") and config["metadata"]["lyrics"]:
-        audio['lyrics'] = [metadata.get("lyrics", {}).get("lyrics", "")]
-
+    if config["metadata"]["lyrics"]:
+        if metadata.get("lyrics_synced") and config["metadata"]["synced_lyrics_metadata"] and config["metadata"]["lyrics_type"] in ["synced", "both", "synced_if_available"]:
+            audio['syncedlyrics'] = metadata.get("lyrics_synced", "")
+        if metadata.get("lyrics_plain") and (config["metadata"]["lyrics_type"] in ["plain", "both"] or (not metadata.get("lyrics_synced") and config["metadata"]["lyrics_type"] == "synced_if_available")):
+            audio['lyrics'] = metadata.get("lyrics_plain", "")
 
     
     # audio["comment"]      = "Some comment"
@@ -319,16 +359,17 @@ def tag_m4a(audio, path, metadata, album_art_data):
 
     if metadata.get("date") and metadata.get("deezer_album_label") and config["metadata"]["copyright"]:
         audio['cprt'] = [f'{metadata.get("date", "")} {metadata.get("deezer_album_label", "")}']
-    else:
-        log.debug("Adding no copyright info to metadata as some info is missing")
-
 
 
     source = f'https://music.youtube.com/watch?v={metadata.get("song_id", "")}'
     audio[f"----:com.apple.iTunes:source"] = [MP4FreeForm(source.encode("utf-8"), AtomDataType.UTF8)]
 
-    if metadata.get("lyrics") and config["metadata"]["lyrics"]:
-        audio["\xa9lyr"] = metadata.get("lyrics", {}).get("lyrics", "")
+    if config["metadata"]["lyrics"]:
+        if metadata.get("lyrics_synced") and config["metadata"]["synced_lyrics_metadata"] and config["metadata"]["lyrics_type"] in ["synced", "both", "synced_if_available"]:
+            audio["----:com.apple.iTunes:SYNCEDLYRICS"] = [metadata.get("lyrics_synced", "").encode("utf-8")]
+        if metadata.get("lyrics_plain") and (config["metadata"]["lyrics_type"] in ["plain", "both"] or (not metadata.get("lyrics_synced") and config["metadata"]["lyrics_type"] == "synced_if_available")):
+            audio["\xa9lyr"] = metadata.get("lyrics_plain", "")
+
 
     # audio["aART"]    = ["Album Artist"]                          # album artist
     # audio["\xa9cmt"] = ["Some comment"]                         # comment
@@ -337,6 +378,90 @@ def tag_m4a(audio, path, metadata, album_art_data):
         audio["covr"] = [MP4Cover(album_art_data, imageformat=MP4Cover.FORMAT_JPEG)]
 
     audio.save()
+
+
+
+# === Get existing audio metadata ===
+
+def first_artist(raw: str | None) -> str | None:
+    """Split on common multi-artist separators and return the first."""
+    if not raw:
+        return None
+    return re.split(r"\s*[;/]\s*", raw.strip())[0].strip() or None
+
+def parse_track(raw: str | None) -> tuple[int | None, int | None]:
+    """Parse '3', '3/12', or '3 of 12' into (pos, count)."""
+    if not raw:
+        return None, None
+    m = re.match(r"(\d+)(?:\s*[/of]+\s*(\d+))?", raw.strip())
+    if not m:
+        return None, None
+    pos   = int(m.group(1))
+    count = int(m.group(2)) if m.group(2) else None
+    return pos, count
+
+def get_audio_metadata(filepath: str | Path) -> dict:
+    path = Path(filepath)
+    ext  = path.suffix.lower()
+    result = {
+        "artist":       None,
+        "title":        None,
+        "album":        None,
+        "album_artist": None,
+        "year":         None,
+        "track_pos":    None,
+        "track_count":  None,
+        "source":       None,
+    }
+
+    if ext == ".mp3":
+        audio = MP3(path)
+        tags  = audio.tags
+        # if tags:
+        #     for key, val in tags.items():
+        #         print(f"{key:8}  {val}")
+        if tags:
+            result["artist"]       = first_artist(str(tags["TPE1"])) if "TPE1" in tags else None
+            result["title"]        = str(tags["TIT2"])  if "TIT2"  in tags else None
+            result["album"]        = str(tags["TALB"])  if "TALB"  in tags else None
+            result["album_artist"] = str(tags["TPE2"])  if "TPE2"  in tags else None
+            result["year"]         = str(tags["TDRC"])  if "TDRC"  in tags else None
+            result["source"]       = str(tags["WOAS"])  if "WOAS"  in tags else None
+            if "TRCK" in tags:
+                result["track_pos"], result["track_count"] = parse_track(str(tags["TRCK"]))
+
+    elif ext == ".m4a":
+        audio = MP4(path)
+        tags  = audio.tags or {}
+        raw_artist = str(tags["\xa9ART"][0]) if "\xa9ART" in tags else None
+        result["artist"]       = first_artist(raw_artist)
+        result["title"]        = str(tags["\xa9nam"][0])  if "\xa9nam"  in tags else None
+        result["album"]        = str(tags["\xa9alb"][0])  if "\xa9alb"  in tags else None
+        result["album_artist"] = str(tags["aART"][0])     if "aART"     in tags else None
+        result["year"]         = str(tags["\xa9day"][0])  if "\xa9day"  in tags else None
+        if "trkn" in tags:
+            trk = tags["trkn"][0]           # tuple: (pos, count)
+            result["track_pos"]   = trk[0] or None
+            result["track_count"] = trk[1] or None
+        custom = tags.get("----:com.apple.iTunes:source")
+        if custom:
+            result["source"] = custom[0].decode("utf-8", errors="replace")
+
+    elif ext in (".ogg", ".opus", ".flac"):
+        audio = OggOpus(path) if ext == ".opus" else (FLAC(path) if ext == ".flac" else OggVorbis(path))
+        result["artist"]       = first_artist( audio.get("artist",       [None])[0])
+        result["title"]        =               audio.get("title",        [None])[0]
+        result["album"]        =               audio.get("album",        [None])[0]
+        result["album_artist"] =               audio.get("albumartist",  [None])[0]
+        result["year"]         =               audio.get("date",         [None])[0]
+        result["source"]       =               audio.get("source",       [None])[0]
+        result["track_pos"]    =               audio.get("tracknumber",  [None])[0]
+        result["track_count"]  =               audio.get("tracktotal",  [None])[0]
+
+    else:
+        raise ValueError(f"Unsupported format: {ext}")
+
+    return result
 
 
 
