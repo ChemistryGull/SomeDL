@@ -1,7 +1,13 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
-## [1.2.0] - 30.03.2026
+
+## [1.2.1] - 31.03.2026
+
+### Fixed
+- Fixed bug in the version check cache that would wrongly alert about an update.
+
+## [1.2.0] - 31.03.2026
 
 ### Overview
 SomeDL 1.2.0 contains big changes to the entire codebase. The core metadata fetching process has been refactored to enable concurrent downloading. These changes also enable more modular reuse of certain parts of the code, allowing the implementation of new features without duplicating much code. Speaking of new features, this update includes a feature to download entrie albums of every input query with the `--fetch-album` flag, a utility to update your existing folder structure with `somedl new-metadata`, and a utitity to import songs aquired by other means, or to update metadata in your existing library with `somedl import`. This update also includes a complete UI rewrite, which was necessary for concurrent downloads. The new UI should be more user-friendy by hiding unnecessary information. Users that still want to see what is going on behind the scenes can change their logging level with the new flags `-v` (just minor warnings, like missing metadata), `-vv` (About the same amout of info as with the old default UI) and `-vvv` (Everything, including debug information).

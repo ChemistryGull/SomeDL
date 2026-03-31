@@ -18,6 +18,8 @@ def read_cache():
     try:
         with open(VERSION_CACHE_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
+        if data.get("current_version") != VERSION:  # invalidate on local version change
+            return None
         cached_at = datetime.fromisoformat(data["cached_at"])
         age_hours = (datetime.now(timezone.utc) - cached_at).total_seconds() / 3600
         if age_hours < CACHE_TTL_HOURS:
@@ -32,6 +34,7 @@ def write_cache(latest_version):
     try:
         data = {
             "latest_version": latest_version,
+            "current_version": VERSION,
             "cached_at": datetime.now(timezone.utc).isoformat(),
         }
         console.debug("Writing somedl_version_cache.json")
