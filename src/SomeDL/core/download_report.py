@@ -5,6 +5,8 @@ from pathlib import Path
 
 import SomeDL.utils.console as console
 from SomeDL.utils.config import config
+from SomeDL.utils.version import VERSION
+
 
 def generateDownloadReport(data, failed, already_downloaded = []):
     # with open('getPlaylist_data_3.json', 'r', encoding="utf-8") as file:
@@ -20,7 +22,7 @@ def generateDownloadReport(data, failed, already_downloaded = []):
     #table = "Oh no..."
     title = "Playlist download report"
 
-    parts = [f'<h1>Download Report {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}</h1>']
+    parts = [f'<h1>Download Report {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())} - SomeDL version {VERSION}</h1>']
     parts.append("<p><i>Don't want these download reports? Disable them with </i><code>somedl --disable-report</code></p>")
     
     parts.append(f"<p>Summary: Out of {len_total} songs, {len_success} were downloaded successfully, {len_failed} songs failed to download and {len_already_downloaded} songs were already present.</p>")

@@ -208,7 +208,7 @@ def metadata_album_check(artist_name: str, song_title: str, album_id: str, album
         return album_id, album_name, album
 
     if config["api"]["genius_album_check"] and config["api"]["genius"]:
-        console.debug("Album-check: Song is suspected to be listed as a single. Consulting Genius...", label)
+        console.debug("Album-check: Song is listed as a single. Cross-checking with genius", label)
         console.update(label, "album", console.Status.ACTIVE, "Checking album on genius")
         guessed_album = geniusGetAlbumBySongName(artist_name, song_title, label)
     else:
@@ -242,7 +242,7 @@ def metadata_album_check(artist_name: str, song_title: str, album_id: str, album
         console.debug(f'Album-check: Song \'{song_title}\' is not in the album \'{new_album_name}\' according to yt-music. Using original album instead.', label)
         return album_id, album_name, album
     
-    console.debug("Album-check: Successfully changed album", label)
+    console.info(f'Album-check: Successfully changed album to {new_album_name} instead of {album_name}', label)
     return new_album_id, new_album_name, new_album 
 
 # === Album Data ===

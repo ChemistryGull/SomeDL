@@ -4,6 +4,7 @@ import time
 
 # from SomeDL.utils.logging import log
 from SomeDL.utils.config import config
+import SomeDL.utils.console as console
 
 genius_headers = {
     "Authorization": f'Bearer {config["api"]["genius_token"]}'
@@ -27,13 +28,13 @@ def geniusGetAlbumBySongName(artist: str, song: str, label: str = None):
     if response:
         response = response.json()
     else:
-        console.warning("Genius returned an invalid response. Skipping album check.", label)
+        console.notice("Genius returned an invalid response. Skipping album check.", label)
         return {}
     # print(url)
     # print(json.dumps(response, indent=4, sort_keys=True))
     
     if len(response.get("response", {}).get("hits", [{}])) == 0:
-        console.warning("Genius returned no results. Trying again a single time.", label)
+        console.notice("Genius returned no results. Trying again a single time.", label)
         time.sleep(2)
 
         url = f'https://{api_base}/search?q={artist} - {song}' # Removing that "-" causes "Kanonenfieber Heizer Tenner" to return a empty result for some reason, even tho it gets an result when looked up via the browser im logged into genius with (although it sometimes returns nothing) May be a temporary server overload https://genius.com/api/search?q=Kanonenfieber%20Heizer%20Tenner
@@ -41,11 +42,11 @@ def geniusGetAlbumBySongName(artist: str, song: str, label: str = None):
         if response:
             response = response.json()
         else:
-            console.warning("Genius returned an invalid response. Skipping album check.", label)
+            console.notice("Genius returned an invalid response. Skipping album check.", label)
             return {}
 
     if len(response.get("response", {}).get("hits", [{}])) == 0:
-        console.warning("Genius returned no results. Continuing without extra Genius album Info", label)
+        console.notice("Genius returned no results. Continuing without extra Genius album Info", label)
         return {}
 
     song_api_path = response.get("response", {}).get("hits", [{}])[0].get("result", {}).get("api_path")
@@ -57,7 +58,7 @@ def geniusGetAlbumBySongName(artist: str, song: str, label: str = None):
     if response:
         response = response.json()
     else:
-        console.warning("Genius returned an invalid response. Skipping album check.", label)
+        console.notice("Genius returned an invalid response. Skipping album check.", label)
         return {}
 
     # --- The genius API lists "album": null sometimes when there is no album. Return false, the song is really a Single (example "Erlkönig - Lūcadelic")

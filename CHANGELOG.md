@@ -2,6 +2,13 @@
 https://keepachangelog.com/en/1.1.0/
 
 
+
+## [1.2.2] - 31.03.2026
+
+### Fixed
+- Fixed missing import of console module in genius.py
+
+
 ## [1.2.1] - 31.03.2026
 
 ### Fixed

@@ -18,22 +18,26 @@ mock_config = {
     },
     "download": {
         "always_search_by_query": False,
+        "check_if_file_exists": True,
         "cookies_from_browser": "",
         "cookies_path": "",
         "disable_download": False,
-        "fetch_album": False,
+        "fetch_albums": False,
         "format": "mp3",
         "id3_version": 3,
+        "number_downloaders": 2,
         "output": "{album_artist}/{year} - {album}/{track_pos} - {song}",
         "output_dir": "/home/chemgull/Documents/Coding/Python/SomeDL/downloads/downloads/",
         "prefer_playlist": False,
         "quality": 5,
+        "queue_size": 2,
         "strict_url_download": False
     },
     "logging": {
-        "config_version": 3,
+        "config_version": 4,
         "download_report": 2,
-        "level": "INFO"
+        "level": "INFO",
+        "log_level": 7
     },
     "metadata": {
         "album_artist": True,
@@ -43,10 +47,17 @@ mock_config = {
         "ffmpeg_metadata": False,
         "genre": True,
         "isrc": True,
+        "lrc_file": False,
         "lyrics": True,
-        "multiple_artists": True
+        "lyrics_fallback_source": "youtube",
+        "lyrics_id3_synced_uslt_fallback": False,
+        "lyrics_source": "lrclib",
+        "lyrics_type": "plain",
+        "multiple_artists": False,
+        "synced_lyrics_metadata": True
     }
 }
+
 
 
 
@@ -130,6 +141,57 @@ class TestMetadataAlbumCheck:
         assert album_id == "11111"
         assert album_name == "Another album"
         assert album == mock_yt.get_album.return_value
+    
+    def test_empty_result_album(self):
+        """No change if empty esult"""
+
+        mock_input_album = {
+            "artists": [
+                {
+                    "name": "My Artist"
+                }
+            ],
+            "title": "Just a single",
+            "type": "Single",
+            "tracks": [
+                {"title": "My Song"},
+            ]
+        }
+
+        mock_yt = MagicMock()
+        mock_yt.search.return_value = ""
+        mock_yt.get_album.return_value = {
+            "artists": [
+                {
+                    "name": "My Artist"
+                }
+            ],
+            "title": "Another album",
+            "type": "Album",
+            "tracks": [
+                {"title": "Track 1"},
+                {"title": "My Song"},
+            ]
+        }
+
+
+        mock_genius = MagicMock()
+        mock_genius.return_value = {
+            "album_name": "Another album",
+            "artist_name": "My Artist",
+            "song_title": "My Song"
+        }        
+
+        with patch(YT_PATCH, mock_yt):
+            with patch(CONFIG_PATCH, {"api": {"genius": True, "genius_album_check": True}}):
+                with patch(GENIUS_PATCH, mock_genius):
+                    album_id, album_name, album = metadata_album_check("My Artist", "My Song", "e4a1geav3wer", "My Album", mock_input_album)
+
+        print(album_id)
+        assert album_id == "e4a1geav3wer"
+        assert album_name == "My Album"
+        assert album == mock_input_album
+
 
     def test_single_but_track_not_in_yt_album(self):
         """If the original song is not in the tracks of the new album, return the old album"""
