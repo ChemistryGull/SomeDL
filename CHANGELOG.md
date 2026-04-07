@@ -1,6 +1,13 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
+## [1.?.?]
+
+
+### Fixed
+- Fix typos
+
+
 
 ## [1.2.3] - 31.03.2026
 

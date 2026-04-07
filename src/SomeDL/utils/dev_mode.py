@@ -32,7 +32,7 @@ def _save(path, data):
 
 def _load(path):
     if not path.exists():
-        raise FileNotFoundError(f"No stored data at {path} — run store_data() first")
+        raise FileNotFoundError(f"No stored data at {path}, run store_data first")
     return json.loads(path.read_text())
 
 
