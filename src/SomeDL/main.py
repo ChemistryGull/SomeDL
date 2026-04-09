@@ -128,7 +128,7 @@ def process_song_list_sequential(songs_list):
         metadata = fetch_metadata(item, metadata_list)
 
         if not metadata:
-            log.warning("Song was not downloaded properly")
+            log.warning("Song could not be downloaded")
             failed_list.append(item)
             continue
         if metadata == "already_downloaded":
@@ -137,7 +137,7 @@ def process_song_list_sequential(songs_list):
 
         # === Download audio ===
         if config["download"]["disable_download"]:
-            log.warning("Not downloading song as disable-download is set")
+            log.warning("Not downloading song because disable-download is set")
             metadata_list.append(metadata)
             continue
 
@@ -153,7 +153,7 @@ def process_song_list_sequential(songs_list):
             addMetadata(metadata, filename)
             metadata["filetype"] = filename.rsplit(".", 1)[-1]
         else: 
-            log.error("File was not downloaded successfully with yt-dlp")
+            log.error("File could not be downloaded using yt-dlp")
             failed_list.append(item)
             continue
 
@@ -163,7 +163,7 @@ def process_song_list_sequential(songs_list):
 
         # except Exception as e:
         #     failed_list.append(item)
-        #     log.critical("A critical exception occured when trying to download song with yt-dlp! If retrying does not help, please notify the program maintainer on https://github.com/ChemistryGull/SomeDL. Error: ")
+        #     log.critical("A critical exception occurred when trying to download song with yt-dlp! If retrying does not help, please notify the program maintainer at https://github.com/ChemistryGull/SomeDL. Error: ")
         #     print(e)
 
     
@@ -229,7 +229,7 @@ def process_song_list_concurrent(songs_list: list):
                 item["label"] = label
 
                 # === Check if the song was already in the queue ===
-                # --- (Neccessary for when the same song is input twice, but is not yet downloaded)
+                # --- (Necessary for when the same song is input twice, but is not yet downloaded)
                 if any(d.get("artist_name") == item.get("artist_name") and d.get("song_title") == item.get("song_title") for d in metadata_list):
                     console.info("This input is a duplicate", item["label"])
                     console.finish(item.get("label"), console.Download_status.ALREADY_DOWNLOADED)
@@ -244,7 +244,7 @@ def process_song_list_concurrent(songs_list: list):
                 metadata = fetch_metadata(item, metadata_list)
 
                 if not metadata:
-                    console.warning("Song was not downloaded properly", item["label"])
+                    console.warning("Song could not be downloaded", item["label"])
                     console.finish(item.get("label"), console.Download_status.FAILED)
                     with console.thread_lock:
                         failed_list.append(item)
@@ -261,7 +261,7 @@ def process_song_list_concurrent(songs_list: list):
 
                 if config["download"]["disable_download"]:
                     console.update(label, "disable_download", console.Status.SKIPPED)
-                    console.notice("Not downloading song as disable-download is set", item["label"])
+                    console.notice("Not downloading song because disable-download is set", item["label"])
                     console.finish(label, console.Download_status.DOWNLOAD_DISABLED)
 
                     with console.thread_lock:
@@ -275,7 +275,7 @@ def process_song_list_concurrent(songs_list: list):
                 console.update(label, "wait_queue", console.Status.ACTIVE, "Queuing for download (in queue)")
                 
             except Exception as e:
-                console.error("A critical exception occured when fetching the metadata for this song! If retrying does not help, please notify the program maintainer on https://github.com/ChemistryGull/SomeDL. Error:", label)
+                console.error("A critical exception occurred when fetching the metadata for this song! If retrying does not help, please notify the program maintainer at https://github.com/ChemistryGull/SomeDL. Error:", label)
                 console.error(e, label)
                 console.finish(label, console.Download_status.FAILED)
                 with console.thread_lock:
@@ -321,7 +321,7 @@ def process_song_list_concurrent(songs_list: list):
 
                     console.finish(label, console.Download_status.SUCCESS)
                 else: 
-                    console.error("File was not downloaded successfully with yt-dlp", label)
+                    console.error("File could not be downloaded using yt-dlp", label)
                     console.update(label, "downloading", console.Status.FAILED)
                     console.finish(label, console.Download_status.FAILED)
                     with console.thread_lock:
@@ -331,13 +331,13 @@ def process_song_list_concurrent(songs_list: list):
                 # === Timer ===
                 timer_end = time.time()
                 length = timer_end - timer_start
-                console.info(f'TIME - The download took {length} seconds.', metadata.get("label"))
+                console.info(f'Download Time: {length} seconds.', metadata.get("label"))
                 metadata["download_time"] = length
                 metadata["total_time"] = f'{round(metadata["download_time"] + metadata.get("metadata_time", 0), 1)} seconds' 
                 
 
             except Exception as e:
-                console.error("A critical exception occured when trying to download song with yt-dlp! If retrying does not help, please notify the program maintainer on https://github.com/ChemistryGull/SomeDL. Error:", label)
+                console.error("A critical exception occurred when trying to download song with yt-dlp! If retrying does not help, please notify the program maintainer at https://github.com/ChemistryGull/SomeDL. Error:", label)
                 console.error(e, label)
                 console.finish(label, console.Download_status.FAILED)
                 with console.thread_lock:
