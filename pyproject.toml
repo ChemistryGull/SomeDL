@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SomeDL"
-version = "1.2.3"
+version = "1.2.4"
 authors = [
     {name="ChemistryGull", email="html.gull@gmail.com"},
 ]
 urls = { "Homepage" = "https://github.com/ChemistryGull/SomeDL" }
-description = "A command line tool to download songs from YouTube and adds metadata sourced from different APIs, requiring no API keys or login."
+description = "A command line utility to download songs from YouTube with metadata from different APIs without the need for API-tokens or login."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
