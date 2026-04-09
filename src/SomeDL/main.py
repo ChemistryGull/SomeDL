@@ -300,7 +300,7 @@ def process_song_list_concurrent(songs_list: list):
                 label = metadata.get("label")    
                 console.update(label, "wait_queue", console.Status.HIDE)
 
-                console.update(label, "downloading", console.Status.ACTIVE, "yt-dlp: Prepering download")
+                console.update(label, "downloading", console.Status.ACTIVE, "yt-dlp: Preparing download")
 
                 # === Download audio ===
                 if config["download"]["strict_url_download"] and metadata.get("original_url_id"):
