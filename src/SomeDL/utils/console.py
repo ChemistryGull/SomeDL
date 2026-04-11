@@ -329,6 +329,17 @@ def finish(label: str, status):
             live_display.console.print(f'[bright_yellow]  Downloaded disabled:      {label}[/]')
 
 
+def print_header(log_level, version):
+    print()
+    if log_level > 4:
+        console.print(Columns([
+                    f'[bold dark_cyan]  SomeDL version {version}[/]',
+                    Align.right(f'[bold dark_cyan] Album | Lyrics | Genre | Copyright | Audio | Album Art | Add Metadata [/]'),
+                ], expand=True, ))
+    else:
+        console.print(f'[bold dark_cyan]  SomeDL version {version}[/]')
+    
+    print()
 
 
 # === Debug stuff ===
