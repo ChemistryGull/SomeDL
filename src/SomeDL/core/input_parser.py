@@ -44,6 +44,13 @@ def generateSongList(input_list):
                 "video_type_original": "Search query"
             })
 
+        if item_parsed["inp_type"] == "artist" and item_parsed.get("artist_id", None):
+            artist = parseArtist(item_parsed["artist_id"])
+            if artist:
+                songs_list.extend(artist)
+            else:
+                console.error(f"Artist skipped: {item}")
+
         # --- If none of these types, the input was not valid so it was ignored
 
     if alert_list_and_v and not config["download"]["prefer_playlist"]:
@@ -77,14 +84,14 @@ def parseInput(inp):
                 console.debug(f"Input is browse URL playlist: {inp}")
                 out["inp_type"] = "playlist"
                 out["playlist_id"] = path_parts[1]
-            elif path_parts[1].startswith("UC"):
-                console.warning(f"Downloading the entire discography of an artist is not yet supported: {inp}")
             else:
                 console.warning(f"Input is not a known type of URL: {inp}")
                 out["inp_type"] = None
 
         elif len(path_parts) > 1 and path_parts[0] == "channel":
-            console.warning(f"Downloading the entire discography of an artist is not yet supported: {inp}")
+            console.debug(f"Downloading the entire discography of the artist: {inp}")
+            out["inp_type"] = "artist"
+            out["artist_id"] = path_parts[1]
 
         elif not config["download"]["prefer_playlist"] and url_queries.get("v", None):
             # --- If the user does not want to download a full playlist when bot "v" and "list" are in the URL, only download the video
@@ -124,6 +131,110 @@ def parseInput(inp):
         out["query"] = inp
 
     return out
+
+
+def parseArtist(artist_id: str):
+    try:
+        artist_result = yt.get_artist(artist_id)
+    except Exception as e:
+        console.error("Artist search returned no results. Skipping this artist. Error info:")
+        print(e)
+        return None
+
+    artist_name = artist_result.get("name")
+    print(f'--- Looking up discography of \"{artist_name}\" --- ')
+
+
+    albums_browseId = artist_result.get("albums", {}).get("browseId")
+    albums_params = artist_result.get("albums", {}).get("params")
+    singles_browseId = artist_result.get("singles", {}).get("browseId")
+    singles_params = artist_result.get("singles", {}).get("params")
+
+    # print()
+    # print(albums_browseId)
+    # print(albums_params)
+    # print()
+    # print(singles_browseId)
+    # print(singles_params)
+    # print()
+
+
+    songs_list = []
+
+
+    # === Album ===
+    
+    # --- Check if "more" button exists in UI, if yes, fetch the data that is reachable with the more button
+    if albums_browseId and albums_params:
+        console.debug("\"more\" button found, fetching more data")
+        artist_albums_result = yt.get_artist_albums(albums_browseId, albums_params)
+    else:
+        console.debug("No \"more\" button, using initial fetched data.")
+        artist_albums_result = artist_result.get("albums", {}).get("results", [])
+        # --- ytmusicapi returns the year value in the type key.
+        #     this is a bug, until that is fixed this is the workaround
+        for d in artist_albums_result:
+            d["year"] = d.pop("type")
+
+
+    for album in artist_albums_result:
+        if not album.get("browseId"):
+            console.notice("No browse id found.")
+            continue
+
+        album_result = parseAlbum(album.get("browseId"))
+
+        if not album_result:
+            continue
+
+        if config["download"]["include_other_artists"] and not album_result[0].get("album_artist") == artist_name:
+            print(f'Not adding album \"{album.get("title")}\" as album artist is \"{album_result[0].get("album_artist")}\", not \"{artist_name}\"')
+            continue
+
+        print(f'Adding {album.get("year")} album \"{album.get("title")}\"')
+        songs_list.extend(album_result)
+
+
+    # === Singles ===
+
+    if config["download"]["include_singles"]:
+
+        # --- Check if "more" button exists in UI, if yes, fetch the data that is reachable with the more button
+        if singles_browseId and singles_params:
+            console.debug("\"more\" button found, fetching more data")
+            artist_singles_result = yt.get_artist_albums(singles_browseId, singles_params)
+        else:
+            console.debug("No \"more\" button, using initial fetched data.")
+            artist_singles_result = artist_result.get("singles", {}).get("results", [])
+            # --- ytmusicapi returns the year value in the type key.
+            #     this is a bug, until that is fixed this is the workaround
+            for d in artist_singles_result:
+                d["type"] = d.pop("year")
+
+
+        for album in artist_singles_result:
+            if not album.get("browseId"):
+                console.notice("No browse id found.")
+                continue
+
+            album_result = parseAlbum(album.get("browseId"))
+
+            if not album_result:
+                continue
+
+            if not config["download"]["include_other_artists"] and not album_result[0].get("album_artist") == artist_name:
+                print(f'Not adding {album.get("type")} \"{album.get("title")}\" as album artist is \"{album_result[0].get("album_artist")}\", not \"{artist_name}\"')
+                continue
+
+            print(f'Adding {album.get("type")} \"{album.get("title")}\"')
+            songs_list.extend(album_result)
+
+
+
+    # console.printj(single_list)
+    print(f'-> Found {len(songs_list)} songs by \"{artist_name}\"')
+    return songs_list
+
 
 
 def parseAlbum(album_id: str):
@@ -168,7 +279,7 @@ def parseAlbum(album_id: str):
             "artist_name":          item_playlist.get("artists", [{}])[0].get("name", ""),
             "artist_all_names":     [a.get("name") for a in item_playlist.get("artists", [])],
             "is_Explicit":          item_playlist.get("isExplicit"),
-            "song_title":           item_playlist.get("title"),
+            "song_title":           item_playlist.get("title").strip(),
             "song_title_clean":     clean_song_title(item_playlist.get("title")),
             "song_id":              item_playlist.get("videoId"),
             "video_type":           item_playlist.get("videoType"),
@@ -215,7 +326,7 @@ def parsePlaylist(playlist_id: str):
             "artist_name":          item.get("artists", [{}])[0].get("name", ""),
             "artist_all_names":     [a.get("name") for a in item.get("artists", [])],
             "is_Explicit":          item.get("isExplicit"),
-            "song_title":           item.get("title"),
+            "song_title":           item.get("title").strip(),
             "song_title_clean":     clean_song_title(item.get("title")),
             "song_id":              item.get("videoId"),
             "video_type":           item.get("videoType"),
@@ -253,7 +364,7 @@ def parseSongURL(song_id: str):
             "artist_id":            song.get("artists", [{}])[0].get("id", ""),
             "artist_name":          song.get("artists", [{}])[0].get("name", ""),
             "artist_all_names":     [a.get("name") for a in song.get("artists", [])],
-            "song_title":           song.get("title"),
+            "song_title":           song.get("title").strip(),
             "song_title_clean":     clean_song_title(song.get("title")),
             "song_id":              song.get("videoId"),
             "video_type":           song.get("videoType"),

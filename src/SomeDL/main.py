@@ -12,7 +12,7 @@ from SomeDL.core.processor import process_song_list_concurrent
 from SomeDL.core.extra import import_songs, update_storage_template
 
 
-# from SomeDL.utils.dev_mode import run_with_data_storage
+from SomeDL.utils.dev_mode import run_with_data_storage
 
 
 def main():
@@ -34,14 +34,18 @@ def main():
         update_storage_template()
         return
 
+    if input_args[0] == "download":
+        input_args.pop(0) # --- For when you mistakingly enter a unneeded "download" option
 
+    
 
     # === Fetch albums if needed ===
     songs_list = generateSongList(input_args)
     failed_list_album = []
     if config["download"]["fetch_albums"]:
         songs_list, failed_list_album = fetch_albums(songs_list)
-
+    # console.printj(songs_list)
+    # return
     # === Convert songs_list to queue ===
     song_list_queue: queue.Queue = queue.Queue()
     for item in songs_list:

@@ -1,7 +1,7 @@
 import re
 import glob
 from pathlib import Path
-import timeit
+
 from SomeDL.utils.config import config
 
 
@@ -28,7 +28,34 @@ def generateOutputName(artist = False, album_artist = False, song = False, album
     # print(f'Output path: {str(path)}')
     return str(path)
 
-def checkIfFileExists(artist, song, album_artist = None):
+def read_archive_file():
+    if not config["download"]["download_archive"]:
+        return
+        
+    archive_path = Path(config["download"]["download_archive"])
+    archive_path = archive_path.expanduser()
+    archive_path = archive_path.resolve()
+
+    if not archive_path.parent.exists():
+        raise FileNotFoundError(f'Directory for the download archive does not exist, create it first: {archive_path.parent}')
+
+    if not archive_path.exists():
+        archive_path.touch()
+        print(f'Created new download archive at: {str(archive_path)}')
+        
+    with open(archive_path, "r", encoding="utf-8") as f:
+        config["download"]["download_archive_data"] = f.read().splitlines()
+
+
+def checkIfFileExists(artist, song, song_id, album_artist = None):
+    # TODO: implement a skip if --redownload is set
+
+    if config["download"]["download_archive"]:
+        if song_id in config["download"]["download_archive_data"]:
+            return True
+
+    if not config["download"]["check_if_file_exists"]:
+        return False
 
     base = Path(config["download"]["output_dir"])
     template = config["download"]["output"] + ".*"

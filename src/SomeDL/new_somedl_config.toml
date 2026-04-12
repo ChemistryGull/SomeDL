@@ -174,6 +174,22 @@ cookies_from_browser = ""
 # Default = false
 prefer_playlist = false
 
+# Set true to always download the full album for each song. Equivalent to the --fetch-albums flag
+# Default = false
+fetch_albums = false
+
+# When true, skip songs that are already present in the output location (checking by artist name and song title)
+# Set false e.g. if you want to have duplicates of the same songs as single & album versions.
+# Files that are redownloaded will be overwritten if set false.
+# Can be temporarily disabled using the --skip-file-check flag.
+# Default = true
+check_if_file_exists = true
+
+# Add song IDs to a archive file. Only download videos that have not been added to the archive already.
+# Enter the path to a archive file (/path/to/archive.txt). The name and filetype of the archive do not matter.
+# Default = "" (Disabled)
+download_archive = ""
+
 
 [api]
 
@@ -221,4 +237,4 @@ log_level = 4
 download_report = 2
 
 # DO NOT CHANGE THE VALUE BELOW!
-config_version = 4
+config_version = 5

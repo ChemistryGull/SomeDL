@@ -6,6 +6,7 @@ from pathlib import Path
 import SomeDL.utils.console as console
 from SomeDL.utils.config import config, generate_config, change_configs, CONFIG_PATH, check_if_config_exists
 from SomeDL.utils.version import VERSION, check_latest_version
+from SomeDL.utils.utils import read_archive_file
 
 def parseCliArgs():
     # --- DOC: https://docs.python.org/3/library/argparse.html
@@ -46,6 +47,9 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         help=f'Show the current configurations.'
     )
 
+
+    # === Download ===
+
     download_group = parser.add_argument_group("Download")
     download_group.add_argument(
         "-f","--format",
@@ -85,7 +89,40 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         action="store_true",
         help="Download the entire albums from all requested songs, even from within playlists."
     )
+    download_group.add_argument(
+        "--no-album",
+        action="store_true",
+        help="Override fetch-albums setting and fetch only a single track."
+    )
+    download_group.add_argument(
+        "--download-archive",
+        type=str,
+        metavar="PATH/TO/FOLDER",
+        help="Add song IDs to a archive file. Only download videos that have not been added to the archive already."
+    )
+    download_group.add_argument(
+        "--skip-file-check",
+        action="store_true",
+        help="Download songs even if they are already present in the output folder."
+    )
+    download_group.add_argument(
+        "--redownload",
+        action="store_true",
+        help="Download songs even if they are already present or in a download archive."
+    )
+    download_group.add_argument(
+        "--include-singles",
+        action="store_true",
+        help="Applies only to artist/channel URLs: Also download Singles and EPs (often duplicates)"
+    )
+    download_group.add_argument(
+        "--include-other-artists",
+        action="store_true",
+        help="Applies only to artist/channel URLs: also download albums with a different album artist."
+    )
 
+
+    # === Logging ===
 
     logging_group = parser.add_argument_group("Logging and debug")
     logging_group.add_argument(
@@ -116,6 +153,7 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     )
 
 
+    # === Metadata and authentication ===
 
     metadata_auth_group = parser.add_argument_group("Metadata & Authentication")
     metadata_auth_group.add_argument(
@@ -146,7 +184,7 @@ Download songs from YouTube by query, multiple queries, or playlist link.
 
 
 
-
+    # === Parsing of the arguments ===
 
     args = parser.parse_args()
     
@@ -224,10 +262,27 @@ Download songs from YouTube by query, multiple queries, or playlist link.
 
     if args.fetch_albums:
         config["download"]["fetch_albums"] = True
+    if args.no_album:
+        config["download"]["fetch_albums"] = False
 
 
-    # if args.fetch_album:
-    #     config["download"]["fetch_album"] = True
+    if args.download_archive:
+        config["download"]["download_archive"] = args.download_archive
+    
+    read_archive_file()
+
+    if args.skip_file_check:
+        config["download"]["check_if_file_exists"] = False
+
+    if args.redownload:
+        config["download"]["check_if_file_exists"] = False
+        config["download"]["download_archive"] = ""
+
+    if args.include_singles:
+        config["download"]["include_singles"] = True
+    if args.include_other_artists:
+        config["download"]["include_other_artists"] = True
+
 
     #print(args.format)
 

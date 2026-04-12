@@ -24,7 +24,7 @@ def fetch_metadata(metadata, known_metadata: list = []):
     start = time.time()
     console.info(f'Start fetching metadata', metadata.get("label"))
 
-    if checkIfFileExists(metadata["artist_name"], metadata["song_title"]):
+    if checkIfFileExists(metadata["artist_name"], metadata["song_title"], metadata["song_id"]):
         console.info(f'[green]Song does already exist. Skipping download.[/]', metadata.get("label"))
 
         return "already_downloaded"
@@ -53,7 +53,7 @@ def fetch_metadata(metadata, known_metadata: list = []):
     # timerend("guess_album")
 
     # === Second check if exists ===
-    if checkIfFileExists(metadata["artist_name"], metadata["song_title"], metadata["album_artist"]):
+    if checkIfFileExists(metadata["artist_name"], metadata["song_title"], metadata["song_id"], metadata["album_artist"]):
         # --- Second check, neccessary if only album_artist is set
         console.info(f'[green]Song does already exist. Skipping download. (2)[/]', metadata.get("label"))
         return "already_downloaded"
@@ -152,7 +152,7 @@ def metadata_type_cleaner(song_data: dict):
         song_data["artist_name"] =       search_results.get("artists", [{}])[0].get("name")
         song_data["artist_id"] =         search_results.get("artists", [{}])[0].get("id")
         song_data["artist_all_names"] =  [a.get("name") for a in search_results.get("artists", [])]
-        song_data["song_title"] =        search_results.get("title", "No title found")
+        song_data["song_title"] =        search_results.get("title", "No title found").strip()
         song_data["song_id"] =           search_results.get("videoId", "No title id found")
         song_data["video_type"] =        search_results.get("videoType",  "No video type found") # --- ("MUSIC_VIDEO_TYPE_ATV" - official audio | "MUSIC_VIDEO_TYPE_OMV" - official music video)
         song_data["yt_url"] =            f'https://music.youtube.com/watch?v={song_data["song_id"]}'
@@ -281,7 +281,7 @@ def metadata_get_lyrics(artist_name: str = None, song_title: str = None, duratio
     """
     console.update(label, "get_lyrics", console.Status.ACTIVE, "Fetching lyrics")
 
-    if not config["metadata"]["lyrics"]:
+    if not config["metadata"]["lyrics"] or config["metadata"]["lyrics_type"] == "none":
         console.update(label, "get_lyrics", console.Status.SKIPPED)
         return {}
 

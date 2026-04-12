@@ -9,7 +9,7 @@ from importlib.resources import files
 
 import SomeDL.utils.console as console
 
-CONFIG_VERSION = 4
+CONFIG_VERSION = 5
 
 default_config = {
     "metadata": {
@@ -43,10 +43,13 @@ default_config = {
         "cookies_path": ("", str, None),
         "cookies_from_browser": ("", str, None), # Maybe add guards there, only certain browsers
         "prefer_playlist": (False, bool, None),
-        "fetch_albums": (False, bool, None), # todo
-        "check_if_file_exists": (True, bool, None),
+        "fetch_albums": (False, bool, None),
         "number_downloaders": (2, int, range(1, 11)),
         "queue_size": (2, int, range(0, 11)),
+        "check_if_file_exists": (True, bool, None),
+        "download_archive": ("", str, None),
+        "include_singles": (False, bool, None),
+        "include_other_artists": (False, bool, None),
     },
     "api": {
         "deezer": (True, bool, None),

@@ -75,7 +75,7 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
 
                 # === Check if the song was already in the queue ===
                 # --- (Necessary for when the same song is input twice, but is not yet downloaded)
-                if any(d.get("artist_name") == item.get("artist_name") and d.get("song_title") == item.get("song_title") for d in metadata_list):
+                if config["download"]["check_if_file_exists"] and any(d.get("artist_name") == item.get("artist_name") and d.get("song_title") == item.get("song_title") for d in metadata_list):
                     console.info("This input is a duplicate", item["label"])
                     console.finish(item.get("label"), console.Download_status.ALREADY_DOWNLOADED)
 
@@ -118,15 +118,17 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
                 download_queue.put(metadata) # ---- blocks when queue is full
 
                 console.update(label, "wait_queue", console.Status.ACTIVE, "Queuing for download (in queue)")
-                
+            
+            except FileNotFoundError as e:
+                console.error("Critical error:")
+                console.error(e)
+
             except Exception as e:
                 console.error("A critical exception occured when fetching the metadata for this song! If retrying does not help, please notify the program maintainer at https://github.com/ChemistryGull/SomeDL. Error:", label)
                 console.error(e, label)
                 console.finish(label, console.Download_status.FAILED)
                 with console.thread_lock:
                     failed_list.append(item)
-
-            download_queue.task_done()
 
 
         for _ in range(NUM_DOWNLOADERS):
@@ -272,6 +274,10 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
                 metadata["download_time"] = length
                 metadata["total_time"] = f'{round(metadata["download_time"] + metadata.get("metadata_time", 0), 1)} seconds' 
                 
+                # === Add line to download archive if enabled ===
+                if config["download"]["download_archive"]:
+                    with open(config["download"]["download_archive"], "a", encoding="utf-8") as f:
+                        f.write(f'{metadata["song_id"]}\n')
 
             except Exception as e:
                 console.error("A critical exception occurred when trying to download song with yt-dlp! If retrying does not help, please notify the program maintainer at https://github.com/ChemistryGull/SomeDL. Error:", label)

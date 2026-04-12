@@ -20,7 +20,7 @@ The audio is downloaded using yt-dlp. SomeDL accepts text queries, YouTube URLs 
 </div>
 
 > [!TIP]
-> If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue here on GitHub. I am open to add functionality based on individual usecases. See [How can I give feedback or make feature requests?](#how-can-i-give-feedback-or-make-feature-requests)
+> If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue or start an discussion here on GitHub. I am open to add functionality based on individual usecases. See [How can I give feedback or make feature requests?](#how-can-i-give-feedback-or-make-feature-requests)
 
 > *Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. SomeDL is developed on Linux and tested on Linux & Windows. This project is not vibecoded.*
 
@@ -41,14 +41,14 @@ Run `somedl -h` to get more information for the different configuration options.
 
 # Features
 - Simple usage
-- Download via search query, YouTube URL or YouTube Playlist URL
-- Simple installation (And [quick guides](#requirements) for the installation of the dependencies)
-- No login or API tokens required
-- Complete metadata - way better than just relying on yt-dlp (see [here](#why-should-i-use-somedl-over-yt-dlp) why)
+- Download via search query, YouTube URL, YouTube Playlist URL and even entire discographies with YouTube Music channel URLs.
+- Simple installation with pip (And [quick guides](#requirements) for the installation of the dependencies).
+- No login or API tokens required.
+- Complete metadata - way better than just relying on yt-dlp (see [here](#why-should-i-use-somedl-over-yt-dlp) why).
 ``` 
 Song title | Artist name | Album name | High quality cover art (544x544) | Release date (Year) | Track number | Genre | Lyrics sycned and plain | Copyright/Label | ISRC | MusicBrainz artist ID (MBID)
 ```
-- Different output formats: `opus, m4a, mp3, ogg`
+- Several output formats: `opus, m4a, mp3, ogg, flac`
 - Sort downloads automatically into folders according to a template if desired
     - For example: `{album_artist}/{artist} - {song}`
     - Or more complex: `{album_artist}/{year} - {album}/{track_pos} - {song}`
@@ -58,13 +58,9 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 - And much more!
 
 ## Proposed Features
-- [x] Option to download the entire album for a given song automatically. (*New in v1.2.0!*)
-- [x] Fallback lyrics source (*New in v1.2.0!*)
-- [x] Synchronized lyrics (*New in v1.2.0!*)
-- [x] Import songs from different folder structures and update metadata in existing files (*New in v1.2.0!*)
-- [x] Easy utility to change output template for existing library (*New in v1.2.0!*)
-- [x] Parallel downloads (*New in v1.2.0!*)
-- [ ] Web-UI
+- [x] Download archive (*New in v1.3.0!*)
+- [x] Downloading entire discographies with YouTube Music channel URLs (*New in v1.3.0!*)
+- [ ] Web-UI (*Work in progress*)
 - [ ] Download songs based on concert setlists
 
 # Installation
@@ -97,11 +93,23 @@ It is also recommended to have Deno installed. yt-dlp needs deno to work properl
 - To install deno, go to https://docs.deno.com/runtime/getting_started/installation/
 - If you have npm installed, you can use npm to install deno. If not, open PowerShell (not CMD!) and execute the command provided. (This downloads and installs a script, be aware to only do this from trusted sources!)
 
+## Post install
+After installing, you can create a configuration file with `somedl --generate-config`. The config file is usually located at:
+
+- Linux:    `~/.config/SomeDL/somedl_config.toml`
+- Windows:  `C:\Users\<User>\AppData\Roaming\SomeDL\somedl_config.toml`
+- MacOS:    `~/Library/Application Support/SomeDL/somedl_config.toml`
+
+In the config files you can edit the behaviour of SomeDL, like defining an output template, setting default output format & output folder and much more. Inside this config file, there are comments that explain each setting. (For Windows users it is recommended to read and edit the config file with an editor that has syntax highlighing, like Notepad++.).
+
 # How-To
 ### Whats the way to get the best metadata?
 If you want the most accurate metadata, especially album name, it is best practice to download songs with YouTube Muisc album URLs, or by using the `--fetch-album` flag. Downloading an entire album this way ensures that all songs in that album get the same album name, and the songs are not split between the regular version "extended editon" and "deluxe edition" variations.
 
 ### How can i download an entire album with just a search query?
+You can use the `--fetch-album` flag. With this flag set, SomeDL downloads the entire album of every song in the download queue. You can also provide a YouTube Music URL to the album.
+
+### How can i download all songs from an artist?
 You can use the `--fetch-album` flag. With this flag set, SomeDL downloads the entire album of every song in the download queue. 
 
 ### How can I change configurations?
@@ -109,7 +117,12 @@ Generate a SomeDL-config file with
 ```
 somedl --generate-config
 ```
-Then edit the `somedl_config.toml` file on the path it prints out. Inside this configurations, there are comments that explain each setting.
+Then edit the `somedl_config.toml` file on the path it prints out. Inside this configuration file, there are comments that explain each setting.
+
+### How can i avoid redownloading files when removing them from the download folder?
+You can use the download archive for this. Define a download archive file with `--downlaod archive /path/to/archive.txt` or by changing the `download_archive` config. The name and filetype of the archive do not matter. When such a file is defined, all video IDs of successfull downloads will be added into that download archive and will be skipped on any future download attempts.
+
+If you want to download a song that has already been downloaded with the download_archive enabled, use the `--redownload` flag to download a song.
 
 ### How can i change the output template for already downloaded files?
 You can type `somedl new-template` into the terminal. It will ask you to provide the path to your files and the path to a new folder. You will also have to provide the new output template. You can choose between moving the files (less SSD writes) and copying files (safer in case something goes wrong). You can also merge different storage template in this way. 

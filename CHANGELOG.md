@@ -1,6 +1,32 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
+
+## [1.3.0]
+
+### Added
+- Add functionality to download all albums from an artist with a channel URL
+- Add fetch_album to the config.
+- Add `--no-album` flag to override the above config setting
+- Add download archive feature. Define a download archive file with `--downlaod archive /path/to/archive.txt` or by changing the `download_archive` config. When such a file is defined, all video IDs will be added into that download archive and will be skipped on any future download attempts. 
+- Add `--redownload` flag to download a song even if its either in a download archive or the file is already present. If the File is present, it will be overwritten.
+- Add `check_if_file_exists` config and corresponding `--skip-file-check` flag to skip checking if a file does already exist. Useful for when you want to have duplicates of the same songs as single & album versions (Having files with the same artist and song title is elsewise not possible, even if in another album)
+
+### Changed
+- In thread_fetch_metadata, switch from iterating over a list to a queue design, to make continous updates via the web-ui possible
+- Move header printing into console.print_header() to clean up main function
+- Clean and remove unused imports in main
+- Move process_song_list_concurrent to processor module to make it reusable for webui
+- Entering `somedl download "..."` now does not try to look up a song called "download". 
+
+### Fixed
+- Fix bug where setting lyrics_type to "none" would still look up lyrics.
+- Add .strip() to all song titles for the (very) rare case that youtube mistakingly adds whitespaces at the end of the title.
+
+### Removed
+- Remove unused deprecated process_song_list_sequential function
+
+
 ## [1.2.4] - 09.24.2026
 
 ### Fixed
