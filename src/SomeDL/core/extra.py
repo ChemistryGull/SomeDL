@@ -10,8 +10,8 @@ import SomeDL.utils.console as console
 from SomeDL.utils.config import config
 from SomeDL.utils.utils import generateOutputName, checkIfFileExists
 from SomeDL.core.input_parser import parseSongURL
-from SomeDL.core.metadata_helper import metadata_type_cleaner, fetch_metadata
-from SomeDL.core.metadata import addMetadata, get_audio_metadata
+from SomeDL.core.metadata_helper import metadata_type_cleaner, fetch_metadata, metadata_get_lyrics
+from SomeDL.core.metadata import addMetadata, get_audio_metadata, get_audio_metadata_for_update, update_metadata_mutagen
 from SomeDL.core.download_report import generateDownloadReport
 
 
@@ -431,7 +431,7 @@ def update_storage_template():
         if mode_res in ["m", "move"]:
             settings["mode"] = "move"
             break
-        print("Invalid choice, enter yes or no.")
+        print("Invalid choice, enter copy or move.")
 
 
     print()
@@ -587,6 +587,243 @@ def update_storage_template():
     generateDownloadReport(metadata_list, failed_list, already_downloaded_list)
 
 
+
+
+# Unused addition, may work on in the future
+def update_metadata():
+    new_log_level = max(config["logging"]["log_level"], 6)
+    console.update_log_level(new_log_level)
+    config["logging"]["log_level"] = new_log_level
+
+    settings = {
+        "folder": "",
+        "mode": "add",
+        "genre": False,
+        "synced_lyrics": True,
+        "plain_lyrics": False,
+    }
+
+    print()
+    print(" ============================= SomeDL - Update Metadata ============================= ")
+    print()
+    print(" Utility to update or redownload missing metadata. Currently only supports updating lyrics")
+    print()
+    print(" ATTENTION: I've done little testing with this utility, please test it on a small amount of disposable files first!!")
+    print(" ATTENTION: The settings in your config file must reflect the update that you want to make")
+    print("            e.g. if you want to add or update synced lyrics, but have disabled synced lyrics in the config, this won't work.")
+    print(" If you want you can share your feedback on this tool (positive or negative) on: https://github.com/ChemistryGull/SomeDL/discussions")
+    print()
+    # print(" This tool moves/copies your files into a new folder with your prefered storage template.")
+    # print(" You can temporary rename your music library with the old folder template.")
+    print()
+
+    print(" 1/3 | Source folder")
+    print("     | Your old music library folder, or the folder containing the files you want to sort into your library")
+
+    settings = {}
+
+    while True:
+        settings["folder"] = Path(input("     |  Path > "))
+        if settings["folder"].exists():
+            break
+        print("Folder does not exist!")
+
+    print()
+
+    print(" 2/3 | Mode")
+    print("     | Add - Only add missing data")
+    print("     | Update - Update all data, even if already present")
+
+    while True:
+        mode_res = input("     |  [add/update] > ").lower()
+        if mode_res in ["a", "add"]:
+            settings["mode"] = "add"
+            break
+        if mode_res in ["u", "update"]:
+            settings["mode"] = "update"
+            break
+        print("Invalid choice, enter add or update.")
+
+    print()
+    
+    print(" 3/3 | What to update")
+    print("     | ")
+    print("     | 1) Plain Lyrics")
+
+    while True:
+        mode_res = input("     |  [y/n] > ").lower()
+        if mode_res in ["y", "yes"]:
+            settings["plain_lyrics"] = True
+            break
+        if mode_res in ["n", "no"]:
+            settings["plain_lyrics"] = False
+            break
+        print("Invalid choice, enter yes or no.")
+
+    print("     | ")
+    print("     | 2) Synced Lyrics")
+
+    while True:
+        mode_res = input("     |  [y/n] > ").lower()
+        if mode_res in ["y", "yes"]:
+            settings["synced_lyrics"] = True
+            break
+        if mode_res in ["n", "no"]:
+            settings["synced_lyrics"] = False
+            break
+        print("Invalid choice, enter yes or no.")
+
+
+    print()
+    print("Settings chosen:")
+    print(json.dumps(settings, indent=4, default=str))
+    print()
+
+    print("Start process?")
+    start = input(" [Y/n] > ")
+    if start in ["n", "no"]:
+        print("CANCEL")
+        exit()
+
+
+    folder = Path(settings["folder"])
+
+
+    # --- music file extensions
+    music_exts = {".mp3", ".flac", ".ogg", ".m4a", ".opus"}
+    
+
+    
+
+    # === Precheck if config is right ===
+
+    if (settings["synced_lyrics"] or settings["plain_lyrics"]) and not config["metadata"]["lyrics"]:
+        console.warning('You need to enable "lyrics" in the configs to update lyrics')
+        return
+
+    if settings["synced_lyrics"] and not config["metadata"]["lyrics_type"] in ["synced", "both", "synced_if_available"]:
+        console.warning('You need to set "lyrics_type" to "synced", "both" or "synced_if_available" in the config file if you want to update synchronized lyrics')
+        return
+    
+    if settings["plain_lyrics"] and not config["metadata"]["lyrics_type"] in ["plain", "both"]:
+        console.warning('You need to set "lyrics_type" to ""plain" or "both" in the config file if you want to update plain lyrics')
+        return
+
+
+    cache_file = folder / "somedl_new_template_cache"
+    if cache_file.exists():
+        with cache_file.open("r", encoding="utf-8") as f:
+            cache_list = [line.rstrip("\n") for line in f]
+    else:
+        cache_list = []
+
+
+
+
+    index = 0
+    for path in folder.rglob("*"):
+        index += 1
+        try:
+
+            print()
+            print(f'--- File Nr. {index} -------------------------------------------------------')
+            print(f'-> {path.name}')
+
+
+            if not path.is_file():
+                console.info(f"Folder, not a file: {path}")
+                with open(cache_file, "a", encoding="utf-8") as f:
+                    f.write(f'{path}\n')
+                continue
+
+            if str(path) in cache_list:
+                console.info(f"File has already been imported (cache file)")
+                continue
+
+            file_extention = path.suffix.lower()
+            if file_extention not in music_exts:
+                console.info(f"Not a music file: {path}")
+                with open(cache_file, "a", encoding="utf-8") as f:
+                    f.write(f'{path}\n')
+                continue
+
+
+
+            data = get_audio_metadata_for_update(str(path))
+            
+            if data.get("source"):
+                parsed_url = urlparse(data.get("source"))
+                url_queries = parse_qs(parsed_url.query)
+                vid_id = url_queries.get("v", [None])[0]
+            else:
+                console.error("File does not contain source tag. It was likely not downloaded using SomeDL, use 'somedl import' instead.")
+                continue
+
+
+
+            fetched_lyrics_already = False
+
+            data_to_update = {
+                "synced_lyrics": None,
+                "plain_lyrics": None,
+                "genre": None,
+                "mb_artist_id": None
+            }
+
+            if settings["synced_lyrics"]:
+
+                if settings["mode"] == "update" or (settings["mode"] == "add" and not data.get("lyrics_synced")):
+                    console.info("Looking for synced lyrics")
+                    result = metadata_get_lyrics(artist_name = data.get("artist"), song_title= data.get("title"), duration = data.get("duration"), song_id = vid_id)
+                    fetched_lyrics_already = True
+
+                    data_to_update["synced_lyrics"] = result.get("lyrics_synced")
+
+                else:
+                    console.info("[cyan]Synced lyrics already present[/]")
+
+            if settings["plain_lyrics"]:
+                if settings["mode"] == "update" or (settings["mode"] == "add" and not data.get("lyrics_unsynced")):
+                    console.info("Looking for plain lyrics")
+
+                    if not fetched_lyrics_already:
+                        result = metadata_get_lyrics(artist_name = data.get("artist"), song_title= data.get("title"), duration = data.get("duration"), song_id = vid_id)
+
+
+                    data_to_update["plain_lyrics"] = result.get("lyrics_plain")
+                else:
+                    console.info("[cyan]Plain lyrics already present[/]")
+            # if settings["genre"]:
+            #     if settings["mode"] == "update" or (settings["mode"] == "add" and not data.get("genre")):
+            #         console.info("Looking for genre on musicbrainz")
+
+            something_to_update = False
+
+            if data_to_update["synced_lyrics"]:
+                console.info("[green]Updating synced lyrics[/]")
+                something_to_update = True
+                # print(data_to_update["synced_lyrics"])
+            
+            if data_to_update["plain_lyrics"]:
+                console.info("[green]Updating plain lyrics[/]")
+                something_to_update = True
+                # print(data_to_update["plain_lyrics"])
+
+            if something_to_update:
+                update_metadata_mutagen(path, synced_lyrics = data_to_update["synced_lyrics"], plain_lyrics = data_to_update["plain_lyrics"])
+            else:
+                console.info("[yellow]Nothing to update or no data found[/]")
+
+
+            with open(cache_file, "a", encoding="utf-8") as f:
+                f.write(f'{path}\n')
+        except Exception as e:
+            console.error("Critical error while processing this file: ")
+            console.error(e)
+
+    print()
+    print("Finished. somedl update-metadata does not yet support download report")
+    #generateDownloadReport(metadata_list, failed_list, already_downloaded_list)
 
 
 # printj(get_audio_metadata("/home/chemgull/Documents/Coding/Python/SomeDL/downloads/downloads/Delain/2020 - Apocalypse & Chill/Creatures.flac"))

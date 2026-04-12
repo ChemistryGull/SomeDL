@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 import SomeDL.utils.console as console
-from SomeDL.utils.config import config, generate_config, change_configs, CONFIG_PATH, check_if_config_exists
+from SomeDL.utils.config import config, generate_config, change_configs, CONFIG_PATH, check_if_config_exists, generate_new_sync_file
 from SomeDL.utils.version import VERSION, check_latest_version
 from SomeDL.utils.utils import read_archive_file
 
@@ -18,8 +18,10 @@ Download songs from YouTube by query, multiple queries, or playlist link.
  - Different types of URLs and queries can be mixed.
  - For advanced configuration, use the config file (somedl --generate-config)
  - Special utilities (in beta):
- - somedl import        Import songs downloaded with other tools, or update the metadata of your existing library.
- - somedl new-template  Move or copy your existing library to a new output template""")
+ - somedl import           Import songs downloaded with other tools, or update the metadata of your existing library.
+ - somedl new-template     Move or copy your existing library to a new output template
+ - somedl update-metadata  Add lyrics to already downloaded songs (Beta!)
+ - somedl sync             Sync a youtube playlist based on a sync file""")
 
 
     # === Main Parser ===
@@ -45,6 +47,12 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         "--show-config",
         action="store_true",
         help=f'Show the current configurations.'
+    )
+    parser.add_argument(
+        "--new-sync-file",
+        type=str,
+        metavar="FILENAME",
+        help=f'Generate new sync file template.'
     )
 
 
@@ -282,6 +290,11 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         config["download"]["include_singles"] = True
     if args.include_other_artists:
         config["download"]["include_other_artists"] = True
+
+
+    if args.new_sync_file:
+        generate_new_sync_file(args.new_sync_file)
+        return False
 
 
     #print(args.format)

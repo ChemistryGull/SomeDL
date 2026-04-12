@@ -2,6 +2,7 @@
 This module manages the user configs
 """
 import os
+import json
 import platform
 import tomlkit
 from pathlib import Path
@@ -50,6 +51,7 @@ default_config = {
         "download_archive": ("", str, None),
         "include_singles": (False, bool, None),
         "include_other_artists": (False, bool, None),
+        "sync_files": ([], list, None),
     },
     "api": {
         "deezer": (True, bool, None),
@@ -242,3 +244,118 @@ config = load_and_verify_config()
 if not config["logging"]["config_version"] == 0:
     # --- If version is 0, no confing has been found. keep it that way.
     config = check_config_updates(config)
+
+
+# === sync files ===
+def generate_new_sync_file(name):
+    SYNC_FILE_PATH = Path(CONFIG_PATH).with_name(f"{name}_sync.json")
+
+    if SYNC_FILE_PATH.is_file():
+        console.warning("A sync file with this name already exists! Choose another name.")
+        console.warning(f'-> {SYNC_FILE_PATH}')
+        return
+
+    print(f'Generating new sync file at {SYNC_FILE_PATH}')
+    print(f'You can move that file everywhere you want.')
+    print(f'To activate the sync file, follow the following steps:')
+    print()
+    print(f' 1) | Add the full filepath to the \"sync_files\" list in the config file')
+    print(f'    | Your config file is located at:')
+    print(f'    | {CONFIG_PATH}')
+    print()
+    print(f' 2) | Add the playlists URLs in the sync file. Each config file can contain as many URLs as you wish.')
+    print()
+    print(f' 3) | (Optional) Change other settings.')
+    print(f'    | All settings defined in the somedl_config.toml can be overwritten with the values set in the sync file.')
+    print(f'    | output and output_dir are predefined, you can remove those or add other ones, e.g format etc.')
+    print(f'    | The file is in the .json format, adhere to its syntax. SomeDL will return an error if the syntax is not valid.')
+    print()
+    print(f' 4) | Use the sync file with "somedl sync {name}"')
+    print(f'    | ({name}_sync.json becomes {name})')
+    print(f'    | Be aware that you can only sync one sync file at a time.')
+    
+    content = {
+        "playlists": ["https://..."],
+        "output": config["download"]["output"],
+        "output_dir": config["download"]["output_dir"],
+    }
+
+    with open(SYNC_FILE_PATH, "w", encoding="utf-8") as f:
+        json.dump(content, f, indent=4)
+
+    
+def load_sync_files(sync_files):
+
+    sync_file = sync_files.pop(0)
+
+    if len(sync_files) > 0:
+        console.warning(f'You can only sync one sync file at a time. Sync {sync_files} individually. Continuing sync with \"{sync_file}\".')
+    else:
+        print(f'Syncing {sync_file}')
+
+    # === prepare known sync files ===
+    sync_files_list = []
+    for entry in config["download"]["sync_files"]:
+        item = {"path": Path(entry)}
+
+        item["name"] = item["path"].stem
+
+        if item["name"].endswith("_sync"):
+            item["name"] = item["name"][:-5]  # remove "_sync"
+
+        sync_files_list.append(item)
+
+    # === Get data for sync file ===
+
+    path = next((d for d in sync_files_list if d["name"] == sync_file), {}).get("path")
+
+    if not path:
+        console.error(f'No sync file "{sync_file}" defined!')
+        return
+
+    path = Path(path)
+
+    if not path.is_file():
+        console.error(f'No sync file found at: {str(path)}')
+        return
+
+    with open(path, "r", encoding="utf-8") as f:
+        sync_data = json.load(f)
+
+    playlists = sync_data.pop("playlists")
+
+    # === Override configs with the sync file configs ===
+    for config_item in sync_data:
+
+        config_group = ""
+
+        # === check if the item is a config option ===
+        if config_item in config["metadata"]:
+            config_group = "metadata"
+        elif config_item in config["download"]:
+            config_group = "download"
+        elif config_item in config["api"]:
+            config_group = "api"
+        elif config_item in config["logging"]:
+            config_group = "logging"
+        else:
+            console.error(f'Invalid sync file \"{sync_file}\": config item "{config_item}" is not defined')
+            return
+
+        default_val, expected_type, valid_values = default_config[config_group][config_item]
+        value = sync_data[config_item]
+
+        # == Check for item validity ===
+        if not isinstance(value, expected_type) or (expected_type == int and isinstance(value, bool)):
+            console.error(f'Invalid sync file \"{sync_file}\": config item "{config_item}": expected {expected_type.__name__}, got {type(value).__name__}')
+            return
+        elif valid_values is not None and value not in valid_values:
+            console.error(f'Invalid sync file \"{sync_file}\": config item "{config_item}": "{value}" not in {list(valid_values)}')
+            return
+
+        # === Set the new config value ===
+        config[config_group][config_item] = value
+
+    console.debug(f'Playlists: {playlists}')
+    return playlists
+

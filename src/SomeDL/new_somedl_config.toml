@@ -10,6 +10,8 @@
 # Want to revert to default configs? Regenerate config with somedl --generate-config. If config regeneration fails, try to delete this old config before trying again.
 # This config file is auto-updated when SomeDL is updated. Your settings will be preserverd, but any comments and restructuring done by you will be undone.
 #
+# I recommend editing this config file with an editor that supports syntax highlighting (e.g. Notepad++ for Windows users)
+#
 
 [metadata]
 
@@ -189,6 +191,20 @@ check_if_file_exists = true
 # Enter the path to a archive file (/path/to/archive.txt). The name and filetype of the archive do not matter.
 # Default = "" (Disabled)
 download_archive = ""
+
+# Sync files
+#
+# Enter the full filepaths of your sync files. 
+# ATTENTION: Each filename has to be unique, even when in different folders!!
+# You can move the syncfiles everywhere on your filesystem as long as the filepath points to that location.
+# e.g.: 
+# sync_files = [
+#     "/path/to/file/personal_playlist_sync.json",
+#     "/path/to/file/concert2026_sync.json"
+# ]
+# For Windows users: use forward slashes!
+# Default = []
+sync_files = []
 
 
 [api]

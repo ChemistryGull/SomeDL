@@ -1,7 +1,7 @@
 import time
 import queue
 
-from SomeDL.utils.config import config
+from SomeDL.utils.config import config, load_sync_files
 import SomeDL.utils.console as console
 from SomeDL.utils.version import VERSION
 from SomeDL.core.input_parser import generateSongList
@@ -9,7 +9,7 @@ from SomeDL.core.metadata_helper import fetch_albums
 from SomeDL.core.cli_parser import parseCliArgs
 from SomeDL.core.download_report import generateDownloadReport
 from SomeDL.core.processor import process_song_list_concurrent
-from SomeDL.core.extra import import_songs, update_storage_template
+from SomeDL.core.extra import import_songs, update_storage_template, update_metadata
 
 
 from SomeDL.utils.dev_mode import run_with_data_storage
@@ -33,11 +33,20 @@ def main():
     if input_args[0] == "new-template":
         update_storage_template()
         return
+    
+    if input_args[0] == "update-metadata":
+        update_metadata()
+        return
 
     if input_args[0] == "download":
         input_args.pop(0) # --- For when you mistakingly enter a unneeded "download" option
 
-    
+    if input_args[0] == "sync":
+        input_args.pop(0)
+        input_args = load_sync_files(input_args)
+        if not input_args:
+            return
+
 
     # === Fetch albums if needed ===
     songs_list = generateSongList(input_args)

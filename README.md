@@ -119,6 +119,27 @@ somedl --generate-config
 ```
 Then edit the `somedl_config.toml` file on the path it prints out. Inside this configuration file, there are comments that explain each setting.
 
+### How do i use sync files?
+SomeDL has this feature to easily sync different playlists, each with their own configurations (e.g. Output directory, file format, etc...). Lets say you have a concert playlist and you do not want to download the songs in it to your main library. Thats where sync files come in handy. A sync file is a json file that contains a list of playlists you want to download as well as configurations that override the ones in the config file. For example if you want your concert playlists to be downloaded as opus fiels to a different folder, add the "folder" and "output.dir" entries.
+
+To create a new sync file, run:
+
+```
+somedl sync --new-sync-file <name for sync file>
+```
+
+It is stored in the same directory as your config file. You can move it everywhere you want. To activate the new sync file, follow these steps:
+
+1. Add the full filepath of your sync file to the "sync_files" list in the config file.
+2. Add the playlists URLs in the sync file. Each config file can contain as many URLs as you wish.
+3. (Optional) Change other settings.
+All settings defined in the somedl_config.toml can be overwritten with the values set in the sync file. output and output_dir are predefined, you can remove those or add other ones, e.g format etc. The file is in the .json format, adhere to its syntax. SomeDL will return an error if the syntax is not valid.
+4. Use the sync file with `somedl sync <sync target name>`
+(e.g. `myPlaylist_sync.json` becomes `myPlaylist`)
+Be aware that you can only sync one sync file at a time!
+
+SomeDL sync does not delete files from your library if it is deleted from the playlist due to the potential for data loss. If thats still a feature that you cannot live without, please let me know in an feature request issue or discussion.
+
 ### How can i avoid redownloading files when removing them from the download folder?
 You can use the download archive for this. Define a download archive file with `--downlaod archive /path/to/archive.txt` or by changing the `download_archive` config. The name and filetype of the archive do not matter. When such a file is defined, all video IDs of successfull downloads will be added into that download archive and will be skipped on any future download attempts.
 
@@ -142,6 +163,14 @@ Then you will have to choose the mode of metadata detection. SomeDL has to figur
 Choose the mode that fits best for your usecase. Do you have many songs downloaded with yt-dlp and still have the 11-digit Video ID [xI91NneSY5Y]? Type yes for option A. Do all your files follow a "Artist - Song" file naming scheme? Type yes for option B. Do you know your files have valid metadata (only Artist name and Song name are needed)? Choose option C. You can also combine options, like A and C or A and B. You cannot combine B with C!
 
 After that, you can start with the import. It is best to first test the import on a smaller folder.
+
+### How can I update only specific metadata for my already downloaded songs
+If you want to update synced or plain lyrics in your library, you can use `somedl update-metadata`. There are two modes, a "add" mode to only add missing data, and a "update" mode to update metadata even if its already present. A few things to consider:
+
+- So far, only synced and plain lyrics can be updated with this tool.
+- I've done little testing with this utility, please test it on a small amount of disposable files before using on your whole library!
+- The settings in your config file must reflect the update that you want to make
+e.g. if you want to add or update synced lyrics, but have disabled synced lyrics in the config, this won't work.
 
 
 

@@ -465,6 +465,232 @@ def get_audio_metadata(filepath: str | Path) -> dict:
 
 
 
+def get_audio_metadata_for_update(filepath: str | Path) -> dict:
+    path = Path(filepath)
+    ext  = path.suffix.lower()
+    result = {
+        "artist":         None,
+        "title":          None,
+        "album":          None,
+        "album_artist":   None,
+        "year":           None,
+        "track_pos":      None,
+        "track_count":    None,
+        "source":         None,
+        "genre":          None,
+        "copyright":      None,
+        "isrc":           None,
+        "lyrics_unsynced": None,
+        "lyrics_synced":   None,
+        "duration":   None,
+    }
+
+    if ext == ".mp3":
+        audio = MP3(path)
+        tags  = audio.tags
+        # if tags:
+        #     for key, val in tags.items():
+        #         print(f"{key:8}  {val}")
+        if tags:
+            result["artist"]       = first_artist(str(tags["TPE1"])) if "TPE1" in tags else None
+            result["title"]        = str(tags["TIT2"])  if "TIT2"  in tags else None
+            result["album"]        = str(tags["TALB"])  if "TALB"  in tags else None
+            result["album_artist"] = str(tags["TPE2"])  if "TPE2"  in tags else None
+            result["year"]         = str(tags["TDRC"])  if "TDRC"  in tags else None
+            result["source"]       = str(tags["WOAS"])  if "WOAS"  in tags else None
+            result["genre"]        = str(tags["TCON"])  if "TCON"  in tags else None
+            result["copyright"]    = str(tags["TCOP"])  if "TCOP"  in tags else None
+            result["isrc"]         = str(tags["TSRC"])  if "TSRC"  in tags else None
+            result["duration"]     = round(audio.info.length)
+            if "TRCK" in tags:
+                result["track_pos"], result["track_count"] = parse_track(str(tags["TRCK"]))
+
+
+            # Unsynced lyrics: USLT frames, keyed as "USLT::<lang>" or "USLT:desc:lang"
+            # Grab the first USLT frame regardless of description/language
+            uslt_key = next((k for k in tags if k.startswith("USLT")), None)
+            if uslt_key:
+                result["lyrics_unsynced"] = tags[uslt_key].text
+
+            # Synced lyrics: SYLT frames; returns list of (text, timestamp_ms) tuples
+            sylt_key = next((k for k in tags if k.startswith("SYLT")), None)
+            if sylt_key:
+                result["lyrics_synced"] = tags[sylt_key].text  # list of (str, int) tuples
+
+
+
+    elif ext == ".m4a":
+        audio = MP4(path)
+        tags  = audio.tags or {}
+        raw_artist = str(tags["\xa9ART"][0]) if "\xa9ART" in tags else None
+        result["artist"]       = first_artist(raw_artist)
+        result["title"]        = str(tags["\xa9nam"][0])  if "\xa9nam"  in tags else None
+        result["album"]        = str(tags["\xa9alb"][0])  if "\xa9alb"  in tags else None
+        result["album_artist"] = str(tags["aART"][0])     if "aART"     in tags else None
+        result["year"]         = str(tags["\xa9day"][0])  if "\xa9day"  in tags else None
+        result["genre"]        = str(tags["\xa9gen"][0])  if "\xa9gen"  in tags else None
+        result["copyright"]    = str(tags["cprt"][0])     if "cprt"     in tags else None
+        result["duration"]     = round(audio.info.length)
+        if "trkn" in tags:
+            trk = tags["trkn"][0]           # tuple: (pos, count)
+            result["track_pos"]   = trk[0] or None
+            result["track_count"] = trk[1] or None
+        custom = tags.get("----:com.apple.iTunes:source")
+        if custom:
+            result["source"] = custom[0].decode("utf-8", errors="replace")
+
+        isrc_raw = tags.get("----:com.apple.iTunes:ISRC")
+        if isrc_raw:
+            result["isrc"] = isrc_raw[0].decode("utf-8", errors="replace")
+
+        if "\xa9lyr" in tags:
+            result["lyrics_unsynced"] = str(tags["\xa9lyr"][0])
+
+        sylt_raw = tags.get("----:com.apple.iTunes:SYNCEDLYRICS")
+        if sylt_raw:
+            result["lyrics_synced"] = sylt_raw[0].decode("utf-8", errors="replace")
+
+
+    elif ext in (".ogg", ".opus", ".flac"):
+        audio = OggOpus(path) if ext == ".opus" else (FLAC(path) if ext == ".flac" else OggVorbis(path))
+        result["artist"]       = first_artist( audio.get("artist",       [None])[0])
+        result["title"]        =               audio.get("title",        [None])[0]
+        result["album"]        =               audio.get("album",        [None])[0]
+        result["album_artist"] =               audio.get("albumartist",  [None])[0]
+        result["year"]         =               audio.get("date",         [None])[0]
+        result["source"]       =               audio.get("source",       [None])[0]
+        result["track_pos"]    =               audio.get("tracknumber",  [None])[0]
+        result["track_count"]  =               audio.get("tracktotal",  [None])[0]
+        result["duration"]     =               round(audio.info.length)
+        result["lyrics_unsynced"] =            audio.get("lyrics", [None])[0]
+        result["lyrics_synced"] =              audio.get("syncedlyrics", [None])[0]
+    
+
+    else:
+        raise ValueError(f"Unsupported format: {ext}")
+    # console.printj(result)
+    return result
+
+
+
+
+# === Update metadata ===
+
+def update_metadata_mutagen(path, genre = None, mb_artist_id = None, synced_lyrics = None, plain_lyrics = None):
+    
+ 
+    # === Add .lrc file if wanted ===
+    if synced_lyrics and config["metadata"]["lrc_file"]:
+        console.info("Saving synced lyrics to .lrc file")
+        with open(Path(path).with_suffix(".lrc"), "w", encoding="utf-8") as f:
+            f.write(synced_lyrics)
+
+
+    try:
+        audio = File(path, easy=False)
+        if audio is None:
+            # Format not recognised at all
+            console.error(f'File "{path}" is not a in valid format')
+            return False
+        audio_type = audio.__class__.__name__.lower()
+    except Exception as e:
+        # Truncated files, permission errors, etc.
+        return False
+
+
+    console.debug(f'Audio type: {audio_type}')
+
+    match audio_type:
+        case "oggopus" | "oggvorbis" | "flac":
+
+            if genre:
+                audio["genre"] = [genre]
+            if mb_artist_id:
+                audio['musicbrainz_artistid'] = [mb_artist_id]
+            
+            if config["metadata"]["lyrics"]:
+                if synced_lyrics and config["metadata"]["synced_lyrics_metadata"] and config["metadata"]["lyrics_type"] in ["synced", "both", "synced_if_available"]:
+                    audio['syncedlyrics'] = synced_lyrics
+                if plain_lyrics and (config["metadata"]["lyrics_type"] in ["plain", "both"] or (not synced_lyrics and config["metadata"]["lyrics_type"] == "synced_if_available")):
+                    audio['lyrics'] = plain_lyrics
+
+            audio.save()
+
+        case "mp4":
+            if genre:
+                audio["\xa9gen"] = [genre]
+            if mb_artist_id:
+                audio[f"----:com.apple.iTunes:musicbrainz_artistid"] = [MP4FreeForm(mb_artist_id.encode("utf-8"), AtomDataType.UTF8)]
+
+            if config["metadata"]["lyrics"]:
+                if synced_lyrics and config["metadata"]["synced_lyrics_metadata"] and config["metadata"]["lyrics_type"] in ["synced", "both", "synced_if_available"]:
+                    audio["----:com.apple.iTunes:SYNCEDLYRICS"] = [synced_lyrics.encode("utf-8")]
+                if plain_lyrics and (config["metadata"]["lyrics_type"] in ["plain", "both"] or (not synced_lyrics and config["metadata"]["lyrics_type"] == "synced_if_available")):
+                    audio["\xa9lyr"] = plain_lyrics
+
+            audio.save()
+
+
+        case "mp3":
+
+            try:
+                tag = EasyID3(path)
+            except:
+                tag = mutagen.File(path, easy=True)
+                tag.add_tags()
+
+            if genre:
+                tag['genre'] = genre
+            if mb_artist_id:
+                tag['musicbrainz_artistid'] =  mb_artist_id
+
+            tag.save(v2_version=config["download"]["id3_version"])
+
+            id3 = ID3(path)
+
+            if config["metadata"]["lyrics"]:
+
+                if synced_lyrics and config["metadata"]["synced_lyrics_metadata"] and config["metadata"]["lyrics_type"] in ["synced", "both", "synced_if_available"]:
+                    # print("starting to SYLT")
+                    id3.add(SYLT(
+                        encoding=3,
+                        lang = "XXX",
+                        desc = "",
+                        format = 2, # milliseconds
+                        type = 1, # lyrics
+                        text = conv_lrc_to_sylt(synced_lyrics)
+                    ))
+
+                    if config["metadata"]["lyrics_id3_synced_uslt_fallback"]:
+                        id3.add(USLT(
+                            encoding=3,
+                            lang = "XXX",
+                            desc = "",
+                            text = synced_lyrics
+                        ))
+
+
+                if plain_lyrics and (config["metadata"]["lyrics_type"] in ["plain", "both"] or (not synced_lyrics and config["metadata"]["lyrics_type"] == "synced_if_available")) and not config["metadata"]["lyrics_id3_synced_uslt_fallback"]:
+                    id3.add(USLT(
+                        encoding=3,
+                        lang = "XXX",
+                        desc = "",
+                        text = plain_lyrics
+                    ))
+            
+            id3.save(v2_version=config["download"]["id3_version"])
+
+
+            
+
+        case _:
+            console.error(f'Audio type "{audio_type}" is not supported. Proceeding without adding metadata')
+            return
+
+
+
+
+
 dummy_metadata = {
     "album_art": [
         {

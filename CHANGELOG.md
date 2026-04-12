@@ -4,13 +4,17 @@ https://keepachangelog.com/en/1.1.0/
 
 ## [1.3.0]
 
+Another large update with many small added features. I could never test each edgecase alone, so please let me know if you find any inconsistencies or bugs!
+
 ### Added
+- Add sync files feature. It lets you define a quick shortcut to download a list of playlists with their own configuration.
 - Add functionality to download all albums from an artist with a channel URL
 - Add fetch_album to the config.
 - Add `--no-album` flag to override the above config setting
 - Add download archive feature. Define a download archive file with `--downlaod archive /path/to/archive.txt` or by changing the `download_archive` config. When such a file is defined, all video IDs will be added into that download archive and will be skipped on any future download attempts. 
 - Add `--redownload` flag to download a song even if its either in a download archive or the file is already present. If the File is present, it will be overwritten.
 - Add `check_if_file_exists` config and corresponding `--skip-file-check` flag to skip checking if a file does already exist. Useful for when you want to have duplicates of the same songs as single & album versions (Having files with the same artist and song title is elsewise not possible, even if in another album)
+- Add `somedl update-metadata` functionality. So far it only supports updating or adding lyrics.
 
 ### Changed
 - In thread_fetch_metadata, switch from iterating over a list to a queue design, to make continous updates via the web-ui possible
