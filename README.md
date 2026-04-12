@@ -60,6 +60,7 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 ## Proposed Features
 - [x] Download archive (*New in v1.3.0!*)
 - [x] Downloading entire discographies with YouTube Music channel URLs (*New in v1.3.0!*)
+- [x] Sync file feature (*New in v1.3.0!*)
 - [ ] Web-UI (*Work in progress*)
 - [ ] Download songs based on concert setlists
 
