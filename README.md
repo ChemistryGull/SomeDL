@@ -84,7 +84,7 @@ pipx install somedl
 ```
 ## Requirements
 ### Python (REQUIRED)
-SomeDL is developed and tested on the newest version of Python (currently 3.14). Python 3.10 is required. Visit [How to install python](docs/how_to_install_python.md) for a short guide.
+SomeDL is developed and tested on the newest version of Python (currently 3.14). Python 3.10 or newer is required. Visit [How to install python](docs/how_to_install_python.md) for a short guide.
 
 ### FFmpeg (REQUIRED)
 SomeDL uses yt-dlp, which needs [ffmpeg](https://ffmpeg.org/) in order to convert the downloaded audio file to mp3. Visit [How to install ffmpeg](docs/how_to_install_ffmpeg.md) for a short guide.
@@ -104,13 +104,13 @@ After installing, you can create a configuration file with `somedl --generate-co
 In the config files you can edit the behaviour of SomeDL, like defining an output template, setting default output format & output folder and much more. Inside this config file, there are comments that explain each setting. (For Windows users it is recommended to read and edit the config file with an editor that has syntax highlighing, like Notepad++.).
 
 # How-To
-### Whats the way to get the best metadata?
+### How to get the most accurate metadata?
 If you want the most accurate metadata, especially album name, it is best practice to download songs with YouTube Muisc album URLs, or by using the `--fetch-album` flag. Downloading an entire album this way ensures that all songs in that album get the same album name, and the songs are not split between the regular version "extended editon" and "deluxe edition" variations.
 
-### How can i download an entire album with just a search query?
-You can use the `--fetch-album` flag. With this flag set, SomeDL downloads the entire album of every song in the download queue. You can also provide a YouTube Music URL to the album.
+### How can I download an entire album with just a search query?
+You can use the `--fetch-album` flag. With this flag, SomeDL downloads the entire album of every song in the download queue. (Alternatively you can also provide a YouTube Music URL to an album) 
 
-### How can i download all songs from an artist?
+### How can I download all songs from an artist?
 You can use the `--fetch-album` flag. With this flag set, SomeDL downloads the entire album of every song in the download queue. 
 
 ### How can I change configurations?
@@ -120,7 +120,7 @@ somedl --generate-config
 ```
 Then edit the `somedl_config.toml` file on the path it prints out. Inside this configuration file, there are comments that explain each setting.
 
-### How do i use sync files?
+### How do I use sync files?
 SomeDL has this feature to easily sync different playlists, each with their own configurations (e.g. Output directory, file format, etc...). Lets say you have a concert playlist and you do not want to download the songs in it to your main library. Thats where sync files come in handy. A sync file is a json file that contains a list of playlists you want to download as well as configurations that override the ones in the config file. For example if you want your concert playlists to be downloaded as opus fiels to a different folder, add the "folder" and "output.dir" entries.
 
 To create a new sync file, run:
@@ -141,15 +141,15 @@ Be aware that you can only sync one sync file at a time!
 
 SomeDL sync does not delete files from your library if it is deleted from the playlist due to the potential for data loss. If thats still a feature that you cannot live without, please let me know in an feature request issue or discussion.
 
-### How can i avoid redownloading files when removing them from the download folder?
+### How can I avoid redownloading files when removing them from the download folder?
 You can use the download archive for this. Define a download archive file with `--downlaod archive /path/to/archive.txt` or by changing the `download_archive` config. The name and filetype of the archive do not matter. When such a file is defined, all video IDs of successfull downloads will be added into that download archive and will be skipped on any future download attempts.
 
-If you want to download a song that has already been downloaded with the download_archive enabled, use the `--redownload` flag to download a song.
+If you want to download a song that has already been downloaded with download_archive enabled, use the `--redownload` flag to download a song.
 
-### How can i change the output template for already downloaded files?
+### How can Ichange the output template for already downloaded files?
 You can type `somedl new-template` into the terminal. It will ask you to provide the path to your files and the path to a new folder. You will also have to provide the new output template. You can choose between moving the files (less SSD writes) and copying files (safer in case something goes wrong). You can also merge different storage template in this way. 
 
-### How can i add metadata to already downloaded files?
+### How can I add metadata to already downloaded files?
 If you already have a library of songs downloaded with yt-dlp or other downloaders, you can use the `somedl import` utility. It will ask you to provide the path to your files and the path to a new folder, or your SomeDL library. You will also have to provide the new output template, and what import mode you want to choose. Import modes are:
 - copy: Oiginal files are left in place (Recommended unless you have a backup and know what you are doing)
 - move: original files are deleted after import
@@ -184,7 +184,7 @@ e.g. if you want to add or update synced lyrics, but have disabled synced lyrics
 - **Anything else**: Start a discussion in the [general](https://github.com/ChemistryGull/SomeDL/discussions/categories/general) category.
 
 ### Why should I use SomeDL over yt-dlp?
-yt-dlp has the ability to add metadata and thumbnails with the flags `--embed-metadata` and `--embed-thumbnail`. However, this data is incomplete and a often mess. Examples:
+yt-dlp has the ability to add metadata and thumbnails with the flags `--embed-metadata` and `--embed-thumbnail`. However, this data is incomplete and often a mess. Examples:
 - No genre data (it puts "Music" as the genre)
 - Embeds rectangular thumbnail instead of square cover art
 - Does not include Lyrics
@@ -192,11 +192,11 @@ yt-dlp has the ability to add metadata and thumbnails with the flags `--embed-me
 - Wrong date (Often uses upload date instead of release date of the song)
 - No track number
 
-yt-dlp is not a song downloader with complete metadata support (and does not claim to be). Thats why someDL uses multiple different sources to get the most accurate metadata possible.
+yt-dlp is not a song downloader with complete metadata support (and does not claim to be). Thats why SomeDL uses multiple different sources to get the most accurate metadata possible.
 
 ### Why is the wrong version of the song downloaded?
 
-Rarely a "radio version" or similar has more views than the original version, meaning it is the first result that comes up and therefore the song that gets downloaded by SomeDL. Possible ways to get the correct song:
+Rarely a "radio version" or similar has more views than the original version, meaning it is the first result that comes up and therefore the song that gets downloaded by SomeDL (Due to YouTubes internal search algorythm). Possible ways to get the correct song:
 - Add e.g. "Original" to your search query, for example "Nirvana - Smells like teen spirit original". Sometimes this results in the correct song being downloaded. 
 - Search for the song on youtube music and download by URL. (IMPORTANT: Always use the link of the original soundtrack! Do not use the music video version, this does not have the correct metadata and audio track, so SomeDL has to search youtube again by artist name and song title, resulting in the same issue)
 
