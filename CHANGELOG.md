@@ -1,8 +1,13 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
+## [1.3.1] - 14.04.2026
 
-## [1.3.0]
+### Fixed
+- Fix critical bug that prevents people from starting SomeDL when they do not have a config yet.
+
+
+## [1.3.0] - 12.04.2026
 
 Another large update with many small added features. I could never test each edgecase alone, so please let me know if you find any inconsistencies or bugs!
 

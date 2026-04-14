@@ -67,7 +67,7 @@ default_config = {
         "download_report": (2, int, None),
         "level": ("INFO", str, ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
         "log_level": (4, int, range(0, 8)),
-        "config_version": (4, int, None), # If this value is ever lost, reset it
+        "config_version": (4, int, None), # ALWAYS STAY AT 0!!!!!! If this value is ever lost, reset it.
     }
 }
 
@@ -241,8 +241,10 @@ def check_config_updates(preloaded_config):
 
 config = load_and_verify_config()
 
-if not config["logging"]["config_version"] == 0:
+# if not config["logging"]["config_version"] == 0:
     # --- If version is 0, no confing has been found. keep it that way.
+if check_if_config_exists():
+    # If file does not exist, there is no reason to do anything.
     config = check_config_updates(config)
 
 
