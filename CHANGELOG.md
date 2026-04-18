@@ -1,7 +1,7 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
-## [1.3.2] - 18.04.2026
+## [1.3.3] - 18.04.2026
 
 ### Added
 - Add cache for the ytmusicapi `get_album` call. This reduces the amount of YouTube Music requests and should improve download speeds by about 0.5 seconds for songs where the cache is utilized. This cache is per session only, nothing is stored on the users filesystem.
@@ -9,6 +9,7 @@ https://keepachangelog.com/en/1.1.0/
 
 ### Fixed
 - Fix bug where metadata fetching would fail when both youtube and lrclib return no results
+- Removed dev print statements from 1.3.2
 
 ## [1.3.1] - 14.04.2026
 

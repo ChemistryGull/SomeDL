@@ -18,11 +18,11 @@ class CachedYTMusic(YTMusic):
     def check_cache(self, ID):
         # === Check if in Cache ===
         if ID in self._cache:
-            print(f"--- [CACHE HIT] {ID}")
-            print(self._cache[ID]["artists"][0]["name"])
+            # print(f"--- [CACHE HIT] {ID}")
+            # print(self._cache[ID]["artists"][0]["name"])
             return self._cache[ID]
         else:
-            print("--- no cache")
+            # print("--- no cache")
             return None
 
     def add_to_cache(self, ID, data):
