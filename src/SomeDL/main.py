@@ -12,11 +12,11 @@ from SomeDL.core.processor import process_song_list_concurrent
 from SomeDL.core.extra import import_songs, update_storage_template, update_metadata
 
 
-from SomeDL.utils.dev_mode import run_with_data_storage
+# from SomeDL.utils.dev_mode import run_with_data_storage
 
 
 def main():
-    run_with_data_storage(0) # --- ONLY FOR DEBUG
+    # run_with_data_storage(0) # --- ONLY FOR DEBUG
     timer_main = time.time()
 
     input_args = parseCliArgs()

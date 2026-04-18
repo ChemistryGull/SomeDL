@@ -455,7 +455,7 @@ def metadata_get_genre_mbid(artist_name: str, album_artist: str, song_title: str
     mb_artist_name = mb_song_res.get("recordings", [{}])[0].get("artist-credit", [{}])[0].get("name", "")
     
     console.update(label, "musicbrainz", console.Status.ACTIVE, "Fetching data from MusicBrainz: Genre")
-    # time.sleep(1) # --- Music brainz allows only about 1 request per second. The sleep is not neccessary, but it reduces the retries for the api calls.
+    time.sleep(1) # --- Music brainz allows only about 1 request per second. The sleep is not neccessary, but it reduces the retries for the api calls.
 
     mb_artist = musicBrainzGetArtistByMBID(mb_artist_mbid, label)
 

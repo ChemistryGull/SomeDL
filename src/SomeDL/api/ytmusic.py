@@ -2,13 +2,69 @@ from ytmusicapi import YTMusic
 
 import SomeDL.utils.console as console
 
-yt = YTMusic()
+# yt = YTMusic()
 
-"""
-General info:
-yt.get_song(video_id) Provides insufficient metadata (No artist, only uploader. No album info)
 
-"""
+# General info:
+# yt.get_song(video_id) Provides insufficient metadata (No artist, only uploader. No album info)
+
+
+# === "wrapper" for ytmusicapi to cache get_album, as thats the only request that is very frequently redone (every time songs are from the same album)
+class CachedYTMusic(YTMusic):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._cache = {}
+
+    def check_cache(self, ID):
+        # === Check if in Cache ===
+        if ID in self._cache:
+            print(f"--- [CACHE HIT] {ID}")
+            print(self._cache[ID]["artists"][0]["name"])
+            return self._cache[ID]
+        else:
+            print("--- no cache")
+            return None
+
+    def add_to_cache(self, ID, data):
+        # === Add to cache and return data again ===
+        if len(self._cache) >= 100: # Number = Max size of cache
+            # remove oldest item
+            oldest_key = next(iter(self._cache))
+            # print("removing:")
+            # print(oldest_key)
+            # print(self._cache[oldest_key].get("title"))
+            del self._cache[oldest_key]
+        
+        
+        # console.printj(self._cache)
+
+        # --- remove unneccessary data
+        if data.get("related_recommendations"):
+            data.pop("related_recommendations")
+        if data.get("other_versions"):
+            data.pop("other_versions")
+        
+        if data.get("title"):
+            # print("--- Add to cache")
+            self._cache[ID] = data
+        
+        # print(len(self._cache))
+        return data
+
+    def get_album(self, browseId):
+        # --- Currently the only thing that can reasonably be cached, as its refetched for every item if they are not donwloaded as a album directly
+        result = self.check_cache(browseId)
+        
+        if result: 
+            return result
+        else:
+            return self.add_to_cache(browseId, super().get_album(browseId))
+
+
+
+yt = CachedYTMusic()
+
+
 
 
 
