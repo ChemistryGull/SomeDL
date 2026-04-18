@@ -16,7 +16,7 @@ from SomeDL.utils.dev_mode import run_with_data_storage
 
 
 def main():
-    # run_with_data_storage(0) # --- ONLY FOR DEBUG
+    run_with_data_storage(0) # --- ONLY FOR DEBUG
     timer_main = time.time()
 
     input_args = parseCliArgs()

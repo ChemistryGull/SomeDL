@@ -317,6 +317,9 @@ def metadata_get_lyrics(artist_name: str = None, song_title: str = None, duratio
 
 
     # === Return just for console logging ===
+    if lyrics == False:
+        return {} # --- Console has been updated from within already
+
     if lyrics.get("instrumental"):
         console.info("Lyrics: Song is instrumental (2)", label)
         console.update(label, "get_lyrics", console.Status.PART_SUCC)
@@ -368,6 +371,9 @@ def get_lyrics_from(source: str, artist_name: str = None, song_title: str = None
             return {}
         
         yt_lyrics = yt.get_lyrics(lyrics_id)
+
+        if not yt_lyrics:
+            return {}
 
         return {
             "lyrics_plain": yt_lyrics.get("lyrics")
@@ -449,7 +455,7 @@ def metadata_get_genre_mbid(artist_name: str, album_artist: str, song_title: str
     mb_artist_name = mb_song_res.get("recordings", [{}])[0].get("artist-credit", [{}])[0].get("name", "")
     
     console.update(label, "musicbrainz", console.Status.ACTIVE, "Fetching data from MusicBrainz: Genre")
-    time.sleep(1) # --- Music brainz allows only about 1 request per second. The sleep is not neccessary, but it reduces the retries for the api calls.
+    # time.sleep(1) # --- Music brainz allows only about 1 request per second. The sleep is not neccessary, but it reduces the retries for the api calls.
 
     mb_artist = musicBrainzGetArtistByMBID(mb_artist_mbid, label)
 

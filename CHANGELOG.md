@@ -1,6 +1,11 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
+## [1.3.2] - 18.04.2026
+
+### Fixed
+- Fix bug where metadata fetching would fail when both youtube and lrclib return no results
+
 ## [1.3.1] - 14.04.2026
 
 ### Fixed

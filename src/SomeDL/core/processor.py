@@ -1,6 +1,7 @@
 import json
 import time
 import re
+import traceback
 
 import threading
 import queue
@@ -126,6 +127,7 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
             except Exception as e:
                 console.error("A critical exception occured when fetching the metadata for this song! If retrying does not help, please notify the program maintainer at https://github.com/ChemistryGull/SomeDL. Error:", label)
                 console.error(e, label)
+                traceback.print_exc()
                 console.finish(label, console.Download_status.FAILED)
                 with console.thread_lock:
                     failed_list.append(item)
@@ -282,6 +284,7 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
             except Exception as e:
                 console.error("A critical exception occurred when trying to download song with yt-dlp! If retrying does not help, please notify the program maintainer at https://github.com/ChemistryGull/SomeDL. Error:", label)
                 console.error(e, label)
+                traceback.print_exc()
                 console.finish(label, console.Download_status.FAILED)
                 with console.thread_lock:
                     failed_list.append(metadata)
