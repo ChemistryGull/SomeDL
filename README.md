@@ -142,11 +142,11 @@ Be aware that you can only sync one sync file at a time!
 SomeDL sync does not delete files from your library if it is deleted from the playlist due to the potential for data loss. If thats still a feature that you cannot live without, please let me know in an feature request issue or discussion.
 
 ### How can I avoid redownloading files when removing them from the download folder?
-You can use the download archive for this. Define a download archive file with `--download archive /path/to/archive.txt` or by changing the `download_archive` config. The name and filetype of the archive do not matter. When such a file is defined, all video IDs of successfull downloads will be added into that download archive and will be skipped on any future download attempts.
+You can use the download archive for this. Define a download archive file with `--download-archive /path/to/archive.txt` or by changing the `download_archive` config. The name and filetype of the archive do not matter. When such a file is defined, all video IDs of successfull downloads will be added into that download archive and will be skipped on any future download attempts.
 
 If you want to download a song that has already been downloaded with download_archive enabled, use the `--redownload` flag to download a song.
 
-### How can Ichange the output template for already downloaded files?
+### How can I change the output template for already downloaded files?
 You can type `somedl new-template` into the terminal. It will ask you to provide the path to your files and the path to a new folder. You will also have to provide the new output template. You can choose between moving the files (less SSD writes) and copying files (safer in case something goes wrong). You can also merge different storage template in this way. 
 
 ### How can I add metadata to already downloaded files?
