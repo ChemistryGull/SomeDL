@@ -61,8 +61,11 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 - [x] Download archive (*New in v1.3.0!*)
 - [x] Downloading entire discographies with YouTube Music channel URLs (*New in v1.3.0!*)
 - [x] Sync file feature (*New in v1.3.0!*)
-- [ ] Web-UI (*Work in progress*)
-- [ ] Download songs based on concert setlists
+- [ ] Web-UI (*Work in progress, almost finished*)
+      - YouTube Music UI interface for song/artist/album search
+      - GUI settings
+      - GUI download status tracker
+- [ ] Download songs based on concert setlists, part of the new web UI (*pretty much finished, out soon*)
 
 # Installation
 This utility can be installed using pip. Also confirm that you meet all the installation [requirements](#requirements)!
