@@ -27,37 +27,58 @@ EasyID3.RegisterTextKey('comment', 'COMM')
 # def addMetadata(metadata: str, mp3_file: str):
 def addMetadata(metadata, path, label = None):
     
+    # === Download and add Cover Art ===
     console.update(label, "albumart", console.Status.ACTIVE, "Downloading album art")
+    if not config["metadata"]["cover_art_size"] == "none":
 
-    if not len(metadata.get("album_art", [])) == 0:
-        album_art_url = metadata.get("album_art", [{}])[-1].get("url")
-        console.debug(f'Album art size: {metadata.get("album_art", [{}])[-1].get("height")} x {metadata.get("album_art", [{}])[-1].get("width")}', label)
-    else:
-        album_art_url = None
+        if not len(metadata.get("album_art", [])) == 0:
+
+            if config["metadata"]["cover_art_size"] == "xs":
+                album_index = 0
+            elif config["metadata"]["cover_art_size"] == "s":
+                album_index = 1
+            elif config["metadata"]["cover_art_size"] == "m":
+                album_index = 2
+            elif config["metadata"]["cover_art_size"] == "l":
+                album_index = -1
+
+            if len(metadata.get("album_art", [{}])) <= album_index:
+                # --- If not the default 4 results get returned, and a index higher than available is selected, fall back to the largest image
+                album_index = -1
+
+            album_art_url = metadata.get("album_art", [{}])[album_index].get("url")
+            console.debug(f'Album art size: {metadata.get("album_art", [{}])[album_index].get("height")} x {metadata.get("album_art", [{}])[album_index].get("width")}', label)
+
+        else:
+            album_art_url = None
+        
+        if album_art_url:
+            console.debug("Downloading Album Artwork", label)
+            album_art_data = downloadAlbumArt(album_art_url)
+        else: 
+            album_art_data = None
+
+        if album_art_data:
+            console.info("Successfully downloaded album art", label)
+            console.update(label, "albumart", console.Status.SUCCESS)
+        else:
+            console.error("Could not find album art!", label)
+            console.update(label, "albumart", console.Status.FAILED)
+
+
+        # === Download cover art as .jpg if wanted ===
+        if config["metadata"]["cover_art_file"] and album_art_data:
+            jpg_path = Path(path).parent / "cover.jpg"
+            if not jpg_path.exists():
+                with open(jpg_path, "wb") as f:
+                    f.write(album_art_data)
     
-    if album_art_url:
-        console.debug("Downloading Album Artwork", label)
-        album_art_data = downloadAlbumArt(album_art_url)
-    else: 
+    else:
+        console.update(label, "albumart", console.Status.SKIPPED, "Downloading album art")
         album_art_data = None
 
-    if album_art_data:
-        console.info("Successfully downloaded album art", label)
-        console.update(label, "albumart", console.Status.SUCCESS)
-    else:
-        console.error("Could not find album art!", label)
-        console.update(label, "albumart", console.Status.FAILED)
 
     console.update(label, "addmetadata", console.Status.ACTIVE, "Adding metadata")
-
-
-    # === Download cover art as .jpg if wanted ===
-    if config["metadata"]["cover_art_file"] and album_art_data:
-        jpg_path = Path(path).parent / "cover.jpg"
-        if not jpg_path.exists():
-            with open(jpg_path, "wb") as f:
-                f.write(album_art_data)
-
 
     # === Add .lrc file if wanted ===
     if metadata.get("lyrics_synced") and config["metadata"]["lrc_file"]:

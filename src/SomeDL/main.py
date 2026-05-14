@@ -1,7 +1,7 @@
 import time
 import queue
 
-from SomeDL.utils.config import config, load_sync_files
+from SomeDL.utils.config import config, load_sync_files, list_sync_files, change_configs
 import SomeDL.utils.console as console
 from SomeDL.utils.version import VERSION
 from SomeDL.core.input_parser import generateSongList
@@ -43,22 +43,66 @@ def main():
 
     if input_args[0] == "sync":
         input_args.pop(0)
-        input_args = load_sync_files(input_args)
+        if not input_args:
+            input_args = list_sync_files()
+
         if not input_args:
             return
 
+        input_args = load_sync_files(input_args)
+
+        if not input_args:
+            return
+        
 
     # === Fetch albums if needed ===
     songs_list = generateSongList(input_args)
     failed_list_album = []
     if config["download"]["fetch_albums"]:
         songs_list, failed_list_album = fetch_albums(songs_list)
-    # console.printj(songs_list)
-    # return
+    
+    # === Slice the range out of the songs_list ===
+    if not config["download"]["range"] == []:
+        songs_list = songs_list[config["download"]["range"][0]:config["download"]["range"][1]:config["download"]["range"][2]]
+
     # === Convert songs_list to queue ===
     song_list_queue: queue.Queue = queue.Queue()
     for item in songs_list:
         song_list_queue.put(item)
+
+    # === Check amount of files to download ===
+    if song_list_queue.qsize() >= 300 and config["download"]["sleep"] == 0 and config["download"]["sleep_warn"]:
+        print(f'\033[33mWARNING - You are about to download more than 300 songs ({song_list_queue.qsize()}).\033[0m')
+        print(f'\033[33mFast downloading of a large number of songs may lead to your IP being blocked by YouTube.')
+        print(f'\033[33mMore info on the yt-dlp github: https://github.com/yt-dlp/yt-dlp/wiki/Extractors#common-youtube-errors\033[0m')
+        print()
+        print("\033[33mIt is recommended to use --sleep 5 or higher to slow down downloads.\033[0m")
+        print()
+        print("\033[33mPress enter to continue with a 5-10 seconds sleep timer\033[0m")
+        print('\033[33mEnter 1 to cancel\033[0m')
+        print('\033[33mEnter 2 continue without a sleep timer\033[0m')
+        print("\033[33mEnter 3 continue without a sleep timer and don't show this warning again (at your own risk)\033[0m")
+
+        while True:
+            inp = input("[~/1/2/3] > ").lower()
+            if inp == "1":
+                print("Cancelling download.")
+                return
+            if inp == "2":
+                print("Continuing without a sleep timer.")
+                break
+            if inp == "3":
+                print("Continuing without a sleep timer. Not showing this message again.")
+                change_configs([["download", "sleep_warn", False]])
+                break
+            if inp == "":
+                print("Continuing with a 5 second sleep timer.")
+                config["download"]["sleep"] = 5
+                config["download"]["number_downloaders"] = 1
+                break
+
+            print("Invalid choice, enter 1, 2, 3 or enter without input.")
+
 
     # === Main Process loop ===
     console.print_header(config["logging"]["log_level"], VERSION)

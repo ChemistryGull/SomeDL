@@ -30,6 +30,15 @@ ffmpeg_metadata =  false    # Default = false   | Set to true to keep the metada
 
 cover_art_file = false      # Default = false   | Set to true to download a cover.jpg file in the same folder as the song (only one cover is created per folder, seperation by album is recommended if you want to use this setting)
 
+# Cover art file resolution
+# Default = "l"
+# Options:
+#  "l"      Large        544x544    50-300 KB     Recommended for most users!
+#  "m"      Medium       226x226    30-60 KB
+#  "s"      Small        120x120    10-20 KB
+#  "xs"     Extra small  60x60      3-6 KB
+#  "none"   Do not add cover art to the music file
+cover_art_size = "l"
 
 # Lyrics:
 
@@ -55,7 +64,7 @@ lyrics_id3_synced_uslt_fallback = false
 
 # Set the lyrics source
 # Options:
-#  "lrclib"         Great free source for lyrics. Has synced lyrics for many songs
+#  "lrclib"         Great free source for lyrics. Has synced lyrics for many songs. Can be quite slow, if you experience slowdowns and don't need synced lyrics, switch to youtube.
 #  "youtube"        Youtube provides some lyris. Does not have synced lyrics.
 #  "none"           Only none as fallback source if you dont want to wait the extra second for the other service to look for lyrics
 #                   none should also be used when only wanting synced lyrics
@@ -155,6 +164,20 @@ number_downloaders = 2
 # Setting this number to something higher than the number of downloaders will likely not improve download speed.
 queue_size = 2
 
+
+# Sleep timer between downloads in seconds
+# Default = 0 (deactivated)
+#
+# Fast downloading of a large number of songs may lead to your IP being blocked by YouTube.
+# To avoid that, set a sleep timer when downloading a large amount of songs at once.
+# (the exact limit is unknown, it is recommended when downloading over 100 and highly recommended when downloading over 300 songs at once).
+# More info: https://github.com/yt-dlp/yt-dlp/wiki/Extractors#common-youtube-errors
+# Setting sleep to a number higher than 0 lowers the number of downloaders to 1.
+# The sleep timer is randomized, e.g. for sleep = 5 the timer will be 5-9 seconds long.
+# You can also set a temporary sleep timer with the --sleep flag.
+sleep = 0
+sleep_warn = true
+
 # Path to a cookies file, or browser to pull cookies from.
 # Needed for age-restricted content.
 # See https://github.com/ChemistryGull/SomeDL for details.
@@ -253,4 +276,4 @@ log_level = 4
 download_report = 2
 
 # DO NOT CHANGE THE VALUE BELOW!
-config_version = 5
+config_version = 6

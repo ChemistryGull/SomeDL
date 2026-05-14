@@ -51,7 +51,7 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     parser.add_argument(
         "--new-sync-file",
         type=str,
-        metavar="FILENAME",
+        metavar="NAME",
         help=f'Generate new sync file template.'
     )
 
@@ -76,6 +76,18 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         type=str,
         metavar="PATH/TO/FOLDER",
         help=f'Select output folder. Default: {config["download"]["output_dir"]}'
+    )
+    download_group.add_argument(
+        "--sleep",
+        type=int,
+        metavar="SECONDS",
+        help=f'Set sleep timer between downloads. Use when downloading a large number of songs at once to avoid YouTube IP blocks.'
+    )
+    download_group.add_argument(
+        "--range",
+        type=str,
+        metavar="from:to:step",
+        help=f'Set range of download list to download. Visit https://python-reference.readthedocs.io/en/latest/docs/brackets/slicing.html for information on the syntax.'
     )
     download_group.add_argument(
         "-d", "--download-url-audio",
@@ -240,6 +252,20 @@ Download songs from YouTube by query, multiple queries, or playlist link.
     if args.output:
         config["download"]["output_dir"] = args.output
 
+    if args.sleep:
+        config["download"]["sleep"] = args.sleep
+    
+    if config["download"]["sleep"] > 0:
+        config["download"]["number_downloaders"] = 1
+    
+    if args.range:
+        start, end, step = (args.range.split(":") + ["", "", ""])[:3]
+
+        config["download"]["range"] = [
+            int(start) if start.strip() != "" else None, 
+            int(end) if end.strip() != "" else None, 
+            int(step) if step.strip() != "" else None, 
+        ]
 
 
     if args.generate_config:

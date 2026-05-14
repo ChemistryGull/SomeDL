@@ -171,10 +171,6 @@ def parseArtist(artist_id: str):
     else:
         console.debug("No \"more\" button, using initial fetched data.")
         artist_albums_result = artist_result.get("albums", {}).get("results", [])
-        # --- ytmusicapi returns the year value in the type key.
-        #     this is a bug, until that is fixed this is the workaround
-        for d in artist_albums_result:
-            d["year"] = d.pop("type")
 
 
     for album in artist_albums_result:
@@ -206,10 +202,6 @@ def parseArtist(artist_id: str):
         else:
             console.debug("No \"more\" button, using initial fetched data.")
             artist_singles_result = artist_result.get("singles", {}).get("results", [])
-            # --- ytmusicapi returns the year value in the type key.
-            #     this is a bug, until that is fixed this is the workaround
-            for d in artist_singles_result:
-                d["type"] = d.pop("year")
 
 
         for album in artist_singles_result:

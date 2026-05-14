@@ -2,6 +2,7 @@
 This module manages the user configs
 """
 import os
+import re
 import json
 import platform
 import tomlkit
@@ -10,7 +11,7 @@ from importlib.resources import files
 
 import SomeDL.utils.console as console
 
-CONFIG_VERSION = 5
+CONFIG_VERSION = 6
 
 default_config = {
     "metadata": {
@@ -23,6 +24,7 @@ default_config = {
         "artist_separator": ("; ", str, [";", "; ", " ;", " ; ", "/", "/ ", " /", " / "]),
         "ffmpeg_metadata": (False, bool, None),
         "cover_art_file": (False, bool, None),
+        "cover_art_size": ("l", str, ["l", "m", "s", "xs", "none"]),
         "lyrics_type": ("plain", str, ["synced", "plain", "both", "synced_if_available", "none"]),
         "synced_lyrics_metadata": (True, bool, None),
         "lrc_file": (False, bool, None),
@@ -38,6 +40,8 @@ default_config = {
         "output": ("{artist} - {song}", str, None),
         #"output": ("{artist}/{album}/{artist} - {song}", str, None),
         # "output": ("{artist}/{year} - {album}/{track_pos} - {song}", str, None),
+        "sleep": (0, int, None),
+        "sleep_warn": (True, bool, None),
         "disable_download": (False, bool, None),
         "strict_url_download": (False, bool, None), # Default False. True: Only uses search by query for metadata, the audio will be downloaded from the original URL regardless
         "always_search_by_query": (False, bool, None),
@@ -52,6 +56,7 @@ default_config = {
         "include_singles": (False, bool, None),
         "include_other_artists": (False, bool, None),
         "sync_files": ([], list, None),
+        "range": ([], list, None),
     },
     "api": {
         "deezer": (True, bool, None),
@@ -138,6 +143,14 @@ def load_and_verify_config():
         raise ValueError("Invalid config file!")
 
     # printj(config, False)
+
+    # === Special checks ===
+
+    if config["metadata"]["lyrics_source"] == "youtube" and config["metadata"]["lyrics_type"] in ["synced", "both", "synced_if_available"]:
+        print("\033[33mWARNING - Youtube does not provide synced lyrics. You have to change the lyrics provider to lrclib if you want synced lyrics.\033[0m")
+
+
+
     return config
 
 
@@ -361,3 +374,51 @@ def load_sync_files(sync_files):
     console.debug(f'Playlists: {playlists}')
     return playlists
 
+def list_sync_files():
+    print("Available sync files:")
+
+    index = 0
+    sync_files_list = []
+    print()
+    for entry in config["download"]["sync_files"]:
+        index += 1
+        item = {"path": Path(entry)}
+
+        item["name"] = item["path"].stem
+
+        if item["name"].endswith("_sync"):
+            item["name"] = item["name"][:-5]  # remove "_sync"
+
+        print(f'  {str(index).zfill(2)}: {item["name"]} - {item["path"]}')
+
+        sync_files_list.append(item)
+
+    if index == 0:
+        print("No sync files defined.")
+        print("Generate a new sync file with 'somedl --new-sync-file name'.")
+        return []
+    
+    print()
+
+    while True:
+        inp_str = input("Select sync file number > ")
+        if inp_str == "":
+            inp = 0
+            break
+
+        try:
+            inp = int(inp_str)
+        except ValueError:
+            print(f"Invalid input. Enter a number between 1 and {len(sync_files_list)}")
+            continue
+
+        if inp > len(sync_files_list):
+            print(f"Invalid input. Enter a number between 1 and {len(sync_files_list)}")
+            continue
+
+        break
+
+    if not inp:
+        return []
+
+    return [sync_files_list[inp - 1]["name"]]

@@ -123,6 +123,29 @@ somedl --generate-config
 ```
 Then edit the `somedl_config.toml` file on the path it prints out. Inside this configuration file, there are comments that explain each setting.
 
+### How can I exclude the cover art or change the cover art resolution?
+To not add the album art to the audio files, set `cover_art_size` to `none` in the configs. You can also choose a different resolution for the cover art, though the highest resolution is recommended for most users, since the cover art accounts for less than 10% of the total file size. The default coverart is already the largest resolution provided by youtube.
+
+### How can i slow the downloads down to prevent IP blocking?
+Fast downloading of a large number of songs may lead to your IP being blocked by YouTube. To prevent that, yt-dlp recommends using a sleep timer between downloads when downloading large numbers of files in a row. (the exact limit is unknown, it is recommended when downloading over 100 and highly recommended when downloading over 300 songs at once).
+
+To set the sleep timer, run your command with the `--sleep 10` flag, with the number being the sleep time in seconds. You can also permanently enable a sleep timer in the config file (`sleep` entry). At least 5 seconds is recommended. Setting sleep to a number higher than 0 lowers the number of downloaders to 1 as well. The sleep timer is randomized, e.g. for sleep = 5 the timer will be 5-9 seconds long.
+
+It is also possible to spit up large playlists into chunks with the `--range` flag (e.g `--range :100` to only download the first 100 songs)
+
+More info on the [yt-dlp github](https://github.com/yt-dlp/yt-dlp/wiki/Extractors#common-youtube-errors).
+
+
+### How can i download only a part of a playlist/album?
+You can use the `--range` flag for that. This flag lets you use the python slicing syntax to select the part of the list of songs you want to download (start:end:step). Examples:
+
+- `--range :3`   Downloads first 3 songs
+- `--range -3:`  Downloads last 3 songs
+- `--range 3:`   Downloads everything except the first 3 songs
+- `--range :-3`  Downloads everything except the last 3 songs
+- `--range 2:6`  Downloads song 3 to 6
+- `--range ::2`  Downloads every second song
+
 ### How do I use sync files?
 SomeDL has this feature to easily sync different playlists, each with their own configurations (e.g. Output directory, file format, etc...). Lets say you have a concert playlist and you do not want to download the songs in it to your main library. Thats where sync files come in handy. A sync file is a json file that contains a list of playlists you want to download as well as configurations that override the ones in the config file. For example if you want your concert playlists to be downloaded as opus fiels to a different folder, add the "folder" and "output.dir" entries.
 
@@ -204,6 +227,9 @@ Rarely a "radio version" or similar has more views than the original version, me
 - Search for the song on youtube music and download by URL. (IMPORTANT: Always use the link of the original soundtrack! Do not use the music video version, this does not have the correct metadata and audio track, so SomeDL has to search youtube again by artist name and song title, resulting in the same issue)
 
 If you do not not use a non-music-video YouTube Music URL, you are always at the mercy of the youtube search algorythm. But this search is accurate over 95% of the time.
+
+### Why is the download pausing at "Fetching lyrics from lrclib" so long?
+Lrclib is a free crowdsourced lyrics API that is widely used. Especially in peak hours there might be slowdowns. If you are experiencing these slowdowns and do not need synced lyrics, switch to youtube as the lyrics provider in the SomeDL config file.
 
 ### Why is the wrong genre/no genre set? 
 SomeDL gets the genre info from MusicBrainz (Neither YouTube nor Genius provide genre info via their APIs). The genre data on MusicBrainz is crowdsourced. Therefore, some artists may not have a genre set, some may have the wrong genre set. Everyone can create an account on MusicBrainz and vote for the genre (called „tags“). You are invited to do so and help make the database more complete. Please do so responsibly.

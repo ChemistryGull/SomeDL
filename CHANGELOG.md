@@ -1,6 +1,18 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
+## [1.4.0] - 14.05.2026
+
+### Added
+- Add `album_cover_size` option to the config file to set the cover art resolution. Default is large (544x544). It is now also possible to add no cover art by setting that option to `"none"`
+- Add sleep timer, as a flag as well as config option. This adds a sleep of the value inserted + 0-5 seconds as a sleep between each yt-dlp download to avoid IP blocking.
+- Add `--range` flag to only download a certain section of the input list. Follows the python slicing syntax (:3, 1:4:2, ::1, 1::2, etc...).
+- Add sync file selection prompt when entering `somedl sync` without a sync file name.
+
+### Fixed
+- Change artist downloading mechanism to incorporate newest changes in the ytmusicapi (https://github.com/sigma67/ytmusicapi/issues/899)
+
+
 ## [1.3.3] - 18.04.2026
 
 ### Added
