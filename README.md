@@ -222,12 +222,12 @@ e.g. if you want to add or update synced lyrics, but have disabled synced lyrics
 yt-dlp has the ability to add metadata and thumbnails with the flags `--embed-metadata` and `--embed-thumbnail`. However, this data is incomplete and often a mess. Examples:
 - No genre data (it puts "Music" as the genre)
 - Embeds rectangular thumbnail instead of square cover art
-- Does not include Lyrics
+- Does not include lyrics
 - Often treats songs as singles, even though they are part of an album (leading to a wrong album name and a wrong thumbnail)
 - Wrong date (Often uses upload date instead of release date of the song)
 - No track number
 
-yt-dlp is not a song downloader with complete metadata support (and does not claim to be). Thats why SomeDL uses multiple different sources to get the most accurate metadata possible.
+yt-dlp is not a song downloader with complete metadata support (and does not claim to be). Thats why SomeDL uses multiple different sources to get the most accurate metadata possible. yt-dlp is still the backbone of SomeDL and it wouldn't exist without it.
 
 ### Why is the wrong version of the song downloaded?
 
