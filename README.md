@@ -50,7 +50,7 @@ Run `somedl web` in your terminal, a browser window with the SomeDL WebUI will o
 - Download via search query, YouTube URL, YouTube Playlist URL and even entire discographies with YouTube Music channel URLs.
 - Simple installation with pip (And [quick guides](https://github.com/ChemistryGull/SomeDL#requirements) for the installation of the dependencies).
 - No login or API tokens required.
-- Complete metadata - way better than just relying on yt-dlp (see [here](#why-should-i-use-somedl-over-yt-dlp) why).
+- Complete metadata - way better than just relying on yt-dlp (see [here](https://github.com/ChemistryGull/SomeDL#why-should-i-use-somedl-over-yt-dlp) why).
 ``` 
 Song title | Artist name | Album name | High quality cover art (544x544) | Release date (Year) | Track number | Genre | Lyrics sycned and plain | Copyright/Label | ISRC | MusicBrainz artist ID (MBID)
 ```
@@ -77,7 +77,7 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 - [x] Download songs based on concert setlists, part of the new web UI (*NEW in 1.5.0*)
 
 # Installation
-This utility can be installed using pip. Also confirm that you meet all the installation [requirements](#requirements)!
+This utility can be installed using pip. Also confirm that you meet all the installation [requirements](https://github.com/ChemistryGull/SomeDL#requirements)!
 ## Windows
 ```
 pip install somedl
@@ -96,10 +96,10 @@ pipx install somedl
 ```
 ## Requirements
 ### Python (REQUIRED)
-SomeDL is developed and tested on the newest version of Python (currently 3.14). Python 3.10 or newer is required. Visit [How to install python](docs/how_to_install_python.md) for a short guide.
+SomeDL is developed and tested on the newest version of Python (currently 3.14). Python 3.10 or newer is required. Visit [How to install python](https://github.com/ChemistryGull/SomeDL/blob/main/docs/how_to_install_python.md)  for a short guide.
 
 ### FFmpeg (REQUIRED)
-SomeDL uses yt-dlp, which needs [ffmpeg](https://ffmpeg.org/) in order to convert the downloaded audio file to mp3. Visit [How to install ffmpeg](docs/how_to_install_ffmpeg.md) for a short guide.
+SomeDL uses yt-dlp, which needs [ffmpeg](https://ffmpeg.org/) in order to convert the downloaded audio file to mp3. Visit [How to install ffmpeg](https://github.com/ChemistryGull/SomeDL/blob/main/docs/how_to_install_ffmpeg.md) for a short guide.
 
 ### Deno
 It is also recommended to have Deno installed. yt-dlp needs deno to work properly (https://github.com/yt-dlp/yt-dlp/wiki/EJS). SomeDL should work without it, but yt-dlp will always print a warning.
@@ -266,7 +266,7 @@ This video is not listed as a song on youtube. This is the case for most regular
 ```
 WARNING - >_yt-dlp: [youtube] No supported JavaScript runtime could be found. Only deno is enabled by default; to use another runtime add –js-runtimes RUNTIME[:PATH] to your command/config. YouTube extraction without a JS runtime has been deprecated, and some formats may be missing. See https://github.com/yt-dlp/yt-dlp/wiki/EJS for details on installing one
 ```
-This warning appears if Deno is not installed properly. Visit [this section](#deno) on how to install deno. 
+This warning appears if Deno is not installed properly. Visit [this section](https://github.com/ChemistryGull/SomeDL#deno) on how to install deno. 
 
 ```
 WARNING - >_yt-dlp: [youtube] xHcPUTfPuk0: Some android_vr client https formats have been skipped as they are missing a URL. YouTube may have enabled the SABR-only streaming experiment for the current session. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
@@ -290,7 +290,7 @@ ERROR - >_yt-dlp: yt-dlp download failed. Do you have ffmpeg installed? Is the s
 ERROR - >_yt-dlp: File was not downloaded successfully with yt-dlp
 WARNING - Song was not downloaded properly
 ```
-Like mentioned in the error message, this song is age-restricted. Visit [How do I download age restricted songs?](#how-do-i-download-age-restricted-songs) on how to download age-restricted content.
+Like mentioned in the error message, this song is age-restricted. Visit [How do I download age restricted songs?](https://github.com/ChemistryGull/SomeDL#how-do-i-download-age-restricted-songs) on how to download age-restricted content.
 
 
 
