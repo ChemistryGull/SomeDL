@@ -5,7 +5,6 @@
 
 ## High Priority 
 - Implement musicbrainz cache?
-- Easy playlist synchronisation (somedl --sync), with config: sync_targets = [list of playlists]
 - Musicbrainz:
     - Now switched to grouping with brackets over strict search with quotes. This should now make all the musicbrainz new searches with musicbrainz obsolete. Observe if this results in more false matches
     - (*switch to 'https://musicbrainz.org/ws/2/artist/?query={artist}&fmt=json', because the current one is not getting the correct results most of the time. also have to rewrite the functions after that because the result will be different*)
@@ -13,11 +12,8 @@
 
 - Add a check to checkIfFileExists if {song} and ({aritst} or {album_artist}) are present in template, warn if not.
 
-- Add lrclib support
 - add video_id as viable tag ? (probably not to avoid breaking functionality for future alternative downloads)
 
-
-- When imput type is album, do not refetch stuff that has already been fetched. In general, refetching album for every song is wastefull time loss. Will change that after refactoring
 
 - Create exception for ConnectionError for the ytmusicapi calls (not connected to internet)
 
@@ -38,14 +34,6 @@
 - README: Add information on what type of search is fastest:
     - Fastest and most accurate is fetching a full album with `/browse/` url (dragging the album into the terminal)
 
-- somedl sync feature
-    - Create a sync file
-    - In there you can set any settings that you would normally set, that then overwrite the original sync
-    - also have sync_target setting thats a list of urls to sync
-    in the main config, there should be a sync_files list were all the paths of the files are stored in (relative to the config folder)
-
-
-
 
 ### Docs:
 - Not working after update? Install the latest workin version with pip install somedl==version_number. You may need to recreate the packa
@@ -56,15 +44,6 @@
 ## Medium Priority
 - Create Flowchart
 - Metadata: Add WOAR. Artist website or the streaming websites. MusicBrainz webiste seems to have links, havent found in the api response yet, gotta look
-- FEAT: Give an option to download an entire album (--album flag)
-- FEAT: Give an option to download everything from an artist (--artist flag)
-
-- Add update metadata functionality. 
-    - Example somedl --update -o /path/to/folder --recursive --to-update "Album_artist, genre, ..." --naming-sceme "{artist} - {song} [{sth else...}]"
-    - Maybe some warning system, like checking the amount of files
-    - some sort of interactive CLI for the update process, where you can select the path, what metadata to change, and the type of search - by yt-dlp video id, a certain output template or by reading youtube urls from the metadata (spotDL adds them into `comment` and SomeDL uses `source` on vorbis & m4a and `WWW Audio Source` on mp3 to store youtube music URLs)
-        - This would require the option to toggle every single metadata
-        - This would also require to look up which APIs are needed for what info, so skip them if they are not needed (`doMusicBrainz = False or False or True or False`)
 
 
 - Unnused placeholder (should better not get implemented:)
@@ -80,7 +59,6 @@
 
 
 ## Distant future
-- GUI?
 
 # WebUI
 
