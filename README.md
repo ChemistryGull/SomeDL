@@ -21,7 +21,7 @@ The audio is downloaded using yt-dlp. SomeDL accepts text queries, YouTube URLs 
 </div>
 
 > [!TIP]
-> If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue or start an discussion here on GitHub. I am open to add functionality based on individual usecases. See [How can I give feedback or make feature requests?](#how-can-i-give-feedback-or-make-feature-requests)
+> If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue or start an discussion here on GitHub. I am open to add functionality based on individual usecases. See [How can I give feedback or make feature requests?](https://github.com/ChemistryGull/SomeDL#how-can-i-give-feedback-or-make-feature-requests)
 
 > *Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. SomeDL is developed on Linux and tested on Linux & Windows. This project is human-made, no code from generative AI is used.*
 
@@ -42,13 +42,13 @@ somedl "https://music.youtube.com/watch?v=W0Wo5zhgvpM" "https://music.youtube.co
 Run `somedl -h` to get more information for the different configuration options.
 
 ## WebUI
-Run `somedl web` in your terminal, a browser windows with the SomeDL WebUI will open.
+Run `somedl web` in your terminal, a browser window with the SomeDL WebUI will open.
 
 
 # Features
 - Simple usage
 - Download via search query, YouTube URL, YouTube Playlist URL and even entire discographies with YouTube Music channel URLs.
-- Simple installation with pip (And [quick guides](#requirements) for the installation of the dependencies).
+- Simple installation with pip (And [quick guides](https://github.com/ChemistryGull/SomeDL#requirements) for the installation of the dependencies).
 - No login or API tokens required.
 - Complete metadata - way better than just relying on yt-dlp (see [here](#why-should-i-use-somedl-over-yt-dlp) why).
 ``` 
