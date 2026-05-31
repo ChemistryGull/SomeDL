@@ -253,7 +253,8 @@ genius_album_check = true
 
 host = "127.0.0.1"
 port = 5000
-
+browser = ""
+open_browser = true
 
 [logging]
 

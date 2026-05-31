@@ -3,7 +3,7 @@
 # SomeDL - Song+Metadata Downloader
 
 
-**SomeDL** is a easy-to-use command-line tool for downloading music with accurate metadata - simple installation and no login or API tokens required!
+**SomeDL** is a easy-to-use command-line tool for downloading music with accurate metadata. Simple installation and no login or API tokens required! Now also with a WebUI!
 
 
 [![PyPI version](https://img.shields.io/pypi/pyversions/somedl)](https://pypi.org/project/somedl/)
@@ -13,19 +13,21 @@
 [![Last commit](https://img.shields.io/github/last-commit/chemistrygull/somedl)](https://github.com/ChemistryGull/SomeDL)
 
 ![SomeDL usage gif](https://github.com/ChemistryGull/SomeDL/blob/main/docs/images/somedl_usage_cut.gif)
+![SomeDL WebUI](https://github.com/ChemistryGull/SomeDL/blob/main/docs/images/webui/somedl_webui_download_2.png)
 
 
-The audio is downloaded using yt-dlp. SomeDL accepts text queries, YouTube URLs and YouTube playlist URLs. Metadata is fetched from YouTube, MusicBrainz, Genius and Deezer. No API tokens required for any of these services, it works out of the box.
+The audio is downloaded using yt-dlp. SomeDL accepts text queries, YouTube URLs and YouTube playlist URLs. Metadata is fetched from YouTube, MusicBrainz, Genius and Deezer. Setlist data is fetched from setlist.fm. No API tokens required for any of these services, it works out of the box.
 
 </div>
 
 > [!TIP]
 > If you have any problems, feature requests, suggestions of improvements of any kind or even general questions, do not hesitate to open an issue or start an discussion here on GitHub. I am open to add functionality based on individual usecases. See [How can I give feedback or make feature requests?](#how-can-i-give-feedback-or-make-feature-requests)
 
-> *Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. SomeDL is developed on Linux and tested on Linux & Windows. This project is not vibecoded.*
+> *Disclaimer: This project - although being fully functional - is primarily a way for me to learn the handling of APIs in python. This program is for educational purposes. SomeDL is developed on Linux and tested on Linux & Windows. This project is human-made, no code from generative AI is used.*
 
 
 # Usage
+## CLI
 Simply type `somedl` followed by your search query in quotes.
 ```
 somedl "Nirvana - Smells like teen spirit"
@@ -38,6 +40,10 @@ somedl "https://music.youtube.com/watch?v=W0Wo5zhgvpM" "https://music.youtube.co
 
 ```
 Run `somedl -h` to get more information for the different configuration options.
+
+## WebUI
+Run `somedl web` in your terminal, a browser windows with the SomeDL WebUI will open.
+
 
 # Features
 - Simple usage
@@ -57,15 +63,18 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 - Download report - get a quick overview over the downloaded songs, including their metadata.
 - And much more!
 
+## WebUI
+- Download songs directly from a browser-based graphical interface and track the progress
+- Search for music within the WebUI using a YouTube Music–style interface.
+- Look up concert setlists for bands and artists.
+- View download history for the current session
+- Change settings directly from the WebUI
+- Customize and theme the SomeDL WebUI to match your preferences
+
 ## Proposed Features
-- [x] Download archive (*New in v1.3.0!*)
-- [x] Downloading entire discographies with YouTube Music channel URLs (*New in v1.3.0!*)
-- [x] Sync file feature (*New in v1.3.0!*)
-- [ ] Web-UI (*Work in progress, almost finished*)
-      - YouTube Music UI interface for song/artist/album search
-      - GUI settings
-      - GUI download status tracker
-- [ ] Download songs based on concert setlists, part of the new web UI (*pretty much finished, out soon*)
+
+- [x] Web-UI (*NEW in 1.5.0*)
+- [x] Download songs based on concert setlists, part of the new web UI (*NEW in 1.5.0*)
 
 # Installation
 This utility can be installed using pip. Also confirm that you meet all the installation [requirements](#requirements)!

@@ -85,6 +85,7 @@ function display_help() {
                 <li><b>Question mark:</b> Shows this message.</li>
             </ul>
             <p>Change the download format, output folder and more in the settings tab. (don't forget to apply!)</p>
+            <p>If a download fails, try again. Often it works on the second try. If it still fails, there might be other problems, like the song being age restricted (<a target="_blank" href="https://github.com/ChemistryGull/SomeDL#how-do-i-download-age-restricted-songs">How to circumvent this</a>).</p>
 
             <h3>${icons.search}YouTube Search</h3>
             <p>Search for songs, albums, or artists just like you would on YouTube Music, Spotify etc. Click a cover image to add that item to your download queue. You can also click on the artists or albums for additional information.</p>

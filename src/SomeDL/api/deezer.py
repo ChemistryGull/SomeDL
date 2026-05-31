@@ -7,7 +7,7 @@ def deezerGetSongByQuery(artist: str, album: str, song: str, label: str = None):
     #url = f'https://api.deezer.com/search/?q={query}&index=0&limit=10'
     url = f'https://api.deezer.com/search/?q=artist:"{artist}" album:"{album}" track:"{song}"&index=0&limit=5'
     try:
-        response = requests.get(url).json()
+        response = requests.get(url, timeout=30).json()
         #print(json.dumps(response, indent=4, sort_keys=True))
         return response
     except requests.exceptions.RequestException as e:
@@ -17,7 +17,7 @@ def deezerGetSongByQuery(artist: str, album: str, song: str, label: str = None):
 def deezerGetAlbumByID(id: int, label: str = None):
     url = f'https://api.deezer.com/album/{id}'
     try:
-        response = requests.get(url).json()
+        response = requests.get(url, timeout=30).json()
         return response
     except requests.exceptions.RequestException as e:
         console.error(f'DEEZER API - An error occurred at deezerGetAlbumByID(): {e}', label)

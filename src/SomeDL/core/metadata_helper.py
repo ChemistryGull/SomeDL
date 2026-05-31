@@ -138,7 +138,7 @@ def metadata_type_cleaner(song_data: dict):
 
     else: # MUSIC_VIDEO_TYPE_OMV (and MUSIC_VIDEO_TYPE_UGC, tho not sure about its functionality)
         console.info(f'Song type is {song_data.get("video_type")}. Looking up based on query', song_data.get("label"))
-        console.printj(song_data)
+        # console.printj(song_data)
         query = f'{song_data.get("artist_name", None)} - {song_data.get("song_title", None)}'
 
         search_results_query = yt.search(query, filter="songs")

@@ -23,8 +23,8 @@ Download songs from YouTube by query, multiple queries, or playlist link.
  - somedl update-metadata  Add lyrics to already downloaded songs (Beta!)
  - somedl sync             Sync a youtube playlist based on a sync file
  
- NEW:
- - somedl web              WebUI for SomeDL. Download songs, search for songs, search for concert setlists, change settings.
+NEW:
+ - somedl web              WebUI for SomeDL. Download songs, search for songs, search for concert setlists, change settings and more!
  """)
 
 

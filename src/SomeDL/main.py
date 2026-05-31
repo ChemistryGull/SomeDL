@@ -58,7 +58,7 @@ def main():
             return
         
     if input_args[0] == "web":
-        console.console.print("[green]Starting SomeDL WebUI. Open the URL below in your browser if it doesnt do so automatically. To stop the server, use the shutdown button in the WebUI or type Ctrl+C[/]")
+        console.console.print("[green]Starting SomeDL WebUI. Open the URL below in your browser if it doesn't do so automatically. To stop the server, use the shutdown button in the WebUI or type Ctrl+C[/]")
         start_webui()
         return
 

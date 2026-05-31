@@ -1,6 +1,28 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
+## [1.5.0] - 31.05.2026
+
+BIG new feature update - SomeDL now finally has a WebUI! Its features are listed below.
+
+### Added
+- Add WebUI
+    - Downloading from a GUI in the browser.
+    - Searching for songs directly in the application in a YouTube Music like interface.
+    - Searching for concert setlists of bands and artists.
+    - View download history (per session)
+    - Change settings directly from the WebUI
+    - Theme the SomeDL WebUI to your liking
+- Add ID system to keep track of which download is which (for the web ui). The ID is generated for each entry in `generateSongList()` (and `fetch_albums()` if thats enabled). The ID is a string of numbers, consisting of a timestamp + a 6 digit counter (increasing for every song in a request). Changed `console.active_items` keys to this ID, set the label as `text` property and put the status in `data`.
+
+
+### Changed
+- Add 30s timeouts to deezer and cover art requests
+- Add single retry to cover art request
+- Instead of skipping a download if its present in metadata_list, only skip download if song is currently being processed (checkes if same label is in `console.active_items`). This makes it possible to redownload a song from the web UI when the file is deleted. If a song is present in on the filesystem, download is skipped as always. This is neccessary to avoid yt-dlp errors (trying to write the same file)
+
+
+
 ## [1.4.0] - 14.05.2026
 
 ### Added

@@ -103,7 +103,7 @@ def get_version():
 
 @app.route("/get-history")
 def get_history():
-    console.webui(f'Fetching download history')
+    # console.webui(f'Fetching download history')
     answer = {
         "metadata_success_list": metadata_success_list,
         "failed_list": failed_list,
