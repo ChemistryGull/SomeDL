@@ -100,7 +100,6 @@ function display_help() {
             <h3>${icons.settings}Settings</h3>
             <p>The settings menu lets you change SomeDL's configuration without interacting with the config file directly. Click the (?) next to any option for a description of what each setting does.</p>
             <ul>
-                <li><b>Save:</b> writes your changes to the config file. Those changes only take effect after restarting the application.</li>
                 <li><b>Apply:</b> saves and applies the changes to your current session. This works for most settings, but be aware that some settings do require a full application restart to be applied properly.</li>
                 <li><b>Reset:</b> undoes any unsaved changes</li>
                 <li><b>Defaults:</b> restores all settings to their default values</li>

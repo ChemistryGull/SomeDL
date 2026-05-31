@@ -64,6 +64,8 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 - And much more!
 
 ## WebUI
+[Here](https://github.com/ChemistryGull/SomeDL/blob/main/docs/webui.md) you can see pictures of the WebUI.
+
 - Download songs directly from a browser-based graphical interface and track the progress
 - Search for music within the WebUI using a YouTube Music–style interface.
 - Look up concert setlists for bands and artists.
