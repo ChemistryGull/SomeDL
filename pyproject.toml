@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SomeDL"
-version = "1.4.0"
+version = "1.5.0"
 authors = [
     {name="ChemistryGull", email="html.gull@gmail.com"},
 ]
@@ -19,6 +19,8 @@ dependencies = [
     "requests",
     "tomlkit",
     "rich",
+    "flask",
+    "waitress"
 ]
 classifiers = [
     "Operating System :: OS Independent",
@@ -37,4 +39,8 @@ license-files = ["LICEN[CS]E*"]
 somedl = "SomeDL.main:main"
 
 [tool.setuptools.package-data]
-SomeDL = ["new_somedl_config.toml"]
+SomeDL = [
+    "new_somedl_config.toml",
+    "webui/templates/*",
+    "webui/static/**/*"
+]

@@ -1,0 +1,386 @@
+/* === YouTube Search === */
+
+.inp-field-yt-type {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  user-select: none;
+  /* padding: 1rem; */
+}
+
+
+#yt-search-results-field {
+  display: flex;
+}
+
+.yt-search-results-field {
+  display: none;
+  /* gap: 0.5rem; */
+  flex-direction: column;
+  margin-top: 0.5rem;
+}
+
+.yt-search-results-field > div:not(:last-child) {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.yt-search-item-wrapper-artist:not(:last-child) {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.yt-search-item {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  align-items: center;
+}
+
+.yt-search-item-wrapper-fff {
+  /* border: 1px var(--color-border) solid; */
+  border-left: 2px var(--color-border) solid;
+  border-bottom: 1px var(--color-border) solid;
+  /* border-top: 1px var(--color-border) solid; */
+  /* border-radius: 1rem; */
+  border-bottom-left-radius: 1rem;
+  border-top-left-radius: 1rem;
+  /* margin: 0.25rem 0; */
+}
+
+.yt-search-coverart {
+  padding: 0.5rem;
+  position: relative;
+  height: 60px;
+  width: 60px;
+  user-select: none;
+}
+
+.yt-search-coverart.large {
+  height: 120px;
+  width: 120px;
+}
+
+.yt-search-coverart img {
+  height: 100%;
+  display: block;
+  border-radius: 0.5rem;
+}
+
+.yt-search-download-btn {
+  position: absolute;
+  inset: 0;
+  font-size: 2rem;
+  
+  opacity: 0;
+  transition: opacity 0.1s ease;
+
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  margin: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.5rem;
+}
+
+.icon-yt-dl-button-large {
+  height: 48px;
+  width: 48px;
+}
+
+
+.yt-search-download-btn:hover {
+  opacity: 1;
+}
+
+.yt-search-text {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+  overflow-x: hidden;
+}
+
+.clickable:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.yt-search-title {
+  font-weight: bold;
+}
+
+.yt-search-title.large {
+  font-size: 2rem;
+}
+
+.yt-search-bottom {
+  display: flex;
+}
+
+.yt-search-artist, .yt-search-album {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  max-width: 60%;
+  cursor: pointer;
+}
+
+.yt-search-bottom-separator {
+  padding: 0 0.25rem;
+}
+
+.yt-search-album:hover {
+  text-decoration: underline;
+}
+.yt-search-artist>span:hover {
+  text-decoration: underline;
+}
+
+.yt-search-artist-album:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+
+
+.yt-search-title {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}
+
+/* .yt-search-bottom > div:not(:last-child)::after {
+  content: "•";
+  padding: 0 0.25rem;
+} */
+
+.yt-search-more {
+  padding: 1.5rem 0.5rem 1.5rem 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+/* .yt-search-more.dd_open {
+  writing-mode: vertical-lr;
+} */
+
+/* .yt-search-album-items-list {
+  width: 100%;
+} */
+
+
+
+.yt-search-tracknumber {
+  border-radius: 0.5rem;
+  /* border: 1px black solid; */
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+
+
+/* === Artist === */
+
+/* #page-search {
+  display: flex;
+  justify-content: center;
+} */
+
+
+
+
+.toggle_more {display: none;}
+.toggle_more_btn {
+  display: inline;
+  cursor: pointer;
+  font-style: italic;
+}
+
+.yt-search-artist-header {
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem 1rem 0 0;
+  position: relative;
+  /* background-image:  */
+    /* linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8)), */
+    /* url("https://lh3.googleusercontent.com/x1oDTFRP5PqALRDTYmw3lK33bbc8l8JYYlUengtv8y-5k2Ktyz5dHUaywkZsK27rjgWJ2tGaikzUrsY=w1440-h600-p-l90-rj"); */
+    /* url("https://lh3.googleusercontent.com/wiDIQ7z11tNmweTDgT0grWM6Yet1nDLIPQg9AU8JcO3qzuomLKV7C9-WBzbSuORkE1ij1aGQVbD8C9Y=w1920-h800-p-l90-rj"); */
+  /* background-size: 100% auto; */
+  /* background-size: contain; */
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
+}
+
+.yt-search-artist-header-btns-wrapper {
+  align-self: flex-start;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* .yt-search-artist-header-back-btn {
+  align-self: flex-start;
+  padding: 0;
+  box-sizing: content-box;
+  width: 3rem;
+  height: 3rem;
+  margin: 0.5rem;
+  flex-shrink: 0;
+} */
+
+.yt-search-artist-header-title {
+  margin-top: 150px;
+}
+
+.yt-search-artist-name {
+  padding: 1rem 2rem;
+  font-size: 2rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px black;
+  background-image: 
+    linear-gradient(to bottom, rgba(0,0,0,0) 0%, color-mix(in srgb, var(--color-background) 50%, transparent) 30%, color-mix(in srgb, var(--color-background) 80%, transparent));
+    /* linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,1)); */
+}
+
+.yt-search-artist-desc {
+  padding: 0.5rem 2rem 2rem 2rem;
+  text-align: justify;
+  text-shadow: 2px 2px 4px black;
+
+  background-image: 
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-background) 80%, transparent) 60%, var(--color-background))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ----------------------------- */
+
+
+
+/* .page-search-wrapper {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+#toggle_more {display: none;}
+#toggle_more_btn {
+  display: inline;
+  cursor: pointer;
+  font-style: italic;
+}
+
+.yt-search-artist-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.yt-search-artist-header-back-btn {
+  align-self: flex-start;
+  padding: 0.5rem;
+  box-sizing: content-box;
+}
+
+.yt-search-artist-header-left {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem;
+}
+
+.yt-search-artist-desc {
+  padding: 0.5rem;
+  text-align: justify;
+}
+
+.yt-search-artist-coverart {
+  padding: 0.5rem;
+  height: 150px;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.yt-search-artist-coverart img {
+  height: 100%;
+  display: block;
+  border-radius: 0.5rem;
+  padding: 0;
+}
+
+.yt-search-artist-name {
+  font-size: 2rem;
+  font-weight: bold;
+} */
+
+
+
+
+/* ------------------------------ */
+
+/* .yt-search-artist-header {
+  display: flex;
+  align-items: center;
+}
+
+.yt-search-artist-header-back-btn {
+  align-self: flex-start;
+  padding: 0.5rem;
+  box-sizing: content-box;
+}
+
+.yt-search-artist-header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.yt-search-artist-desc {
+  padding: 0.5rem;
+  overflow-y: auto;
+  height: 10rem;
+  text-align: justify;
+  white-space: pre-line;
+}
+
+
+
+.yt-search-artist-coverart {
+  padding: 0.5rem;
+  height: 150px;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.yt-search-artist-coverart img {
+  height: 100%;
+  display: block;
+  border-radius: 0.5rem;
+  padding: 0;
+}
+
+.yt-search-artist-name {
+  font-size: 2rem;
+  font-weight: bold;
+} */

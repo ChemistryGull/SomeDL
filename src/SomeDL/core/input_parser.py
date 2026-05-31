@@ -1,4 +1,5 @@
 import json
+import time
 
 from urllib.parse import urlparse, parse_qs
 
@@ -56,6 +57,13 @@ def generateSongList(input_list):
     if alert_list_and_v and not config["download"]["prefer_playlist"]:
         # --- To warn the user that only a song will be downloaded. Remove in the future. Also remove the aprt inside the parseInput function
         print("URL contains both song (v=) and playlist (list=) IDs. Only the song is downloaded. To download the entire playlist, add the '--get-playlist' flag or change the 'prefer_playlist' config.")
+
+    index = 0
+    for item in songs_list:
+        index += 1
+        # --- somedl_id: a string made of the number 
+        item["somedl_id"] = str(int(time.time() * 10000000)) + str(index).zfill(6)[-6:]
+         
 
     console.debug("Finished input parsing")
     return songs_list
@@ -221,6 +229,8 @@ def parseArtist(artist_id: str):
             print(f'Adding {album.get("type")} \"{album.get("title")}\"')
             songs_list.extend(album_result)
 
+    else:
+        print("Not looking up singles. If you want to include singles, add '--include-singles'.")
 
 
     # console.printj(single_list)
@@ -335,7 +345,6 @@ def parsePlaylist(playlist_id: str):
 
 def parseSongURL(song_id: str):
     try:
-        # song = yt.get_song(song_id)
         result = yt.get_watch_playlist(song_id)
         # printj(result.get("tracks", [None])[0])
         #print(json.dumps(result, indent=4, sort_keys=True))

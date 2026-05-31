@@ -11,7 +11,7 @@ from importlib.resources import files
 
 import SomeDL.utils.console as console
 
-CONFIG_VERSION = 6
+CONFIG_VERSION = 7
 
 default_config = {
     "metadata": {
@@ -73,6 +73,12 @@ default_config = {
         "level": ("INFO", str, ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
         "log_level": (4, int, range(0, 8)),
         "config_version": (4, int, None), # ALWAYS STAY AT 0!!!!!! If this value is ever lost, reset it.
+    },
+    "webui": {
+        "host": ("127.0.0.1", str, None),
+        "port": (5000, int, None),
+        "open_browser": (True, bool, None),
+        "browser": ("", str, None),
     }
 }
 
@@ -92,6 +98,7 @@ def get_config_dir(app_name: str) -> Path:
 
 
 CONFIG_PATH = (get_config_dir("SomeDL"))
+WEBUI_CONFIG_PATH = Path(CONFIG_PATH).with_name("somedl_webui_cache.json")
 
 # === Load data ===
 
@@ -110,7 +117,8 @@ def load_and_verify_config():
         "metadata": {},
         "download": {},
         "api": {},
-        "logging": {}
+        "logging": {},
+        "webui": {}
     }
 
     if not check_if_config_exists():
@@ -184,17 +192,18 @@ def change_configs(config_list):
 
 
 
-def generate_config():
+def generate_config(prompt = True):
     new_config = load_new_config()
     # print(new_config)
 
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     
     if Path(CONFIG_PATH).is_file():
-        answer = input("WARNING - Config file already exists. Do you want to overwrite it? [y/N] > ")
-        if not answer.lower() in ["y", "yes"]:
-            print("Writing config file canceled.")
-            return
+        if prompt:
+            answer = input("WARNING - Config file already exists. Do you want to overwrite it? [y/N] > ")
+            if not answer.lower() in ["y", "yes"]:
+                print("Writing config file canceled.")
+                return
 
     print(f'Generating config in {CONFIG_PATH}')
 
@@ -219,7 +228,12 @@ def update_config():
 
     save_config(new_config_data)
     
-    
+def deep_update_config(updates: dict) -> dict:
+    # --- Updates all settings in place. Some settings might not apply properly
+    for section, values in updates.items():
+        if section in config:
+            config[section].update(values)
+
 
 # === Save data ===
 
@@ -353,6 +367,8 @@ def load_sync_files(sync_files):
             config_group = "api"
         elif config_item in config["logging"]:
             config_group = "logging"
+        elif config_item in config["webui"]:
+            config_group = "webui"
         else:
             console.error(f'Invalid sync file \"{sync_file}\": config item "{config_item}" is not defined')
             return
@@ -422,3 +438,18 @@ def list_sync_files():
         return []
 
     return [sync_files_list[inp - 1]["name"]]
+
+
+# === WebUI ===
+def webui_config_load():
+    if not WEBUI_CONFIG_PATH.exists():
+        return {}
+    
+    with open(WEBUI_CONFIG_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def webui_config_save(data):
+    WEBUI_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(WEBUI_CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)

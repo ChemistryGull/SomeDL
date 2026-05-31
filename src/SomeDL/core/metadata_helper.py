@@ -43,12 +43,15 @@ def fetch_metadata(metadata, known_metadata: list = []):
         new_album_id, new_album_name, album = metadata_album_check(metadata["artist_name"], metadata["song_title_clean"], metadata["album_id"], metadata["album_name"], album, label=metadata.get("label"))
         
         metadata["album_id"] = new_album_id
-        metadata["album_name"] = new_album_name     
+        metadata["album_name"] = new_album_name
 
     # === Extract album data from album dict (from YT-API) ===      time < 0.01
         metadata.update(metadata_get_album_data(metadata["song_title"], album))
     
     console.update(metadata.get("label"), "album", console.Status.SUCCESS)
+
+    # if not metadata.get("album_artist"):
+    #     metadata["album_artist"] = metadata["artist_name"]
 
     # timerend("guess_album")
 
@@ -129,9 +132,13 @@ def metadata_type_cleaner(song_data: dict):
         return True # --- Nothing to change if its ATV
 
     # === OMV ===
+    # elif True: # ADD CONFIG; Potential way to let user download OMV (would need a lot of modifications down the line as there is no album and related data)
+    #     console.info(f'Song type is {song_data.get("video_type")}. Attempting download', song_data.get("label"))
+    #     return True
+
     else: # MUSIC_VIDEO_TYPE_OMV (and MUSIC_VIDEO_TYPE_UGC, tho not sure about its functionality)
-        console.info("Song type is OMV or other. Looking up based on query", song_data.get("label"))
-        
+        console.info(f'Song type is {song_data.get("video_type")}. Looking up based on query', song_data.get("label"))
+        console.printj(song_data)
         query = f'{song_data.get("artist_name", None)} - {song_data.get("song_title", None)}'
 
         search_results_query = yt.search(query, filter="songs")
@@ -193,6 +200,12 @@ def fetch_albums(songs_list):
             songname = song.get("text_query", f'{song.get("artist_name")} - {song.get("song_title")}')
             console.error(f'Failed to fetch album for \"{songname}\"')
             continue
+    
+    index = 0
+    for item in new_song_list:
+        index += 1
+        # --- somedl_id: a string made of the number 
+        item["somedl_id"] = str(int(time.time() * 10000000)) + str(index).zfill(6)[-6:]
 
     return new_song_list, failed_list
             

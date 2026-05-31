@@ -1,0 +1,205 @@
+#page-setlist {
+    padding: 0;
+}
+
+.page-setlist-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+/* === Artist Table === */
+.setlist-artist-table {
+    border-radius: 1rem;
+    overflow: auto;
+    border: 1px solid var(--color-main);
+}
+.setlist-artist-table>table {
+    border-spacing: 0;
+    width: 100%;
+}
+.setlist-artist-table thead {
+    position: sticky;
+    top: 0;
+    background-color: var(--color-main);
+}
+.setlist-artist-table td, .setlist-artist-table th {
+    padding: 0.5rem 1rem;
+}
+.setlist-artist-table td:first-child {
+    cursor: pointer;
+}
+.setlist-artist-table tbody tr:hover {
+    background-color: var(--color-background-highlight);
+}
+
+
+
+/* === Setlist table === */
+
+.setlist_table_wrapper {
+    border-radius: 1rem;
+    overflow: auto;
+    user-select: none;
+}
+
+.setlist_table {
+    border-spacing: 0;
+    /* background-color: var(--color-main); */
+    table-layout: fixed;
+}
+
+.setlist_table thead {
+    position: sticky;
+    top: 0;
+    /* background-color: var(--color-main); */
+    z-index: 1;
+}
+
+.setlist_table tr:first-child th {
+    cursor: pointer;
+    vertical-align: top;
+    padding-top: 0.75rem;
+    background-color: var(--color-main);
+}
+
+.setlist_table tr:first-child th>div {
+    width: 120px;
+    overflow-x: hidden;
+}
+
+.setlist_table th:first-child {
+    position: sticky;
+    top: 0;
+    left: 0;
+    background-color: var(--color-main);
+}
+
+.setlist_table th {
+    padding: 0.25rem;
+}
+
+
+/* --- Tour row --- */
+.setlist_table th.setlist-tour-cell {
+    max-width: 0;
+    position: relative;
+    /* border-right: 1px solid white; */
+}
+
+.setlist_table th.setlist-tour-cell>div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline;
+    position: sticky;
+    left: 290px;
+    right: 10px;
+    min-width: 0;
+}
+.setlist_table th.setlist-tour-cell>div:hover {
+    /* overflow: visible; */
+    direction: rtl;
+}
+
+.setlist_table th.setlist-tour-cell:nth-child(even) {
+    background-color: color-mix(in srgb, var(--color-main) 90%, grey);
+}
+.setlist_table th.setlist-tour-cell:nth-child(odd):not(:first-child) {
+    background-color: color-mix(in srgb, var(--color-main) 70%, grey);
+}
+
+
+
+/* --- Body --- */
+.setlist_table td {
+    /* border: 1px black solid; */
+    background-color: var(--color-background);
+    text-align: center;
+    white-space: nowrap;
+    padding: 0.25rem 1rem;
+    /* cursor: grabbing; */
+}
+
+.setlist_table td:not(:first-child) {
+    padding: 0.25rem;
+    max-width: 0;
+}
+
+.setlist_table div.setlist-body-item {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.setlist_table div.setlist-body-item:hover {
+    direction: rtl;
+}
+
+.setlist_table td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: var(--color-main);
+    cursor: pointer;
+}
+
+.setlist_table td:first-child>div:first-child {
+    font-weight: bold;
+}
+
+.song-name-column {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.song-name-column>div:first-child {
+    max-width: 200px;
+    min-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+.song-name-column>div:first-child:hover {
+    direction: rtl;
+}
+
+.setlist_table tr:has(td.setlist-is-special) {
+    font-style: italic;
+}
+
+
+/* --- Hovering --- */
+
+#setlist_tbody tr:hover td {
+    background-color: var(--color-background-highlight);
+}
+#setlist_tbody tr:hover td:first-child {
+    background-color: var(--color-main-highlight);
+}
+
+
+
+/* --- Unselected --- */
+
+.setlist_table td.td-unselected {
+    color: DimGray 
+}
+
+th.setlist-venue.unselected {
+    color: DimGray ;
+}
+
+th.setlist-venue.unselected hr {
+    border-color: DimGray ;
+}
+
+tr.setlist-row.unselected {
+    color: DimGray ;
+}
+
+tr.setlist-row.venue-unselected {
+    color: DimGray ;
+}

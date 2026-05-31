@@ -10,8 +10,11 @@ from SomeDL.core.cli_parser import parseCliArgs
 from SomeDL.core.download_report import generateDownloadReport
 from SomeDL.core.processor import process_song_list_concurrent
 from SomeDL.core.extra import import_songs, update_storage_template, update_metadata
+from SomeDL.webui.server import start_webui
 
 
+
+# --- Debug
 # from SomeDL.utils.dev_mode import run_with_data_storage
 
 
@@ -54,6 +57,12 @@ def main():
         if not input_args:
             return
         
+    if input_args[0] == "web":
+        console.console.print("[green]Starting SomeDL WebUI. Open the URL below in your browser if it doesnt do so automatically. To stop the server, use the shutdown button in the WebUI or type Ctrl+C[/]")
+        start_webui()
+        return
+
+
 
     # === Fetch albums if needed ===
     songs_list = generateSongList(input_args)
@@ -102,6 +111,11 @@ def main():
                 break
 
             print("Invalid choice, enter 1, 2, 3 or enter without input.")
+    
+    # === Convert songs_list to queue ===
+    song_list_queue: queue.Queue = queue.Queue()
+    for item in songs_list:
+        song_list_queue.put(item)
 
 
     # === Main Process loop ===
@@ -112,11 +126,13 @@ def main():
 
     failed_list.extend(failed_list_album)
 
+
     # === Download report ===
     if len(songs_list) >= config["logging"]["download_report"]:
         generateDownloadReport(metadata_success_list, failed_list, already_downloaded_list)
     else:
         console.debug("No Download Report generated")
+
 
     # === End timer === TODO add full summary of how many downloaded etc
     end = time.time()

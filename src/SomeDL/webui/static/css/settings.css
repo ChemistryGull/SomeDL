@@ -1,0 +1,212 @@
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    gap: 0.5rem;
+}
+
+.settings-grid td {
+    padding-right: 1rem;
+}
+
+.s-section-label {
+    grid-column: 1 / span 2;
+    text-align: center;
+    font-size: 1.5rem;
+    margin: 1rem 0 0.5rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px var(--color-border) solid;
+}
+
+.s-label {
+    text-align: right;
+}
+.s-label::after {
+    content: ":";
+}
+
+.s-control {
+    display: flex;
+    align-items: center;
+}
+
+.s-control input:not(input[type='checkbox']) {
+    flex-grow: 1;
+    max-width: 300px;
+}
+.s-control select {
+    flex-grow: 1;
+    max-width: 300px;
+}
+
+/* === Popup warpper === */
+.popup-wrap {
+    display: inline-flex;
+}
+
+.popup-box {
+    display: none;
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+
+}
+
+.popup {
+    position: relative;
+    background-color: var(--color-background);
+    border-radius: 2rem;
+    border: 2px solid var(--color-text);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-width: 80vw;
+    max-height: 80vh;
+}
+
+.popup-hdr {
+    background-color: var(--color-main);
+    padding: 2rem 4rem 2rem 2rem;
+    font-size: 1.5rem;
+}
+
+.popup-body {
+    padding: 2rem;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.popup-close {
+    color: var(--color-text);
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 1.5rem;
+    height: 2rem;
+    width: 2rem;
+    background: none;
+    border: none;
+    box-sizing: content-box;
+    padding: 1rem;
+    text-shadow: 1px 1px 1px black;
+    cursor: pointer;
+}
+.popup-close:active {
+    text-shadow: -1px -1px 1px black;
+}
+
+.popup-button-box {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: right;
+}
+.popup-button-box button {
+    min-width: 4rem;
+}
+
+.settings-help-btn {
+    background-color: transparent;
+    border-radius: 50%;
+    border: 1px solid var(--color-text);
+    color: var(--color-text);
+    padding: 0px;
+    box-sizing: content-box;
+    cursor: pointer;
+    width: 1rem;
+    margin-left: 0.5rem;
+}
+
+
+
+.settings-apply-wrapper {
+    display: flex;
+    gap: 0.5rem;
+
+    /* position: sticky;
+    bottom: 0;
+    right: 0;
+    padding: 1rem 0; */
+}
+
+.settings-apply-wrapper button {
+    min-width: 4rem;
+}
+
+
+/* WebUI appearance settings */
+
+.s-webui-color-wrap {
+    display: flex;
+    padding: 0.25rem;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.s-webui-color-wrap input[type="radio"] {
+    margin: 0;
+}
+
+
+.s-webui-color-boxes {
+    display: flex;
+    border-radius: 1rem;
+    overflow: hidden;
+    flex: 1;
+}
+
+.s-webui-color-boxes>div{
+    /* background-color: yellowgreen; */
+    width: 100%; /* this just pretends to be 100%, it really just splits them eaqually*/
+    height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.s-webui-color-title {
+    min-width: 8rem;
+}
+
+.s-webui-noicon {
+  width: 24px;
+}
+.s-webui-edit,.s-webui-trash {
+  cursor: pointer;
+}
+.s-webui-edit:hover {
+  color: var(--color-main);
+}
+.s-webui-trash:hover {
+  color: rgb(255, 0, 0);
+}
+
+
+.settings-webui-add-btn {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+.settings-webui-add-btn>button {
+    height: 1.5rem;
+}
+
+.settings-webui-new-theme {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem 1rem;
+}
+
+.settings-webui-new-theme>div:nth-child(2n-1) {
+    text-align: right;
+}
+
+.color-input-extra {
+    display: none;
+}

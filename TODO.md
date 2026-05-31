@@ -82,6 +82,23 @@
 ## Distant future
 - GUI?
 
+# WebUI
+
+Idea: implement a input_queue. in normal use, this is filled with with the items and a _done at the end. In webUI use, it is 
+
+## flask-socketio uses a lot of dependencies :/
+**Maybe Switch back to regular calls to /status and doing an interval? reduces dependencies by a lot...**
+sudo pacman -S python-flask-socketio
+resolving dependencies...
+looking for conflicting packages...
+
+Packages (10) python-bidict-0.23.1-5  python-dnspython-1:2.8.0-3  python-engineio-4.13.1-1
+              python-eventlet-0.40.4-2  python-greenlet-3.3.2-1  python-simple-websocket-1.1.0-2
+              python-socketio-5.16.1-1  python-websocket-client-1.9.0-3  python-wsproto-1.3.2-1
+              python-flask-socketio-5.6.1-1
+
+Total Download Size:    2.66 MiB
+Total Installed Size:  19.84 MiB
 
 
 # General

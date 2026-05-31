@@ -1,0 +1,89 @@
+/* === Download === */
+
+
+.inp-field {
+    display: flex;
+    width: 100%;
+    gap: 1rem;
+    margin: 1rem 0;
+    /* padding: 1rem; */
+}
+
+.inp-field-text {
+    flex-grow: 1;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border-radius: 1rem;
+    background-color: var(--color-button);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+
+}
+
+.ui-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+
+    font-size: 1rem;
+    height: 2rem;
+	min-width: 2rem;
+    box-sizing: content-box;
+    border-radius: 1rem;
+    
+    padding: 0.5rem;
+    background-color: var(--color-button);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    user-select: none;
+}
+
+.ui-button-small {
+    height: 1.5rem;
+}
+
+.ui-button:hover {
+    border: 1px solid var(--color-main-highlight);
+}
+
+.ui-button:active {
+    border: 1px solid rgba(0, 0, 0, 0);
+}
+
+.ui-button.disabled {
+    border: 1px solid var(--color-background-highlight);
+    color: var(--color-background-highlight);
+}
+
+
+.inp-field-option {
+    cursor: pointer;
+}
+
+.inp-field-option input {
+    display: none; /* hide default radio */
+}
+
+.inp-field-option>span {
+    display: inline-block;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background-color: var(--color-button);
+}
+
+
+.inp-field-option:hover span {
+    border-color: var(--color-main-highlight);
+}
+
+.inp-field-option input:checked + span {
+    background-color: var(--color-main);
+    /* color: white; */
+    /* border-color: #4CAF50; */
+}
+
+
+

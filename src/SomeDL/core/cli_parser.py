@@ -21,7 +21,11 @@ Download songs from YouTube by query, multiple queries, or playlist link.
  - somedl import           Import songs downloaded with other tools, or update the metadata of your existing library.
  - somedl new-template     Move or copy your existing library to a new output template
  - somedl update-metadata  Add lyrics to already downloaded songs (Beta!)
- - somedl sync             Sync a youtube playlist based on a sync file""")
+ - somedl sync             Sync a youtube playlist based on a sync file
+ 
+ NEW:
+ - somedl web              WebUI for SomeDL. Download songs, search for songs, search for concert setlists, change settings.
+ """)
 
 
     # === Main Parser ===
@@ -199,6 +203,33 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         help="Always use the metadata provided by YouTube without cross-checking it against Genius. This will cause some songs to be downloaded as singles instead of as part of an album."
     )
 
+    # === WebUI ===
+
+    metadata_auth_group = parser.add_argument_group("WebUI")
+    metadata_auth_group.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Start the WebUI without automatically opening a browser window"
+    )
+    metadata_auth_group.add_argument(
+        "--browser",
+        type=str,
+        metavar="BROWSER NAME",
+        help="Browser to open the WebUI with"
+    )
+    metadata_auth_group.add_argument(
+        "--host",
+        type=str,
+        metavar="127.0.0.1",
+        help="Host address for the WebUI server"
+    )
+    metadata_auth_group.add_argument(
+        "--port",
+        type=int,
+        metavar="5000",
+        help="Port of the WebUI server"
+    )
+
 
 
 
@@ -322,6 +353,20 @@ Download songs from YouTube by query, multiple queries, or playlist link.
         generate_new_sync_file(args.new_sync_file)
         return False
 
+
+    # --- WebUI
+
+    if args.no_browser:
+        config["webui"]["open_browser"] = False
+
+    if args.browser:
+        config["webui"]["browser"] = args.browser
+
+    if args.host:
+        config["webui"]["host"] = args.host
+
+    if args.port:
+        config["webui"]["port"] = args.port
 
     #print(args.format)
 

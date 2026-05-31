@@ -249,6 +249,12 @@ max_retry = 3   # Default = 3  | Only affects musicbrainz retries
 genius_album_check = true
 
 
+[webui]
+
+host = "127.0.0.1"
+port = 5000
+
+
 [logging]
 
 # Logging level (since 1.2.0)
@@ -276,4 +282,4 @@ log_level = 4
 download_report = 2
 
 # DO NOT CHANGE THE VALUE BELOW!
-config_version = 6
+config_version = 7

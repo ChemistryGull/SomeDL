@@ -58,7 +58,86 @@ class CachedYTMusic(YTMusic):
         if result: 
             return result
         else:
-            return self.add_to_cache(browseId, super().get_album(browseId))
+            data = None
+            try:
+                data = super().get_album(browseId)
+            except Exception as e:
+                print("[ytmusicapi] - Refreshing connection")
+                try: 
+                    data = super().get_album(browseId)
+                except Exception as e:
+                    print("[ytmusicapi] - Error while getting data from YouTube:")
+                    print(e)
+
+            return self.add_to_cache(browseId, data)
+
+    def search(self, query, filter = None):
+        try:
+            return super().search(query, filter)
+        except Exception as e:
+            print("[ytmusicapi] - Refreshing connection")
+            try: 
+                return super().search(query, filter)
+            except Exception as e:
+                print("[ytmusicapi] - Error while getting data from YouTube:")
+                print(e)
+
+    def get_playlist(self, ID, limit = None):
+        try:
+            return super().get_playlist(ID, limit)
+        except Exception as e:
+            print("[ytmusicapi] - Refreshing connection")
+            try: 
+                return super().get_playlist(ID, limit)
+            except Exception as e:
+                print("[ytmusicapi] - Error while getting data from YouTube:")
+                print(e)
+
+    def get_watch_playlist(self, ID):
+        try:
+            return super().get_watch_playlist(ID)
+        except Exception as e:
+            print("[ytmusicapi] - Refreshing connection")
+            try: 
+                return super().get_watch_playlist(ID)
+            except Exception as e:
+                print("[ytmusicapi] - Error while getting data from YouTube:")
+                print(e)
+
+    def get_artist(self, channelId):
+        try:
+            return super().get_artist(channelId)
+        except Exception as e:
+            print("[ytmusicapi] - Refreshing connection")
+            try: 
+                return super().get_artist(query)
+            except Exception as e:
+                print("[ytmusicapi] - Error while getting data from YouTube:")
+                print(e)
+        
+    def get_artist_albums(self, browseId, params):
+        try:
+            return super().get_artist_albums(browseId, params)
+        except Exception as e:
+            print("[ytmusicapi] - Refreshing connection")
+            try: 
+                return super().get_artist_albums(browseId, params)
+            except Exception as e:
+                print("[ytmusicapi] - Error while getting data from YouTube:")
+                print(e)
+
+    def get_lyrics(self, query):
+        try:
+            return super().get_lyrics(query)
+        except Exception as e:
+            print("[ytmusicapi] - Refreshing connection")
+            try: 
+                return super().get_lyrics(query)
+            except Exception as e:
+                print("[ytmusicapi] - Error while getting data from YouTube:")
+                print(e)
+
+
 
 
 
@@ -68,6 +147,21 @@ yt = CachedYTMusic()
 
 
 
+# import os, psutil
+
+# process = psutil.Process(os.getpid())
+# print(psutil.Process(os.getpid()).memory_info().rss / 1048576) # To check how much memory the program uses
+
+# console.printj(yt._cache)
+
+# # print(yt.search("delain - we are the others"))
+# # print(yt.get_album("MPREb_zw0AuvoXPdK"))
+# yt.get_album("MPREb_zw0AuvoXPdK")
+# yt.get_album("MPREb_EtNdKFDvyZV")
+# yt.get_album("MPREb_MQylc253yXw")
+# yt.get_album("MPREb_pWTdxQZwm4T")
+
+# console.printj(yt._cache)
 
 # timerstart("YT")
 

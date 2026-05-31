@@ -15,10 +15,7 @@ from rich import box
 
 
 active_items: dict[str, dict] = {}  # see active_items_test at the end of the file
-finished_item_ids = {}              # Fills up with IDs from console.finish() function for web UI
 thread_lock = threading.Lock()
-pause_event = threading.Event()     # To pause the execution from the web UI
-pause_event.set()                   # start unpaused
 live_display: Live = None           # set in main()
 console = Console()                 # Used for console logs outside of live_display
 timers = {}
@@ -75,10 +72,10 @@ def tEnd(name = "default"):
     now = time.time()
     console.debug(f'\033[94mTIMER {name} = {now - timers.get(name, 0)} s\033[0m')
 
-def log(message: str, label: dict = None) -> None:
+def log(message: str, label: str = None) -> None:
     # --- only used for testing, such message should not appear in production
     if label:
-        out = f'[bright_black]{label["text"]}:[/] LOG - {message}'
+        out = f'[bright_black]{label}:[/] LOG - {message}'
     else:
         out = f'LOG - {message}'
 
@@ -87,21 +84,15 @@ def log(message: str, label: dict = None) -> None:
     else:
         console.print(out)
 
-def webui(message: str) -> None:
-    out = f'WEBUI - {message}'
-    if live_display:
-        live_display.console.print(out)
-    else:
-        console.print(out)
 
 # === Logging function ===
 
-def debug(message: str, label: dict = None) -> None:
+def debug(message: str, label: str = None) -> None:
     if global_log_level < 7:
         return
     
     if label:
-        out = f'[bright_black]{label["text"]}:[/] DEBUG - {message}'
+        out = f'[bright_black]{label}:[/] DEBUG - {message}'
     else:
         out = f'DEBUG - {message}'
     
@@ -110,12 +101,12 @@ def debug(message: str, label: dict = None) -> None:
     else:
         console.print(out)
 
-def info(message: str, label: dict = None) -> None:
+def info(message: str, label: str = None) -> None:
     if global_log_level < 6:
         return
 
     if label:
-        out = f'[bright_black]{label["text"]}:[/] INFO - {message}'
+        out = f'[bright_black]{label}:[/] INFO - {message}'
     else:
         out = f'INFO - {message}'
 
@@ -124,12 +115,12 @@ def info(message: str, label: dict = None) -> None:
     else:
         console.print(out)
 
-def notice(message: str, label: dict = None) -> None:
+def notice(message: str, label: str = None) -> None:
     if global_log_level < 5:
         return
 
     if label:
-        out = f'[bright_black]{label["text"]}:[/] NOTICE - {message}'
+        out = f'[bright_black]{label}:[/] NOTICE - {message}'
     else:
         out = f'NOTICE - {message}'
 
@@ -138,12 +129,12 @@ def notice(message: str, label: dict = None) -> None:
     else:
         console.print(out)
 
-def warning(message: str, label: dict = None) -> None:
+def warning(message: str, label: str = None) -> None:
     if global_log_level < 4:
         return
 
     if label:
-        out = f'[bright_black]{label["text"]}:[/] [yellow]WARNING - {message}[/]'
+        out = f'[bright_black]{label}:[/] [yellow]WARNING - {message}[/]'
     else:
         out = f'[yellow]WARNING - {message}[/]'
 
@@ -152,12 +143,12 @@ def warning(message: str, label: dict = None) -> None:
     else:
         console.print(out)
 
-def error(message: str, label: dict = None) -> None:
+def error(message: str, label: str = None) -> None:
     if global_log_level < 3:
         return
 
     if label:
-        out = f'[bright_black]{label["text"]}:[/] [red]ERROR - {message}[/]'
+        out = f'[bright_black]{label}:[/] [red]ERROR - {message}[/]'
     else:
         out = f'[red]ERROR - {message}[/]'
 
@@ -166,12 +157,12 @@ def error(message: str, label: dict = None) -> None:
     else:
         console.print(out)
 
-def critical(message: str, label: dict = None) -> None:
+def critical(message: str, label: str = None) -> None:
     if global_log_level < 2:
         return
 
     if label:
-        out = f'[bright_black]{label["text"]}:[/] [red]CRITICAL - {message}[/]'
+        out = f'[bright_black]{label}:[/] [red]CRITICAL - {message}[/]'
     else:
         out = f'[red]CRITICAL - {message}[/]'
 
@@ -200,10 +191,10 @@ def make_table() -> Table:
     table = Table(box=box.SIMPLE, show_header=True, header_style="bold dark_cyan", expand=True)
     table.add_column("Downloading", style="dark_cyan", ratio=1)
     table.add_column("Status: Album / Lyrics / Genre / Copyright / Audio / Album Art / Add Metadata", ratio=3)
-    # printj(active_items, False)
+
     with thread_lock:
         for label, content in active_items.items():
-            table.add_row(content["text"], make_column(content["data"]))
+            table.add_row(label, make_column(content))
     return table
 
 def make_column(content):
@@ -239,38 +230,27 @@ def make_column(content):
     return Columns(parts)
 
 
-def init(label: dict):
-    # --- Initialize active_item. Used so that an item counts as active as soon as its removed from the queue list (webui needs that)
+def update(label: str, ID: str, status: str, message: str = "Nothing"):
     if not live_display:
         return
     with thread_lock:
-        if not active_items.get(label["id"]):
-            active_items[label["id"]] = {"text": label["text"], "data": {}}
-
-def update(label: dict, ID: str, status: str, message: str = "Nothing"):
-    if not live_display:
-        return
-    with thread_lock:
-        if not active_items.get(label["id"]):
-            active_items[label["id"]] = {"text": label["text"], "data": {ID: {"status": status, "message": message}}}
-        elif not active_items[label["id"]].get(ID):
-            active_items[label["id"]]["data"][ID] = {"status": status, "message": message}
-            active_items[label["id"]]["text"] = label["text"]
+        if not active_items.get(label):
+            active_items[label] = {ID: {"status": status, "message": message}}
+        elif not active_items[label].get(ID):
+            active_items[label][ID] = {"status": status, "message": message}
         else:
-            active_items[label["id"]]["data"][ID]["status"] = status
-            active_items[label["id"]]["data"][ID]["message"] = message
-            active_items[label["id"]]["text"] = label["text"]
-
+            active_items[label][ID]["status"] = status
+            active_items[label][ID]["message"] = message
 
             
     live_display.update(make_table())
 
 # --- Removing without message
-def remove(label: dict):
+def remove(label: str):
     if not live_display:
         return
     with thread_lock:
-        active_items.pop(label["id"], None)
+        active_items.pop(label, None)
     live_display.update(make_table())
 
 
@@ -282,24 +262,23 @@ class Download_status(str, Enum):
     FAILED = "failed"
     ALREADY_DOWNLOADED = "already_downloaded"
 
-def finish(label: dict, status):
+def finish(label: str, status):
     if not live_display:
         return
     with thread_lock:
-        this_item = active_items.pop(label["id"], None)
-        finished_item_ids[label["id"]] = status
+        this_item = active_items.pop(label, None)
     live_display.update(make_table())
 
 
     if status is Download_status.ALREADY_DOWNLOADED:
-        live_display.console.print(         f'[blue]  Already Downloaded:       {label["text"]}[/]')
+        live_display.console.print(         f'[blue]  Already Downloaded:       {label}[/]')
         return
     
 
     text = ""
     if this_item:
         counter = 0
-        for ID, item in this_item["data"].items():
+        for ID, item in this_item.items():
             counter += 1
             match item["status"]:
                 case Status.ACTIVE:
@@ -326,13 +305,13 @@ def finish(label: dict, status):
         if global_log_level > 4:
             live_display.console.print(Columns(
                 [
-                    f'[green]  Downloaded successfully:  {label["text"]}[/]',
+                    f'[green]  Downloaded successfully:  {label}[/]',
                     Align.right(text)
                 ],
                 expand=True
             ))
         else:
-            live_display.console.print(        f'[green]  Downloaded successfully:  {label["text"]}[/]')
+            live_display.console.print(        f'[green]  Downloaded successfully:  {label}[/]')
         
     elif status is Download_status.FAILED:
         # live_display.console.print(          f'[red]  Downloaded failed:        {label}[/] {text}')
@@ -340,26 +319,26 @@ def finish(label: dict, status):
         if global_log_level > 4:
             live_display.console.print(Columns(
                 [
-                    f'[red]  Downloaded failed:        {label["text"]}[/]',
+                    f'[red]  Downloaded failed:        {label}[/]',
                     Align.right(text)
                 ],
                 expand=True
             ))
         else:
-            live_display.console.print(          f'[red]  Downloaded failed:        {label["text"]}[/]')
+            live_display.console.print(          f'[red]  Downloaded failed:        {label}[/]')
 
     elif status is Download_status.DOWNLOAD_DISABLED:
         # live_display.console.print(f'[bright_yellow]  Downloaded disabled:      {label}[/] {text}')
         if global_log_level > 4:
             live_display.console.print(Columns(
                 [
-                    f'[bright_yellow]  Downloaded disabled:      {label["text"]}[/]',
+                    f'[bright_yellow]  Downloaded disabled:      {label}[/]',
                     Align.right(text)
                 ],
                 expand=True
             ))
         else:
-            live_display.console.print(f'[bright_yellow]  Downloaded disabled:      {label["text"]}[/]')
+            live_display.console.print(f'[bright_yellow]  Downloaded disabled:      {label}[/]')
 
 
 def print_header(log_level, version):
@@ -377,16 +356,16 @@ def print_header(log_level, version):
 
 # === Debug stuff ===
 
-active_items_test = {
-    "17771447553066918000001": {
-        "text": "1/2 The Warning - MORE",
+active_items_test = { # Just for debug
+    "5876438471578700001": {
+        "label": "2/9 Castle Rat - Feed The Dream",
         "data": {
             "album": {
                 "status": "success",
                 "message": "Nothing"
             },
             "get_lyrics": {
-                "status": "skipped",
+                "status": "success",
                 "message": "Nothing"
             },
             "musicbrainz": {
@@ -415,33 +394,110 @@ active_items_test = {
             }
         }
     },
-    "17771447553066950000002": {
-        "text": "2/2 The Warning - EVOLVE",
-        "data": {
-            "album": {
-                "status": "success",
-                "message": "Nothing"
-            },
-            "get_lyrics": {
-                "status": "skipped",
-                "message": "Nothing"
-            },
-            "musicbrainz": {
-                "status": "success",
-                "message": "Nothing"
-            },
-            "deezer": {
-                "status": "success",
-                "message": "Nothing"
-            },
-            "wait_queue": {
-                "status": "hide",
-                "message": "Nothing"
-            },
-            "downloading": {
-                "status": "active",
-                "message": "yt-dlp: Postprocessing  (Got 3.29MiB at [green]\u001b[0;32m3.83MiB/s\u001b[0m[/])"
-            }
+    "3/9 Castle Rat - Resurrector": {
+        "album": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "get_lyrics": {
+            "status": "not_found",
+            "message": "Nothing"
+        },
+        "musicbrainz": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "deezer": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "wait_queue": {
+            "status": "hide",
+            "message": "Nothing"
+        },
+        "downloading": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "albumart": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "addmetadata": {
+            "status": "success",
+            "message": "Nothing"
+        }
+    }
+}
+
+
+active_items_test = { # Just for debug
+    "2/9 Castle Rat - Feed The Dream": {
+        "album": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "get_lyrics": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "musicbrainz": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "deezer": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "wait_queue": {
+            "status": "hide",
+            "message": "Nothing"
+        },
+        "downloading": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "albumart": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "addmetadata": {
+            "status": "success",
+            "message": "Nothing"
+        }
+    },
+    "3/9 Castle Rat - Resurrector": {
+        "album": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "get_lyrics": {
+            "status": "not_found",
+            "message": "Nothing"
+        },
+        "musicbrainz": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "deezer": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "wait_queue": {
+            "status": "hide",
+            "message": "Nothing"
+        },
+        "downloading": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "albumart": {
+            "status": "success",
+            "message": "Nothing"
+        },
+        "addmetadata": {
+            "status": "success",
+            "message": "Nothing"
         }
     }
 }

@@ -1,0 +1,203 @@
+
+/* === Download === */
+
+#page-download {
+    padding: 0 2rem;
+}
+
+.page-download-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    /* padding: 2rem; */
+    padding-top: 2rem;
+    box-sizing: border-box;
+}
+
+
+.downloader-field {
+  /* background-color: rgb(94, 105, 117); */
+  overflow: auto;
+  padding: 1rem;
+  border-radius: 1rem;
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+  /* border: 1px solid var(--color-main); */
+}
+
+
+.dl-item {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dl-item>div {
+  padding: 0.75rem;
+  white-space: nowrap;
+}
+
+.dl-item-title {
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}
+
+.dl-item-dlbar {
+  position: absolute;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-dlbar-1),
+    var(--color-dlbar-2) 20px
+  );
+  background-size: 200px 3rem;
+  animation: move 3s linear infinite;
+
+  z-index: -1;
+  top: 0; 
+  right: 100%; 
+  bottom: 0;
+  left: 0;
+  transition: right 1s ease;
+
+  border-radius: 1rem;
+  border: 1px inset var(--color-text);
+}
+.dl-field-no-transition .dl-item-dlbar {
+  /* To skip transition when reloading items */
+  transition: right 0s;
+}
+
+@keyframes move {
+  to {
+    background-position: 200px 0;
+  }
+}
+
+.dl-item-dlbar.dl-queue {
+  /* --- Overriding normal dlbar style when not visible, cannot do display none due to animations */
+  border: none !important;
+  padding: 0 !important;
+}
+
+.dl-item-status.dl-finished {
+  border-radius: 1rem;
+  border: 1px solid var(--color-text);
+}
+
+.dl-item-fin-status {
+  padding: 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--color-text);
+  width: 1rem;
+  height: 1rem;
+  background-color: green;
+  user-select: none;
+}
+
+.dl-item-remove {
+  display: none;
+  cursor: pointer;
+  text-shadow: 1px 1px 4px black;
+  padding: 0 1rem !important;
+  user-select: none;
+}
+.dl-item-remove:hover {
+  color: rgb(255, 0, 0);
+}
+
+.dl-item.dl-queue-item:hover > .dl-item-remove {
+  display: block;
+}
+
+.dl-item.dl-queue-item:hover > .dl-item-status {
+  display: none;
+}
+
+
+/* --- Download temp settings */
+.downloader-temp-settings {
+  display: grid;
+  grid-template-columns: 100px 200px auto;
+}
+
+
+/* === Download history === */
+
+.dl-hist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dl-hist-selection {
+  text-align: center;
+}
+
+.hist-tabs {
+  flex-grow: 1;
+  position: sticky;
+  top: 1rem;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+
+}
+
+.hist-tabs>div {
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+}
+.hist-tabs hr {
+  flex-grow: 0;
+  height: 100%;
+  margin: 0;
+  padding: 1rem 0;
+  /* align-self: stretch; */
+}
+
+.hist-tab {
+  display: none;
+}
+
+/* --- Download history table */
+
+.download-report-table {
+  overflow-x: auto;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 1rem;
+  border: 1px var(--color-main) solid;
+}
+
+.download-report-table table {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.download-report-table thead {
+  background-color: var(--color-main);
+}
+
+.download-report-table th {
+  padding: 1rem 0.5rem;
+  text-align: center;
+  white-space: nowrap; /* prevents text wrapping */
+}
+
+.download-report-table td {
+  padding: 0.5rem;
+  text-align: center;
+  white-space: nowrap; /* prevents text wrapping */
+}
+
+.download-report-table td.dl-hist-album-art {
+  padding: 0 0 0 0.5rem !important;
+}
+
+.download-report-table td.dl-hist-album-art img {
+  height: 2rem;
+  border-radius: 0.25rem;
+}
