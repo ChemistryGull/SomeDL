@@ -12,3 +12,5 @@ __pycache__/
 .pytest_cache/
 
 mock_data/
+
+docs/readthedocs/build/
