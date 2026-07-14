@@ -78,6 +78,8 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 
 - [x] Web-UI (*NEW in 1.5.0*)
 - [x] Download songs based on concert setlists, part of the new web UI (*NEW in 1.5.0*)
+- [ ] Improvements to the WebUI (*Working on, hopefully released soon*)
+- [ ] Mobile support for WebUI - will still require SomeDL running on a PC, Server or in termux (*Currently working out feasability*)
 
 # Installation
 This utility can be installed using pip. Also confirm that you meet all the installation [requirements](https://github.com/ChemistryGull/SomeDL#requirements)!
