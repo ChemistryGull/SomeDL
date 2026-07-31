@@ -87,3 +87,39 @@
 
 
 
+/* Loading spinner */
+
+#loading-spinner {
+    position: absolute;
+    top:0;
+    right: 0;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#loading-spinner>svg {
+    animation: spin 0.6s steps(8) infinite;
+    transform-origin: center;
+    display: inline-block;
+    display: none;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.loading-message {
+    opacity: 1;
+    transition: opacity 0.6s ease;
+}
+
+.loading-message-error {
+    color: red;
+}
+
+.loading-message-fade-out {
+    opacity: 0;
+}

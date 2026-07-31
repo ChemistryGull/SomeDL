@@ -39,6 +39,13 @@
 
 /* === Setlist table === */
 
+#setlist-topright-head {
+    vertical-align: middle;
+}
+#setlist-topright-head a {
+    text-decoration: none;
+}
+
 .setlist_table_wrapper {
     border-radius: 1rem;
     overflow: auto;
@@ -75,11 +82,38 @@
     top: 0;
     left: 0;
     background-color: var(--color-main);
+    z-index: 3;
 }
 
 .setlist_table th {
     padding: 0.25rem;
 }
+
+.setlist-venue {
+    position: relative;
+}
+.setlist-venue-url {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.setlist-venue-url svg {
+    width: 16px;
+}
+
+.setlist-venue-song-nr {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  height: 1.1rem;
+  font-weight: 100;
+}
+
+.setlist-venue-song-nr hr {
+  flex: 1;
+}
+
 
 
 /* --- Tour row --- */
@@ -100,7 +134,6 @@
     min-width: 0;
 }
 .setlist_table th.setlist-tour-cell>div:hover {
-    /* overflow: visible; */
     direction: rtl;
 }
 
@@ -136,6 +169,13 @@
 
 .setlist_table div.setlist-body-item:hover {
     direction: rtl;
+}
+.setlist_table div.setlist-body-item:hover .setlist-song-index {
+    display: none !important;
+}
+.setlist-song-index {
+    display: none;
+    padding-right: 0.25rem;
 }
 
 .setlist_table td:first-child {
@@ -202,4 +242,18 @@ tr.setlist-row.unselected {
 
 tr.setlist-row.venue-unselected {
     color: DimGray ;
+}
+
+
+/* === Setlist settings === */
+
+.setlist-settings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: center;
+}
+
+.setlist-settings-label {
+    text-align: right;
 }

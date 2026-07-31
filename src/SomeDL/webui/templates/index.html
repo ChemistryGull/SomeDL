@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Downloader</title>
+    <title>SomeDL WebUI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ui.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/download.css') }}">
@@ -216,8 +216,11 @@
             <div class="page" id="page-download-history">
 
                 <div class="dl-hist-header">
-                    <h2 style="text-align: center;">Download Histroy</h2>
-                    <button class="ui-button" onclick="refresh_history()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg></button>
+                    <h2 style="text-align: center; margin: 0;">Download Histroy</h2>
+                    <div class="flex-expander"></div>
+                    <button class="ui-button" onclick="clear_history()" title="Clear download history"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>
+                    <button class="ui-button" onclick="download_report()" title="Download history as download report"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-download"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg></button>
+                    <button class="ui-button" onclick="refresh_history()" title="Refresh download history"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg></button>
                 </div>
                 
                         
@@ -235,11 +238,9 @@
                         <span>Already downloaded (<span class="hist-nr-already"></span>/<span class="hist-nr-all"></span>)</span>
                     </label>
                 </div>
-                
 
                 <div class="hist-tab hist-tab-success" style="display: block;">
-                    <br>
-                    <div class="download-report-table">
+                    <div class="download-report-table scroll-area">
                         <table>
                             <thead>
                                 <tr>
@@ -255,19 +256,19 @@
                                     <th>URL</th>
                                     <th>Download time</th>
                                     <th>Filetype</th>
+                                    <th></th>
                                 </tr>
                                 
                             </thead>
                             <tbody>
-
+                                
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <div class="hist-tab hist-tab-failed">
-                    <br>
-                    <div class="download-report-table">
+                    <div class="download-report-table scroll-area">
                         <table>
                             <thead>
                                 <tr>
@@ -276,6 +277,7 @@
                                     <th>Song Name</th>
                                     <th>Video Type</th>
                                     <th>Youtube URL</th>
+                                    <th>Error</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -284,8 +286,7 @@
                 </div>
 
                 <div class="hist-tab hist-tab-already">
-                    <br>
-                    <div class="download-report-table">
+                    <div class="download-report-table scroll-area">
                         <table>
                             <thead>
                                 <tr>
@@ -352,18 +353,19 @@
                     <div class="setlist-header">
                         <!-- <h1>Setlist</h1> -->
                         <div class="inp-field">
-                            <input class="inp-field-text inp-left" id="setlistfm-artist-inp-field" onkeypress="if(event.key === 'Enter') setlistfm_artist_search()" placeholder="Search for bands or artists, data from setlist.fm">
-                            <button class="inp-field-button ui-button" onclick="setlistfm_artist_search()">
+                            <input class="inp-field-text inp-left" id="setlistfm-artist-inp-field" onkeypress="if(event.key === 'Enter') setlist.artist_search()" placeholder="Search for bands or artists, data from setlist.fm">
+                            <button class="inp-field-button ui-button" onclick="setlist.artist_search()">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-search">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
                                     <path d="M21 21l-6 -6" />
                                 </svg>
                             </button>
-                            <button class="inp-field-button ui-button" onclick="setlistfm_load_more()" title="Load 20 more venues">
+                            <button class="inp-field-button ui-button" onclick="setlist.load_more()" title="Load 20 more venues">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-rewind-forward-20" version="1.1" id="svg5" sodipodi:docname="rewind-forward-20-plus.svg" inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <path stroke="none" d="M0 0h24v24H0z" fill="none" id="path1" /> <path     d="m 3.9037272,15.688582 a 6,6 0 0 1 3.993,-10.4780002 H 18.896727" id="path2" /> <path d="m 18.775819,17.024436 v 3 a 1.5,1.5 0 0 0 3,0 v -3 a 1.5,1.5 0 0 0 -3,0" id="path3" /> <path d="m 15.896727,8.2105818 3,-3 -3,-3" id="path4" /> <path d="m 12.775819,15.524436 h 2 a 1,1 0 0 1 1,1 v 1 a 1,1 0 0 1 -1,1 h -1 a 1,1 0 0 0 -1,1 v 1 a 1,1 0 0 0 1,1 h 2" id="path5" /> <path style="fill:#000000;stroke-width:2;stroke-linecap:round;stroke-dasharray:none" d="m 7.06776,18.517831 h 3.265523" id="path6" sodipodi:nodetypes="cc" /> <path style="fill:#000000;stroke-width:2;stroke-linecap:round;stroke-dasharray:none" d="m 8.716373,16.837514 v 3.455747" id="path7" sodipodi:nodetypes="cc" /></svg>
                             </button>
-                            <button class="inp-field-button ui-button" title="Download current selection" onclick="setlistfm_download()" style="font-size: 1.5rem;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-download"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg></button>
+                            <button class="inp-field-button ui-button" title="Open setlist settings" onclick="setlist.open_settings()" style="font-size: 1.5rem;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-settings"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg></button>
+                            <button class="inp-field-button ui-button" title="Download current selection" onclick="setlist.download()" style="font-size: 1.5rem;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-download"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg></button>
                         </div>
                     </div>
                     <br>
@@ -373,7 +375,7 @@
                         <div id="setlist_error" style="display: none; padding: 0.75rem 1rem; z-index: 10;">Error</div>
 
                     </div>
-
+                    
 
                     <div style="display: none;" class="setlist-artist-table">
                         <table>
@@ -390,13 +392,13 @@
                         </table>
                     </div>
 
-
-                    <div style="display: none;" class="setlist_table_wrapper" id="setlist_scroll_area">
+                    <div style="display: none;" class="setlist_table_wrapper scroll-area">
                         <table class="setlist_table">
                             <thead id="setlist_thead"></thead>
                             <tbody id="setlist_tbody"></tbody>
                         </table>
                     </div>
+
                 </div>
                
             </div>
@@ -453,7 +455,7 @@
 
                         <div class="s-label">Quality (mp3)</div>
                         <div class="s-control">
-                            <input class="s-inp s-download" type="range" id="s-quality" min="0" max="9" value="5" step="1" oninput="document.getElementById('qval').textContent=this.value">
+                            <input class="s-inp s-download" type="range" id="s-quality" min="0" max="9" value="4" step="1" oninput="document.getElementById('qval').textContent=9-this.value">
                             <span class="range-val" id="qval">5</span>
                             <div class="popup-wrap">
                             <button class="settings-help-btn">?</button>
@@ -1105,44 +1107,34 @@
                             </div>
                         </div>
 
-                        <!-- <div class="s-section-label" id="s-ui">Web UI colors</div>
-
-                        <div class="s-label">Color sceme</div>
+                        <div class="s-label">Browser</div>
                         <div class="s-control">
-                            <div class="radio-group">
-
-                                <label>
-                                    <input type="radio" name="plan" checked />
-                                    
-                                    <div class="card">
-                                    <div class="title">Starter</div>
-
-                                    <div class="boxes">
-                                        <div class="mini-box">5 Projects</div>
-                                        <div class="mini-box">10 GB</div>
-                                        <div class="mini-box">Email Support</div>
-                                        <div class="mini-box">$9/mo</div>
+                            <input class="s-inp s-webui" type="text" id="s-browser">
+                            <div class="popup-wrap">
+                                <button class="settings-help-btn">?</button>
+                                <div class="popup-box">
+                                    <div class="popup">
+                                        <div class="popup-hdr">Browser<button class="popup-close">✖</button></div>
+                                        <div class="popup-body"><i>Default: "" (empty)</i><p>Opens in default browser if left empty. Enter the name of the browser to open when the WebUI starts.</p></div>
                                     </div>
-                                    </div>
-                                </label>
-
-                                <label>
-                                    <input type="radio" name="plan" />
-                                    
-                                    <div class="card">
-                                    <div class="title">Pro</div>
-
-                                    <div class="boxes">
-                                        <div class="mini-box">Unlimited</div>
-                                        <div class="mini-box">1 TB</div>
-                                        <div class="mini-box">Priority Support</div>
-                                        <div class="mini-box">$29/mo</div>
-                                    </div>
-                                    </div>
-                                </label>
-
+                                </div>
                             </div>
-                        </div> -->
+                        </div>
+
+                        <div class="s-label">Automatically open browser</div>
+                        <div class="s-control">
+                            <input class="s-inp s-webui" type="checkbox" id="s-open_browser">
+                            <div class="popup-wrap">
+                                <button class="settings-help-btn">?</button>
+                                <div class="popup-box">
+                                    <div class="popup">
+                                        <div class="popup-hdr">Open browser<button class="popup-close">✖</button></div>
+                                        <div class="popup-body"><i>Default: true</i><p>Automatically opens a webbrowser tab with the WebUI when the WebUI is started.</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
 
 
 
@@ -1206,6 +1198,10 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div id="loading-spinner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-loader-4"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 21v-3m6.36 .36l-2.12 -2.12m4.76 -4.24h-3m.36 -6.36l-2.12 2.12m-4.24 -4.76v3m-6.36 -.36l2.12 2.12m-3.76 4.24h2m1 4.95l.71 -.71" /></svg>
             </div>
 
         </div>

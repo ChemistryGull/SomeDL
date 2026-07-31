@@ -81,6 +81,7 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
                     console.warning(f'Song could not be downloaded, error on initial lookup.', item["label"])
                     console.finish(item.get("label"), console.Download_status.FAILED)
                     with console.thread_lock:
+                        item["error"] = "Song could not be downloaded, error on initial lookup. That video may not be a song. Try looking the song up on YouTube Music or via the SomeDL WebUI (somedl web)."
                         failed_list.append(item)
                     continue
 
@@ -103,6 +104,7 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
                     # --- This has to be outside the above with console.thread_lock, as else it would cause a deadlock (thread_lock called in a thread_lock).
                     console.info("This input is a duplicate", item["label"])
                     console.finish(item.get("label"), console.Download_status.ALREADY_DOWNLOADED)
+                    item["path"] = None
                     already_downloaded_list.append(item)
                     continue
 
@@ -112,15 +114,17 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
                 metadata = fetch_metadata(item, metadata_list)
 
                 if not metadata:
-                    console.warning("Song could not be downloaded", item["label"])
+                    console.warning("Song could not be downloaded, error on metadata fetching.", item["label"])
                     console.finish(item.get("label"), console.Download_status.FAILED)
                     with console.thread_lock:
+                        item["error"] = "Song could not be downloaded, error on metadata fetching."
                         failed_list.append(item)
                     continue
 
-                if metadata == "already_downloaded":
-                    console.finish(item.get("label"), console.Download_status.ALREADY_DOWNLOADED)
-                    
+                if metadata.get("already_downloaded"):
+                    console.finish(item.get("label"), console.Download_status.ALREADY_DOWNLOADED, path=metadata.get("path"))
+                    item["path"] = metadata.get("path")
+
                     with console.thread_lock:
                         already_downloaded_list.append(item)
                     continue
@@ -153,6 +157,7 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
                 traceback.print_exc()
                 console.finish(label, console.Download_status.FAILED)
                 with console.thread_lock:
+                    item["error"] = str(e)
                     failed_list.append(item)
 
 
@@ -197,16 +202,18 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
                     console.update(label, "downloading", console.Status.SUCCESS)
                     
                     addMetadata(metadata, filename, label)
+                    metadata["path"] = filename
                     metadata["filetype"] = filename.rsplit(".", 1)[-1]
                     with console.thread_lock:
                         metadata_success_list.append(metadata)
 
-                    console.finish(label, console.Download_status.SUCCESS)
+                    console.finish(label, console.Download_status.SUCCESS, path=filename)
                 else: 
                     console.error("File could not be downloaded using yt-dlp", label)
                     console.update(label, "downloading", console.Status.FAILED)
                     console.finish(label, console.Download_status.FAILED)
                     with console.thread_lock:
+                        metadata["error"] = "File could not be downloaded using yt-dlp. Retrying might help."
                         failed_list.append(metadata)
                     continue
 
@@ -228,6 +235,7 @@ def process_song_list_concurrent(song_list_queue: queue.Queue, oneshot: bool = T
                 traceback.print_exc()
                 console.finish(label, console.Download_status.FAILED)
                 with console.thread_lock:
+                    metadata["error"] = str(e)
                     failed_list.append(metadata)
 
             download_queue.task_done()

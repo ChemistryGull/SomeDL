@@ -10,7 +10,13 @@ def setlistfm_get_artist(artist_name):
     url = f"{BASE_URL}/search/artists?artistName={artist_name}&sort=relevance"
     headers = {"Accept": "application/json", "X-Proxy-Token": PROXY_TOKEN}
     try:
-        response = requests.get(url, headers=headers).json()
+        response = requests.get(url, headers=headers, timeout=20).json()
+
+    except requests.exceptions.Timeout:
+        print("Request timed out after 20 seconds")
+        console.warning(f'Setlist request "{artist_name}" timed out after 20 seconds.')
+        return None
+
     except Exception as e:
         traceback.print_exc()
 
@@ -30,7 +36,13 @@ def setlistfm_get_setlist(mbid, page):
 
 
     try:
-        response = requests.get(url, headers=headers).json()
+        response = requests.get(url, headers=headers, timeout=20).json()
+
+    except requests.exceptions.Timeout:
+        print("Request timed out after 20 seconds")
+        console.warning(f'Setlist request "{artist_name}" timed out after 20 seconds.')
+        return None
+
     except Exception as e:
         # print("Error wh")
         traceback.print_exc()

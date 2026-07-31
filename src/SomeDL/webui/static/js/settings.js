@@ -267,12 +267,15 @@ var settings = {
             const id = element.id.replace("s-", "");
             const group = element.classList[1].replace("s-", ""); // --- IMPORTANT: group name has to always be the second class name!
             
+            if (id == "quality") {
+                new_config[group][id] = 9 - Number(element.value);
+                continue;
+            }
             if (id == "sync_files") {
                 sync_files = element.value.trim() === "" ? [] : element.value.split(",").map(s => s.trim());
                 new_config[group][id] = sync_files;
                 continue;
             }
-            
             if (element.type == "checkbox") {
                 new_config[group][id] = element.checked;
             } else {
@@ -295,8 +298,9 @@ var settings = {
                 element.value = config[group][id].join(", ")
                 continue;
             }
-            
-            if (element.type == "checkbox") {
+            if (id == "quality") {
+                element.value = 9 - config[group][id];
+            } else if (element.type == "checkbox") {
                 element.checked = config[group][id]
             } else {
                 element.value = config[group][id]
@@ -371,10 +375,6 @@ var settings = {
     async apply () {
         // --- Updates config file & loaded configs
         console.log(" === Settings apply === ");
-
-        // if (!confirm("Changing the settings of a running session may lead to some of the running downloads failing. Do you want to continue?")) {
-        //     return;
-        // }
 
         await settings_apply(this.read(), true);
         settings.remember_current();

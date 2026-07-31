@@ -12,8 +12,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/chemistrygull/somedl?style=flat)](https://github.com/ChemistryGull/SomeDL)
 [![Last commit](https://img.shields.io/github/last-commit/chemistrygull/somedl)](https://github.com/ChemistryGull/SomeDL)
 
-![SomeDL usage gif](https://github.com/ChemistryGull/SomeDL/blob/main/docs/images/somedl_usage_cut.gif)
-![SomeDL WebUI](https://github.com/ChemistryGull/SomeDL/blob/main/docs/images/webui/somedl_webui_download_2.png)
+![SomeDL usage gif](https://raw.githubusercontent.com/ChemistryGull/SomeDL/refs/heads/main/docs/images/somedl_usage_cut.gif)
+![SomeDL WebUI](https://raw.githubusercontent.com/ChemistryGull/SomeDL/refs/heads/main/docs/images/webui/somedl_webui_download_2.png)
 
 
 The audio is downloaded using yt-dlp. SomeDL accepts text queries, YouTube URLs and YouTube playlist URLs. Metadata is fetched from YouTube, MusicBrainz, Genius and Deezer. Setlist data is fetched from setlist.fm. No API tokens required for any of these services, it works out of the box.

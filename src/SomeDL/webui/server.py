@@ -6,8 +6,14 @@ import hashlib
 import json
 import webbrowser
 import logging
+import traceback
+import os
+import subprocess
+import platform
+from pathlib import Path
 
 from flask import Flask, render_template, request, jsonify, Response
+# from flask_cors import CORS
 from waitress import serve
 
 from SomeDL.core.processor import process_song_list_concurrent
@@ -17,6 +23,7 @@ import SomeDL.utils.console as console
 from SomeDL.utils.config import config, change_configs, deep_update_config, generate_config, webui_config_load, webui_config_save
 from SomeDL.api.ytmusic import yt
 from SomeDL.utils.version import VERSION
+from SomeDL.core.download_report import build_download_report
 
 
 # Replace default logging to make it work with rich (everything is put into console.webui(), as its only flask/werkzeug/waitress returning logging logs here)
@@ -45,6 +52,15 @@ logging.basicConfig(
 
 
 app = Flask(__name__)
+# CORS(app)
+
+# --- Handle 
+@app.errorhandler(500)
+def handle_500(error):
+    return jsonify({
+        "error": "Internal Server Error"
+    }), 500
+
 
 # === Main lists and queues ===
 
@@ -55,6 +71,7 @@ metadata_success_list: list = []
 failed_list: list = []
 already_downloaded_list: list = []
 yt_dl_lock = threading.Lock()
+song_list_lock = threading.Lock()
 
 
 
@@ -68,64 +85,129 @@ def get_status():
         "finished_items": console.finished_item_ids,
         "items_in_queue": song_list_queue.qsize()
     } 
-    return jsonify(answer)
+    return jsonify(answer), 200
 
 @app.route("/get-queue")
 def get_queue():
     return jsonify({
         "active": console.active_items,
         "queue": list(song_list_queue.queue)}
-    )
+    ), 200
 
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
     stop_event.set()
-    return jsonify({"ok": True})
+    return jsonify({"message": "shutdown triggered"}), 200
 
 @app.route("/add", methods=["POST"])
 def add():
     data = request.json
-    input_list = data.get("item")
+    input_list = data.get("input_list")
     console.webui(f'Downloading songs: {input_list}')
+
     if not input_list:
         return jsonify({"error": "No item"}), 400
 
-    songs_list = generateSongList(input_list)
+    with yt_dl_lock: # --- Wait until the previous request is finished
+        try:
+            songs_list = generateSongList(input_list)
+        except Exception as e:
+            console.error("Failed to generate song list in /add")
+            traceback.print_exc()
+            return jsonify({"error": "Failed to generate song list, internal server error"}), 500
 
-    for item in songs_list:
-        song_list_queue.put(item)
+        for item in songs_list:
+            song_list_queue.put(item)
 
-    return jsonify({"ok": True, "song_list": songs_list})
+        return jsonify({"song_list": songs_list}), 200
 
 @app.route("/get-version")
 def get_version():
-    return {"v": VERSION}
+    return jsonify({"v": VERSION}), 200
 
 @app.route("/get-history")
 def get_history():
     # console.webui(f'Fetching download history')
-    answer = {
-        "metadata_success_list": metadata_success_list,
-        "failed_list": failed_list,
-        "already_downloaded_list": already_downloaded_list
-    }
-    return jsonify(answer)
+    with console.thread_lock:
+        answer = {
+            "metadata_success_list": metadata_success_list,
+            "failed_list": failed_list,
+            "already_downloaded_list": already_downloaded_list
+        }
+    return jsonify(answer), 200
+
+@app.route("/open-file", methods=["POST"])
+def open_file():
+    data = request.json
+    path = data.get("path")
+    console.webui(f'Opening file "{path}"')
+
+    if not path:
+        return jsonify({"error": "No path"}), 400
+
+    path = Path(path)
+
+    if not path.exists():
+        return jsonify({"error": "File does not exist"}), 404
+
+    system = platform.system()
+
+    if system == "Windows":
+        os.startfile(path)
+    elif system == "Darwin":
+        subprocess.Popen(["open", path])
+    elif system == "Linux":
+        subprocess.Popen(["xdg-open", path])
+    else:
+        return jsonify({"error": "Operating system not recognized"}), 500
+   
+    return jsonify("message", "successfully openend file"), 200
+
+@app.route("/get-download-report", methods=["GET"])
+def get_download_report():
+    try:
+        with console.thread_lock:
+            html = build_download_report(metadata_success_list, failed_list, already_downloaded_list)
+            return jsonify({"html": html}), 200
+    except Exception as e:
+        return jsonify({"error": f'Failed to generate download report ({e})'}), 500
+
+
+@app.route("/clear-download-history", methods=["POST"])
+def clear_download_history():
+    try:
+        with console.thread_lock:
+            metadata_success_list.clear()
+            failed_list.clear()
+            already_downloaded_list.clear()
+            return jsonify({}), 200
+    except Exception as e:
+        return jsonify({"error": f'Failed to generate download report ({e})'}), 500
+
+
+
+    
 
 
 # === Controls ===
-@app.route("/pause-download")
+@app.route("/pause-download", methods=["POST"])
 def pause_download():
     console.webui("Pausing download")
     console.pause_event.clear()
-    return jsonify({"ok": True})
+    return jsonify({"message": "Download paused"}), 200
 
-@app.route("/resume-download")
+@app.route("/resume-download", methods=["POST"])
 def resume_download():
     console.webui("Resuming download")
     console.pause_event.set()
-    return jsonify({"ok": True})
+    return jsonify({"message": "Download resumed"}), 200
 
-@app.route("/clear-queue")
+@app.route("/get-downloader-state", methods=["GET"])
+def get_downloader_state():
+    is_running = console.pause_event.is_set()
+    return jsonify({"is_running": is_running}), 200
+
+@app.route("/clear-queue", methods=["POST"])
 def clear_queue():
     console.webui("Clearing download queue")
     # --- Pause processing
@@ -144,7 +226,7 @@ def clear_queue():
     if is_running:
         console.pause_event.set()
 
-    return jsonify({"ok": True})
+    return jsonify({"message": "Queue cleared"}), 200
 
 @app.route("/remove-item", methods=["POST"])
 def remove_item():
@@ -153,36 +235,38 @@ def remove_item():
     console.webui(f'Removing queue item with ID: {somedl_id}')
 
     if not (data):
-        return jsonify({"error": "No settings from webui provided"}), 400
+        return jsonify({"error": "No settings provided from webui"}), 400
 
-    # --- Pause processing
-    is_running = console.pause_event.is_set()
-    console.pause_event.clear()
-    
-    # --- Drain queue and add all items keep that are not the target somedl_id
-    keep = []
+    with song_list_lock: # --- Only remove one item at a time
+        # --- Pause processing
+        is_running = console.pause_event.is_set()
+        console.pause_event.clear()
+        
+        # --- Drain queue and add all items keep that are not the target somedl_id
+        keep = []
 
-    try:
-        while True:
-            item = song_list_queue.get_nowait()
+        try:
+            while True:
+                item = song_list_queue.get_nowait()
 
-            if str(item.get("somedl_id")) != str(somedl_id):
-                keep.append(item)
+                if str(item.get("somedl_id")) != str(somedl_id):
+                    keep.append(item)
 
-            song_list_queue.task_done()
+                song_list_queue.task_done()
 
-    except queue.Empty:
-        pass
+        except queue.Empty:
+            pass
 
-    # put remaining items back
-    for item in keep:
-        song_list_queue.put(item)
+        # put remaining items back
+        for item in keep:
+            song_list_queue.put(item)
 
-    # --- Continue processing (to download the remaining ones)
-    if is_running:
-        console.pause_event.set()
+        # --- Continue processing (to download the remaining ones)
+        if is_running:
+            console.pause_event.set()
 
-    return jsonify({"ok": True})
+        return jsonify({"message": "Item removed"}), 200
+
 
 
 # === Youtube ===
@@ -195,7 +279,7 @@ def yt_download():
     with yt_dl_lock: # --- Wait until the previous request is finished
         console.webui(f'Downloading {url}')
         if not url:
-            return jsonify({"error": "No item"}), 400
+            return jsonify({"error": "No url"}), 400
 
         if artist_presets:
             orig_include_singles = config["download"]["include_singles"]
@@ -203,18 +287,23 @@ def yt_download():
             config["download"]["include_singles"] = artist_presets.get("singles")
             config["download"]["include_other_artists"] = artist_presets.get("other")
             
-        songs_list = generateSongList([url])
+        try:
+            songs_list = generateSongList([url])
+        except Exception as e:
+            console.error("Failed to generate song list in /yt-download")
+            traceback.print_exc()
+            return jsonify({"error": "Failed to generate song list, internal server error"}), 500
+
 
         if artist_presets:
             config["download"]["include_singles"] = orig_include_singles
             config["download"]["include_other_artists"] = orig_include_other_artists
 
         for item in songs_list:
+            item["skip_album_check"] = True
             song_list_queue.put(item)
 
-        # console.printj(list(song_list_queue.queue))
-
-        return jsonify({"ok": True, "song_list": songs_list})
+        return jsonify({"song_list": songs_list}), 200
 
 @app.route("/yt-search", methods=["POST"])
 def yt_search():
@@ -223,17 +312,15 @@ def yt_search():
     search_filter = data.get("filter")
     console.webui(f'YT searching: "{search_query}"')
     if not (search_query and search_filter):
-        return jsonify({"error": "No search_query or search_filter"}), 400
+        return jsonify({"error": "No search_query or filter"}), 400
 
-    
     try:
         search_results = yt.search(search_query, filter=search_filter)
     except Exception as e:
         console.warning("ytmusicapi error")
-        return jsonify({"error": "ytmusicapi error"}), 503
+        return jsonify({"error": "ytmusicapi error"}), 500
 
-
-    return jsonify({"ok": True, "result": search_results})
+    return jsonify({"result": search_results}), 200
 
 @app.route("/yt-get-album", methods=["POST"])
 def yt_get_album():
@@ -247,9 +334,9 @@ def yt_get_album():
         search_results = yt.get_playlist(album_id)
     except Exception as e:
         console.warning("ytmusicapi error")
-        return jsonify({"error": "ytmusicapi error"}), 503
+        return jsonify({"error": "ytmusicapi error"}), 500
 
-    return jsonify({"ok": True, "result": search_results})
+    return jsonify({"result": search_results}), 200
 
 @app.route("/yt-get-album-browse-id", methods=["POST"])
 def yt_get_album_browse_id():
@@ -264,13 +351,13 @@ def yt_get_album_browse_id():
         search_results = yt.get_playlist(album_results.get("audioPlaylistId"), limit=None)
     except Exception as e:
         console.warning("ytmusicapi error")
-        return jsonify({"error": "ytmusicapi error"}), 503
+        return jsonify({"error": "ytmusicapi error"}), 500
 
     if data.get("return_album_data"):
         # --- If wanted, also returns the album result data
-        return jsonify({"ok": True, "result": search_results, "album_data": album_results})
+        return jsonify({"result": search_results, "album_data": album_results}), 200
     else:
-        return jsonify({"ok": True, "result": search_results})
+        return jsonify({"result": search_results}), 200
  
 @app.route("/yt-get-artist", methods=["POST"])
 def yt_get_artist():
@@ -285,7 +372,7 @@ def yt_get_artist():
     except Exception as e:
         console.error("Artist search returned no results. Skipping this artist. Error info:")
         console.error(e)
-        return jsonify({"error": "Interal exception in yt-get-artist"}), 400
+        return jsonify({"error": "Interal exception in yt-get-artist"}), 500
 
     # console.printj(artist_result)
 
@@ -331,11 +418,8 @@ def yt_get_artist():
     
     artist_result.get("singles", {})["results"] = artist_singles_result
 
-    
-    
 
-
-    return jsonify({"ok": True, "result": artist_result})
+    return jsonify({"result": artist_result}), 200
 
 
 # === Setlist ===
@@ -348,7 +432,11 @@ def setlist_artist():
         return jsonify({"error": "No search_query"}), 400
 
     search_results = setlistfm_get_artist(search_query)
-    return search_results
+
+    if search_results == None:
+        return jsonify({"error": "Setlist.fm request timed out"}), 504
+
+    return jsonify({"result": search_results}), 200
 
 @app.route("/setlist-mbid", methods=["POST"])
 def setlist_mbid():
@@ -356,18 +444,22 @@ def setlist_mbid():
     mbid = data.get("mbid")
     page = data.get("page")
     console.webui(f'Fetching setlist data: {mbid}, page {page}')
-    if not (mbid):
-        return jsonify({"error": "No search_query"}), 400
+    if not (mbid and page):
+        return jsonify({"error": "No mbid or page"}), 400
 
     setlist_result = setlistfm_get_setlist(mbid, page)
-    return setlist_result
+
+    if setlist_result == None:
+        return jsonify({"error": "Setlist.fm request timed out"}), 504
+
+    return jsonify({"result": setlist_result}), 200
 
 
 # === Settings ===
-@app.route("/settings-read", methods=["POST"])
+@app.route("/settings-read", methods=["GET"])
 def settings_read():
     with yt_dl_lock:
-        return config
+        return jsonify({"config": config}), 200
 
 @app.route("/settings-apply", methods=["POST"])
 def settings_apply():
@@ -393,7 +485,7 @@ def settings_apply():
             console.webui(f'Applying settings')
             deep_update_config(settings)
 
-        return jsonify({"ok": True})
+        return jsonify({"message": "applied settings"}), 200
 
 
 # === WebUI configs ===
@@ -416,7 +508,7 @@ def req_webui_save_config():
 
     webui_config_save(webui_settings)
     
-    return jsonify({"ok": True})
+    return jsonify({"message": "applied settings"}), 200
 
 
 # === Serve main HTML page ===
@@ -441,10 +533,15 @@ def start_webui():
 
     t = threading.Thread(target=start_server, daemon=True)
     t.start()
+    
     if config["webui"]["open_browser"]:
         if config["webui"]["browser"]:
-            browser = webbrowser.get(config["webui"]["browser"])
-            browser.open(f'http://127.0.0.1:{config["webui"]["port"]}/')
+            try:
+                browser = webbrowser.get(config["webui"]["browser"])
+                browser.open(f'http://127.0.0.1:{config["webui"]["port"]}/')
+            except Exception:
+                console.warning(f'Browser \"{config["webui"]["browser"]}\" not found. Resorting to default browser.')
+                webbrowser.open(f'http://127.0.0.1:{config["webui"]["port"]}/')
         else:
             webbrowser.open(f'http://127.0.0.1:{config["webui"]["port"]}/')
 

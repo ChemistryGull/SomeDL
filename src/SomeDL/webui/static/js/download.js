@@ -115,9 +115,21 @@ function new_item_template(somedl_id, title) {
                 <div class="dl-item-title">${title}</div>
                 <div class="dl-item-status">Queued</div>
                 <div class="dl-item-remove" onclick="download.remove('${somedl_id}')">${icons.trash}</div>
+                <div class="dl-item-hidden dl-item-open-wrap">
+                    <div class="dl-item-play-song" title="Open file in music player">${icons.play}</div>
+                    <div class="dl-item-open-folder" title="Open containing folder">${icons.open_folder}</div>
+                </div>
+                <div class="dl-item-hidden dl-item-redownload">
+                    <div class="dl-item-redownload" title="Try to redownload">${icons.redownload}</div>
+                </div>
             </div>`
 }
 
+async function dl_update_status_loop() {
+    // --- Loops the refresh function, waits 500 seconds after it has finished
+    await dl_update_status()
+    setTimeout(dl_update_status_loop, 500);
+}
 
 async function dl_update_status() {
     console.log(dl_status_active);
@@ -147,7 +159,7 @@ async function dl_update_status() {
         var somedl_id = node.dataset.id
 
         var status_node = node.querySelector(".dl-item-status");
-        var dl_bar_node = node.querySelector(".dl-item-dlbar"); 
+        var dl_bar_node = node.querySelector(".dl-item-dlbar");
 
         if (data.active_items[somedl_id]) {
             // dl_bar_node.style.display = "block";
@@ -201,7 +213,7 @@ async function dl_update_status() {
             node.classList.remove("dl-queue-item");
             node.classList.replace("active", "dl-finished"); // --- dl-finished used in refresh_queue_items()
 
-            switch (data.finished_items[somedl_id]) {
+            switch (data.finished_items[somedl_id][0]) {
                 case "success":
                     status_node.innerHTML = "Success"
                     dl_bar_node.style.background = "green";
@@ -223,11 +235,13 @@ async function dl_update_status() {
                 case "failed":
                     status_node.innerHTML = "Download failed"
                     dl_bar_node.style.background = "red";
-                    // node.style.background = "red";
-                    // status_node.style.color = "red";
-                    // status_node.classList.add("dl-finished")
-                    // status_node.style.background = "red";
-
+                    // --- Activate redownload button
+                    node.classList.add("dl-redownloadable");
+                    // node.querySelector(".dl-item-redownload").addEventListener("click", () => {
+                    //     add_list([node.querySelector(".dl-item-title").innerText]);
+                    // })
+                    node.querySelector(".dl-item-redownload").dataset.title = node.querySelector(".dl-item-title").innerText;
+                    node.querySelector(".dl-item-redownload").setAttribute("onclick", "add_list([this.dataset.title]);");
                     break;
                 case "already_downloaded":
                     status_node.innerHTML = "Already downloaded"
@@ -242,9 +256,54 @@ async function dl_update_status() {
                     status_node.innerHTML = "ERROR"
                     break;
             }
+
+            if (data.finished_items[somedl_id][1]) {
+                // --- Add open folder/file buttons to finished items
+                var dl_bar_play_song = node.querySelector(".dl-item-play-song");
+                var dl_bar_open_folder = node.querySelector(".dl-item-open-folder");
+
+                node.classList.add("dl-has-path");
+
+                const path = data.finished_items[somedl_id][1];
+                console.log(path);
+                console.log({
+                    node,
+                    play: dl_bar_play_song,
+                    folder: dl_bar_open_folder
+                });           
+                // const dir = path.substring(0, path.lastIndexOf('/'));
+                const dir = path.substring(0, Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')));
+
+                // dl_bar_play_song.addEventListener("click", () => {
+                //     req_open_file(path);
+                // })
+                // dl_bar_open_folder.addEventListener("click", () => {
+                //     req_open_file(dir);
+                // })
+
+
+                // dl_bar_play_song.dataset.path = path;
+                // dl_bar_open_folder.dataset.dir = dir;
+               
+                dl_bar_play_song.dataset.path = path;
+                dl_bar_play_song.setAttribute("onclick", "req_open_file(this.dataset.path);");
+
+                dl_bar_open_folder.dataset.dir = dir;
+                dl_bar_open_folder.setAttribute("onclick", "req_open_file(this.dataset.dir);");
+                
+                // dl_bar_play_song.setAttribute("onclick", `req_open_file('${escape_attr(path)}')`);
+                // dl_bar_open_folder.setAttribute("onclick", `req_open_file('${escape_attr(dir)}')`);
+
+
+            }
+            
         }
        
     })
+}
+
+function escape_attr(str) {
+      return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
 function update_download_tracker(active_nr, finished_nr) {

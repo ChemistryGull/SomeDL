@@ -12,8 +12,15 @@ Download & General
 
     In ``active_items``, the ``text`` element contains the artist name and song title, as well as the download number.
     ``data`` contains a list of processes this item went through in the order shown below, each with a status 
-    (``active``, ``success``, ``part_succ``, ``not_found``, ``failed``, ``skipped``, ``hide``, ) 
+    (``active``, ``success``, ``part_succ``, ``not_found``, ``failed``, ``skipped``, ``hide``) 
     and a message showing additional information in an active state, though sometimes formated as a python rich string.
+
+    ``finished_items`` is a dict of completed items, 
+    with the SomeDL ID as key and the status as first property and the output path as the second property in the list. 
+    ``success`` always returns a path. 
+    ``already_downloaded`` returns a path except for items that are marked as already downloaded
+    because they are duplicates the queue, and thus does not have a path (yet). 
+    ``failed`` always returns ``null``.
 
     Because this design is reused from the CLI, its not the most straightforward.
 
@@ -22,8 +29,8 @@ Download & General
 
     :resheader Content-Type: application/json
 
-    :>json dict active_items: Items currently being processed, with the SomeDL ID as key. 
-    :>json dict finished_items: Doct of completed items, with the SomeDL ID as key and the status as property.
+    :>json dict active_items: Items currently being processed, with the SomeDL ID as key
+    :>json dict finished_items: Dict of finished items
     :>json int items_in_queue: Number of items waiting in the queue
 
     **Example request (JavaScript):**
@@ -107,9 +114,10 @@ Download & General
                 }
             },
             "finished_items": {
-                "17806688160307190000001": "success",
-                "17806688160354710000001": "success",
-                "17806688160397410000001": "success"
+                "17806688160307190000001": ["success", "/path/to/file.ext"],
+                "17806688160354710000001": ["failed", null],
+                "17806688160397410000001": ["already_downloaded", null],
+                "17806688160416870000001": ["already_downloaded", "/path/to/file.ext"],
             },
             "items_in_queue": 5
         }
@@ -300,7 +308,7 @@ Download & General
     :resheader Content-Type: application/json
 
     :>json dict metadata_success_list: List of songs that were successfully downloaded
-    :>json dict already_downloaded_list: List of songs that were already downloaded and thus skipped
+    :>json dict already_downloaded_list: List of songs that were already downloaded and thus skipped (path is null if song was skipped because it was in the queue twice)
     :>json int failed_list: List of songs that failed to download
 
     **Example response:**
@@ -340,6 +348,7 @@ Download & General
                     ],
                     "artist_id": "UCPdbkw3S_0ZSHAqlnxo9E_g",
                     "artist_name": "Gojira",
+                    "artist_name_original": "Gojira",
                     "date": "2016",
                     "deezer_album_id": 13304751,
                     "deezer_album_label": "Roadrunner Records",
@@ -352,6 +361,7 @@ Download & General
                     "download_time": 19.918654441833496,
                     "duration": 270,
                     "filetype": "mp3",
+                    "inp_type": "Playlist",
                     "label": {
                         "id": "17806746083312502000002",
                         "text": "2/0 Gojira - Stranded"
@@ -360,9 +370,12 @@ Download & General
                     "mb_artist_name": "Gojira",
                     "mb_genres": "progressive metal",
                     "metadata_time": 28.545751810073853,
+                    "path": "path/to/music_file",
+                    "playlist_id": "PLf6K355GeZ...",
                     "somedl_id": "17806746083312502000002",
                     "song_id": "zgychWIo6UA",
                     "song_title": "Stranded",
+                    "song_title_original": "Stranded",
                     "song_title_clean": "Stranded",
                     "text_query": "gojira - stranded",
                     "total_time": "48.5 seconds",
@@ -389,6 +402,7 @@ Download & General
                         "id": "17806746083312340000001",
                         "text": "1/0 Delain - Not Enough"
                     },
+                    "path": "path/to/music_file or null",
                     "somedl_id": "17806746083312340000001",
                     "song_id": "oQ5DHtZU3RI",
                     "song_title": "Not Enough",
@@ -441,6 +455,7 @@ Download & General
                     ],
                     "deezer_isrc": "FRX452148688",
                     "duration": 224,
+                    "error": "Download failed due to xyz..."
                     "label": {
                         "id": "17806746083312592000003",
                         "text": "3/0 Hämatom - Liebe auf den ersten xxxx"
@@ -465,7 +480,60 @@ Download & General
             ]
         }
 
+.. http:post:: /open-file
 
+    Opens a file on the users PC in the default application, used for opening downloaded file and/or the containing folder.
+
+    **Request body:**
+
+    :<json string path: Absolute filepath.
+
+    .. code-block:: json
+
+        {
+            "path": "/path/to/file",
+        }
+    
+
+    **Responses:**
+
+    :statuscode 200: Successfully opened file
+    :statuscode 400: Missing or invalid ``path`` field
+    :statuscode 404: File not found
+    :statuscode 500: Internal server error, operating system not recognized
+
+    :resheader Content-Type: application/json
+
+.. http:post:: /get-download-report
+
+    Returns the complete download report as a html string.
+
+    **Responses:**
+
+    :statuscode 200: Successully generated the download report
+    :statuscode 500: Internal server error, generating download report failed
+
+    :resheader Content-Type: application/json
+
+    **Example response:**
+
+    .. code-block:: json
+
+        {
+            "hmtl": "<html string>",
+        }
+
+
+.. http:get:: /clear-download-history
+
+    Clears download history.
+
+    **Responses:**
+
+    :statuscode 200: Success
+    :statuscode 500: Internal server error, failed to clear download history
+
+    :resheader Content-Type: application/json
 
 Control
 -------
@@ -506,6 +574,28 @@ Control
         {
             "message": "Download resumed"
         }
+
+
+
+.. http:get:: /get-downloader-state
+
+    Gets state of downloader (running or paused).
+
+    **Response:**
+
+    :statuscode 200: Shutdown successfully triggered
+    :resheader Content-Type: application/json
+    :>json bool is_running: True if downloader is running, false if it is paused.
+
+
+    **Example response:**
+
+    .. code-block:: json
+
+        {
+            "is_running": true
+        }
+
 
 
 .. http:post:: /clear-queue
@@ -587,7 +677,7 @@ YouTube Search
 
     **Responses:**
 
-    :statuscode 200: Sucessfully added url
+    :statuscode 200: Successfully added url
     :statuscode 400: Missing or invalid "url" field
     :statuscode 500: Failed to generate song list, internal server error.
 
@@ -1261,6 +1351,7 @@ Setlist
     :statuscode 200: Successfull lookup
     :statuscode 400: Missing or invalid ``search_query`` field
     :statuscode 500: Internal server error
+    :statuscode 504: Request timeout (20 seconds)
 
     :resheader Content-Type: application/json
 
@@ -1309,7 +1400,7 @@ Setlist
     .. code-block:: json
 
         {
-            "mbid": "Artist/Band name",
+            "mbid": "Artist/Band mbid",
             "page": "1"
         }
     
@@ -1319,6 +1410,7 @@ Setlist
     :statuscode 200: Successfull lookup
     :statuscode 400: Missing or invalid ``mbid`` field
     :statuscode 500: Internal server error
+    :statuscode 504: Request timeout (20 seconds)
 
     :resheader Content-Type: application/json
 

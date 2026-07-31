@@ -282,12 +282,12 @@ class Download_status(str, Enum):
     FAILED = "failed"
     ALREADY_DOWNLOADED = "already_downloaded"
 
-def finish(label: dict, status):
+def finish(label: dict, status, path: str = None):
     if not live_display:
         return
     with thread_lock:
         this_item = active_items.pop(label["id"], None)
-        finished_item_ids[label["id"]] = status
+        finished_item_ids[label["id"]] = [status, path]
     live_display.update(make_table())
 
 

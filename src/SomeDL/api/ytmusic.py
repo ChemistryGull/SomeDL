@@ -1,3 +1,5 @@
+import traceback
+
 from ytmusicapi import YTMusic
 
 import SomeDL.utils.console as console
@@ -68,6 +70,7 @@ class CachedYTMusic(YTMusic):
                 except Exception as e:
                     print("[ytmusicapi] - Error while getting data from YouTube:")
                     print(e)
+                    traceback.print_exc()
 
             return self.add_to_cache(browseId, data)
 
@@ -81,6 +84,7 @@ class CachedYTMusic(YTMusic):
             except Exception as e:
                 print("[ytmusicapi] - Error while getting data from YouTube:")
                 print(e)
+                traceback.print_exc()
 
     def get_playlist(self, ID, limit = None):
         try:
@@ -92,6 +96,7 @@ class CachedYTMusic(YTMusic):
             except Exception as e:
                 print("[ytmusicapi] - Error while getting data from YouTube:")
                 print(e)
+                traceback.print_exc()
 
     def get_watch_playlist(self, ID):
         try:
@@ -103,6 +108,7 @@ class CachedYTMusic(YTMusic):
             except Exception as e:
                 print("[ytmusicapi] - Error while getting data from YouTube:")
                 print(e)
+                traceback.print_exc()
 
     def get_artist(self, channelId):
         try:
@@ -114,6 +120,7 @@ class CachedYTMusic(YTMusic):
             except Exception as e:
                 print("[ytmusicapi] - Error while getting data from YouTube:")
                 print(e)
+                traceback.print_exc()
         
     def get_artist_albums(self, browseId, params):
         try:
@@ -125,6 +132,7 @@ class CachedYTMusic(YTMusic):
             except Exception as e:
                 print("[ytmusicapi] - Error while getting data from YouTube:")
                 print(e)
+                traceback.print_exc()
 
     def get_lyrics(self, query):
         try:
@@ -136,6 +144,7 @@ class CachedYTMusic(YTMusic):
             except Exception as e:
                 print("[ytmusicapi] - Error while getting data from YouTube:")
                 print(e)
+                traceback.print_exc()
 
 
 

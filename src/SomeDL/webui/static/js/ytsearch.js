@@ -54,7 +54,7 @@ async function yt_search() {
             search_results_string += `
                 <div class="yt-search-item">
                     <div class="yt-search-coverart">
-                        <img src="${album_art_url}" alt="Coverart">
+                        <img src="${album_art_url}" alt="Coverart" loading="lazy">
                         <button class="yt-search-download-btn" onclick="yt_search_download('https://music.youtube.com/watch?v=${video_id}', this)">${icons.download()}</button>
                     </div>
                     <div class="yt-search-text">
@@ -95,7 +95,7 @@ async function yt_search() {
             <div class="yt-search-item-wrapper">
                 <div class="yt-search-item">
                     <div class="yt-search-coverart">
-                        <img src="${album_art_url}" alt="Coverart">
+                        <img src="${album_art_url}" alt="Coverart" loading="lazy">
                         <button class="yt-search-download-btn" onclick="yt_search_download('https://music.youtube.com/browse/${browse_id}', this)">${icons.download()}</button>
                     </div>
                     <div class="yt-search-text">
@@ -126,7 +126,7 @@ async function yt_search() {
             search_results_string += `
                 <div class="yt-search-item">
                     <div class="yt-search-coverart">
-                        <img src="${album_art_url}" alt="Coverart">
+                        <img src="${album_art_url}" alt="Coverart" loading="lazy">
                         <button class="yt-search-download-btn" onclick="prompt_yt_download_artist('https://music.youtube.com/channel/${browse_id}', '${artist}')">${icons.download()}</button>
                     </div>
                     <div class="yt-search-text clickable" onclick="yt_get_artist_content('${browse_id}')">
@@ -284,7 +284,7 @@ async function yt_get_artist_content(browse_id) {
             <div class="yt-search-item-wrapper yt-search-item-wrapper-artist">
                 <div class="yt-search-item">
                     <div class="yt-search-coverart">
-                        <img src="${album_art_url}" alt="Coverart">
+                        <img src="${album_art_url}" alt="Coverart" loading="lazy">
                         <button class="yt-search-download-btn" onclick="yt_search_download('https://music.youtube.com/browse/${browse_id}', this)">${icons.download()}</button>
                     </div>
                     <div class="yt-search-text">
@@ -326,7 +326,7 @@ async function yt_get_artist_content(browse_id) {
             <div class="yt-search-item-wrapper yt-search-item-wrapper-artist">
                 <div class="yt-search-item">
                     <div class="yt-search-coverart">
-                        <img src="${album_art_url}" alt="Coverart">
+                        <img src="${album_art_url}" alt="Coverart" loading="lazy">
                         <button class="yt-search-download-btn" onclick="yt_search_download('https://music.youtube.com/browse/${browse_id}', this)">${icons.download()}</button>
                     </div>
                     <div class="yt-search-text">
@@ -408,7 +408,7 @@ async function yt_get_album(browse_id) {
         <div class="yt-search-item">
             <button class="yt-search-artist-header-back-btn ui-button" onclick="yt_search_return_btn('yt-search-results-field-history-${old_history_number}')">${icons.chevron_left}</button>
             <div class="yt-search-coverart large">
-                <img src="${album_art_url}" alt="Coverart">
+                <img src="${album_art_url}" alt="Coverart" loading="lazy">
                 <button class="yt-search-download-btn"  onclick="yt_search_download('https://music.youtube.com/browse/${browse_id}', this)">${icons.download(true)}</button>
             </div>
             <div class="yt-search-text">

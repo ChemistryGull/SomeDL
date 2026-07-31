@@ -42,7 +42,8 @@ def generateSongList(input_list):
             songs_list.append({
                 "text_query": item,
                 "video_type": "Search query",
-                "video_type_original": "Search query"
+                "video_type_original": "Search query",
+                "inp_type": "Search query"
             })
 
         if item_parsed["inp_type"] == "artist" and item_parsed.get("artist_id", None):
@@ -131,6 +132,8 @@ def parseInput(inp):
             out["video_id"] = parsed_url.path.split("/")[1]
         else:
             console.warning(f"Input is not a valid URL: {inp}")
+            if path_parts and path_parts[0].startswith("@"):
+                console.warning(f"If you want to download the discography of an artist, use the url that contains the channel ID (e.g. https://music.youtube.com/channel/UCRAHc... ). This can be obtained by right click -> 'Copy Link' from the YT Music search directly (not YouTube!). Alternatively, you can use the SomeDL WebUI with 'somedl web'.")
             out["inp_type"] = None
     else:
         # --- like "Spiritbox - Circle with me"
@@ -186,7 +189,7 @@ def parseArtist(artist_id: str):
             console.notice("No browse id found.")
             continue
 
-        album_result = parseAlbum(album.get("browseId"))
+        album_result = parseAlbum(album.get("browseId"), artist_id)
 
         if not album_result:
             continue
@@ -217,7 +220,7 @@ def parseArtist(artist_id: str):
                 console.notice("No browse id found.")
                 continue
 
-            album_result = parseAlbum(album.get("browseId"))
+            album_result = parseAlbum(album.get("browseId"), artist_id)
 
             if not album_result:
                 continue
@@ -239,7 +242,7 @@ def parseArtist(artist_id: str):
 
 
 
-def parseAlbum(album_id: str):
+def parseAlbum(album_id: str, artist_id: str = None):
 
     try:
         album_result = yt.get_album(album_id)
@@ -279,9 +282,11 @@ def parseAlbum(album_id: str):
             "album_id":             item_playlist.get("album", {}).get("id"),
             "artist_id":            item_playlist.get("artists", [{}])[0].get("id", ""),
             "artist_name":          item_playlist.get("artists", [{}])[0].get("name", ""),
+            "artist_name_original": item_playlist.get("artists", [{}])[0].get("name", ""),
             "artist_all_names":     [a.get("name") for a in item_playlist.get("artists", [])],
             "is_Explicit":          item_playlist.get("isExplicit"),
             "song_title":           item_playlist.get("title").strip(),
+            "song_title_original":  item_playlist.get("title").strip(),
             "song_title_clean":     clean_song_title(item_playlist.get("title")),
             "song_id":              item_playlist.get("videoId"),
             "video_type":           item_playlist.get("videoType"),
@@ -300,6 +305,10 @@ def parseAlbum(album_id: str):
         }
         if item_data.get("song_id"):
             item_data["original_url_id"] = item_data.get("song_id")
+        if artist_id:
+            item_data["inp_type"] = "Artist"
+        else:
+            item_data["inp_type"] = "Album"
 
         album.append(item_data)
 
@@ -326,18 +335,25 @@ def parsePlaylist(playlist_id: str):
             "album_name":           (item.get("album") or {}).get("name"),
             "artist_id":            item.get("artists", [{}])[0].get("id", ""),
             "artist_name":          item.get("artists", [{}])[0].get("name", ""),
+            "artist_name_original": item.get("artists", [{}])[0].get("name", ""),
             "artist_all_names":     [a.get("name") for a in item.get("artists", [])],
             "is_Explicit":          item.get("isExplicit"),
             "song_title":           item.get("title").strip(),
+            "song_title_original":  item.get("title").strip(),
             "song_title_clean":     clean_song_title(item.get("title")),
             "song_id":              item.get("videoId"),
             "video_type":           item.get("videoType"),
             "video_type_original":  item.get("videoType"),
             "yt_url":               f'https://www.youtube.com/watch?v={item.get("videoId")}',
             "original_url_id":      item.get("videoId"),
+            "playlist_id":          playlist_id
         }
         if item_data.get("song_id"):
             item_data["original_url_id"] = item_data.get("song_id")
+        if playlist_id.startswith("OLAK"):
+            item_data["inp_type"] = "Album"
+        else:
+            item_data["inp_type"] = "Playlist"
 
         playlist.append(item_data)
 
@@ -364,8 +380,10 @@ def parseSongURL(song_id: str):
             "album_name":           (song.get("album") or {}).get("name"),
             "artist_id":            song.get("artists", [{}])[0].get("id", ""),
             "artist_name":          song.get("artists", [{}])[0].get("name", ""),
+            "artist_name_original": song.get("artists", [{}])[0].get("name", ""),
             "artist_all_names":     [a.get("name") for a in song.get("artists", [])],
             "song_title":           song.get("title").strip(),
+            "song_title_original":  song.get("title").strip(),
             "song_title_clean":     clean_song_title(song.get("title")),
             "song_id":              song.get("videoId"),
             "video_type":           song.get("videoType"),
@@ -373,6 +391,7 @@ def parseSongURL(song_id: str):
             "yt_url":               f'https://www.youtube.com/watch?v={song.get("videoId")}',
             "lyrics_id":            result.get("lyrics", None), # --- API only returns lyrics if its of video_type ATV
             "original_url_id":      song.get("videoId"),
+            "inp_type":             "Song",
         }
         return song_data
     else:

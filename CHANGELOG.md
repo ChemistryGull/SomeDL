@@ -1,6 +1,53 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
+
+## [1.6.0] - 31.07.2026
+
+SomeDL is now on ReadTheDocs! Check it out here: https://somedl.readthedocs.io/en/latest/index.html
+
+This update includes a whole lot of small changes. There have been severaly bugfixes and improvements on the WebUI. You can now open downloaded songs directly from the WebUI in your default music player! Now there is also a button that lets you redownload a song that failed to download (Especially useful when youtube has issues of rejecting some requests at random). The Setlist section also got several new features, like sorting the setlist alphabetically, downloading the setlist and more.
+
+The download report also got an overhaul. It now includes a simple download checker and you can export the download data as an .csv.
+
+If I find the time, I'll look into making the webUI mobile-capable, so that you can use SomeDL on the go :) (requires SomeDL running on a server or within termux).
+
+### Added
+- Add WebUI settings entries "browser" and "open browser"
+- Add loading spinner and error warnings
+- Add a warning that downloading by artist handle (https://www.youtube.com/@artistname) is not possible, one should use the url with the channel ID.
+- Add `/open-file`. Opens file on the users PC with the default application. The user can now open files and containing folders of downloaded songs directly from the WebUI.
+- Add "settings" button to the setlist tab (only per-session settings).
+- Setlist:
+    - Add option to show the song order of each venues setlist.
+    - Add option to download the current setlist table as a simple html file.
+    - Add option to sort the setlist alphabetically.
+    - Add links to each setlist.fm entry
+- Add fields to data structure:
+    - `artist_name_original` and `song_title_original` for clear comparison after download
+    - `inp_type` for all input types (`Song`, `Playlist`, `Album`, `Artist`, `Search query` and `Fetch Albums`)
+    - `playlist_id` for when the `inp_type` is `Playlist`
+    - `error` shows error information for failed downloads. Does not show additional info for unexpected errors or tracebacks like in the CLI
+- Add flask endpoints `get-download-report` and `clear-download-history`
+
+### Changed
+- Completely overhauled the download report
+    - Export as `.csv`
+    - Integrated simple download checker
+- Add try except to fallback to default browser when defined browser is not found.
+- Downloading a single from the YouTube Search in the WebUI now downloads the clicked version and skips the album check (Implement `skip_album_check`)
+- Add 20 seconds timeout to setlist.fm requests
+- WebUI: Switch from interval to setTimeout in dl_update_status() loop, to avoid overlapping request on slow connection speeds.
+- Tables in Download History tab can now be vertically scrolled with the mouse while maintaining selectability (select with double click).
+- Automatically unselect venues with no songs in setlist table
+
+### Fixed
+- In WebUI internal_api, add_item(), trim input and remove entries that are empty to avoid having failed downloads due to empty strings.
+- Fix the pause button being in the wrong state after page refresh (adds `/get-downloader-state`).
+- Fix rare issue where all ytmusicapi requests fail in current session. This was due to a change in the YouTube Music UI and was fixed by the ytmusicapi team in version 1.12.1. This version is now targeted. Relevant issue: https://github.com/sigma67/ytmusicapi/issues/935
+
+
+
 ## [1.5.0] - 31.05.2026
 
 BIG new feature update - SomeDL now finally has a WebUI! Its features are listed below.
@@ -14,7 +61,6 @@ BIG new feature update - SomeDL now finally has a WebUI! Its features are listed
     - Change settings directly from the WebUI
     - Theme the SomeDL WebUI to your liking
 - Add ID system to keep track of which download is which (for the web ui). The ID is generated for each entry in `generateSongList()` (and `fetch_albums()` if thats enabled). The ID is a string of numbers, consisting of a timestamp + a 6 digit counter (increasing for every song in a request). Changed `console.active_items` keys to this ID, set the label as `text` property and put the status in `data`.
-
 
 ### Changed
 - Add 30s timeouts to deezer and cover art requests

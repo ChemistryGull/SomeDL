@@ -92,11 +92,12 @@ def checkIfFileExists(artist, song, song_id, album_artist = None):
     #     song=sanitize(song)
     # )
     # print(filled_filepath)
-    path = base / Path(filled_filepath)
+    path = (base / Path(filled_filepath)).resolve() # --- Make absolute
     path_str = re.sub(r'[\[\]]', lambda m: '[[]' if m.group() == '[' else '[]]', str(path))
-    # print(path_str)
-    if glob.glob(path_str):
-        return True
+    glob_res = glob.glob(path_str)
+
+    if glob_res:
+        return glob_res[0]
 
     return False
 

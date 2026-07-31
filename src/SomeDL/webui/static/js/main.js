@@ -15,17 +15,31 @@ window.onload = async function () {
     await settings.load();
     settings.remember_current();
 
+    // --- Get downloader state
+    const downloader_state = await get_downloader_state();
+    if (downloader_state.is_running) {
+        document.querySelectorAll(".download-btn-pause").forEach(el => el.style.display = "flex");
+        document.querySelectorAll(".download-btn-resume").forEach(el => el.style.display = "none");        
+    } else {
+        document.querySelectorAll(".download-btn-pause").forEach(el => el.style.display = "none");
+        document.querySelectorAll(".download-btn-resume").forEach(el => el.style.display = "flex");   
+    }
+
     // --- Refetch download queue
     refresh_queue_items();
 
-    // --- Initialize status fetching interval
-    setInterval(dl_update_status, 500);
+    // --- Initialize status fetching loop
+    // setInterval(dl_update_status, 500);
+    dl_update_status_loop();
 
     // --- Load version
-    // const version = await get_version();
-    // document.querySelector(".version").innerHTML = "v" + version.v;
+    const version = await get_version();
+    if (version) {
+        document.querySelector(".version").innerHTML = "v" + version.v;
+    }
 
 }
+
 
 
 // === Initialize coloris without transparancy ===
@@ -85,14 +99,19 @@ function display_help() {
                 <li><b>Question mark:</b> Shows this message.</li>
             </ul>
             <p>Change the download format, output folder and more in the settings tab. (don't forget to apply!)</p>
-            <p>If a download fails, try again. Often it works on the second try. If it still fails, there might be other problems, like the song being age restricted (<a target="_blank" href="https://github.com/ChemistryGull/SomeDL#how-do-i-download-age-restricted-songs">How to circumvent this</a>).</p>
+            <p>If a download fails, try again. Often it works on the second try. If it still fails, there might be other problems, like the song being age restricted (<a target="_blank" href="https://somedl.readthedocs.io/en/latest/usage/howto.html#how-do-i-download-age-restricted-songs">How to circumvent this</a>). Also view the command-line output for additional information.</p>
 
             <h3>${icons.search}YouTube Search</h3>
             <p>Search for songs, albums, or artists just like you would on YouTube Music, Spotify etc. Click a cover image to add that item to your download queue. You can also click on the artists or albums for additional information.</p>
 
             <h3>${icons.setlist}Setlist</h3>
-            <p>Search for a band or artist to display their concert setlists history. From there you can deselect any songs or venues you don't want and load more shows with the +20 button. Underlined song titles have extra info, hover over them to see it. When you're happy with your selection, press the download button in the top-left corner.</p>
-            <p>Setlist data is provided by <a href="https://setlist.fm" target="_blank">setlist.fm</a>. their API is rate-limited, so please avoid running large amount of searches in rapid succession.</p>
+            <p>Search for a band or artist to display their concert setlists history. From there you can deselect any songs or venues you don't want and load more shows with the +20 button. When you're happy with your selection, press the download button in the top-left corner.</p>
+            <p>Extra information in the table:</p>
+            <ul>
+                <li><u>Underlined</u> Underlined song titles contain extra info. Hover over them to see it.</li>
+                <li><i>Italic</i> Covers and songs played from tape are italic. Hover over them for exact information.</li>
+            </ul>
+            <p>Setlist data is provided by <a href="https://setlist.fm" target="_blank">setlist.fm</a>. Their API is rate-limited, so please avoid making a large amount of searche requests in rapid succession.</p>
 
             <h3>${icons.history}Download History</h3>
             <p>Similar to the download report, the download history shows information of all downloaded songs. Resets when application is restarted.</p>
@@ -109,7 +128,7 @@ function display_help() {
             <hr>
             <h4>Contact</h4>
             <ul>
-                <li>Need more info? Visit the <a href="https://github.com/ChemistryGull/SomeDL" target="_blank">GitHub page</a></li>
+                <li>Need more info? Visit the <a href="https://github.com/ChemistryGull/SomeDL" target="_blank">GitHub page</a> and the <a href="https://somedl.readthedocs.io/en/latest/index.html" target="_blank">ReadTheDocs Page</a></li>
                 <li>Need help? Ask <a href="https://github.com/ChemistryGull/SomeDL/discussions" target="_blank">here</a></li>
                 <li>Tips or ideas? Tell me <a href="https://github.com/ChemistryGull/SomeDL/discussions/categories/ideas" target="_blank">here</a></li>
                 <li>Found a bug? Tell me <a href="https://github.com/ChemistryGull/SomeDL/issues" target="_blank">here</a></li>
@@ -130,6 +149,44 @@ function display_help() {
         `)
 }
 
+
+// === Loader function ===
+var loader = {
+    counter: 0,
+    start () {
+        this.counter++;
+        setTimeout(() => {
+            // --- Don't show loading spinner in the fist 100 ms
+            if (this.counter > 0) {
+                document.querySelector("#loading-spinner>svg").style.display = "block";
+            }
+        }, 100)
+    },
+    stop (message) {
+        this.counter--;
+        
+        if (this.counter <= 0) {
+            document.querySelector("#loading-spinner>svg").style.display = "none";
+            this.counter = 0
+        }
+
+        if (message) {
+            const el = document.createElement("span");
+            el.classList.add("loading-message", "loading-message-error");
+            el.textContent = message;
+            document.getElementById("loading-spinner").prepend(el);
+            setTimeout(() => {
+                el.classList.add("loading-message-fade-out");
+
+                // wait for fade transition to finish, then remove
+                el.addEventListener("transitionend", () => {
+                    el.remove();
+                });
+            }, 5000);
+        }
+    }
+    
+}
 
 // === Flying download button ===
 
@@ -198,6 +255,68 @@ function flying_download_button(target) {
 }
 
 
+
+// === drag and move table ===
+const DRAG_THRESHOLD = 6;
+
+var activeArea = null;
+var startX = 0;
+var startY = 0;
+var scrollLeft = 0;
+var scrollTop = 0;
+var isDragging = false;
+
+document.querySelectorAll('.scroll-area').forEach(area => {
+
+    area.addEventListener('pointerdown', e => {
+        activeArea = area;
+
+        startX = e.pageX;
+        startY = e.pageY;
+
+        scrollLeft = area.scrollLeft;
+        scrollTop  = area.scrollTop;
+
+        isDragging = false;
+
+    });
+
+    area.addEventListener('click', e => {
+        if (isDragging) e.stopPropagation();
+    }, true);
+});
+
+window.addEventListener('pointermove', e => {
+    if (!activeArea) return;
+
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) {
+        return; // --- don't scroll when something is selected
+    }
+
+    const dx = e.pageX - startX;
+    const dy = e.pageY - startY;
+    const dist = Math.hypot(dx, dy);
+    activeArea.style.userSelect = 'none';
+
+    if (dist > DRAG_THRESHOLD) {
+        isDragging = true;
+
+        activeArea.scrollLeft = scrollLeft - dx;
+        activeArea.scrollTop  = scrollTop  - dy;
+    }
+});
+
+window.addEventListener('pointerup', () => {
+    if (activeArea) {
+        activeArea.style.userSelect = '';
+    }
+    activeArea = null;
+});
+
+
+
+// === Icons ===
 var icons = {
     download(large = false) {
         var icon_class = large ? "icon-yt-dl-button-large" : "icon-yt-dl-button-small";
@@ -211,5 +330,12 @@ var icons = {
     search: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-search"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>`,
     setlist: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-hand-love-you"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M11 11.5v-1a1.5 1.5 0 0 1 3 0v1.5" /><path d="M17 12v-6.5a1.5 1.5 0 0 1 3 0v10.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7a69.74 69.74 0 0 1 -.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47" /><path d="M14 10.5a1.5 1.5 0 0 1 3 0v1.5" /><path d="M8 13v-8.5a1.5 1.5 0 0 1 3 0v7.5" /></svg>`,
     history: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-history"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 8l0 4l2 2" /><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" /></svg>`,
-    settings: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-settings"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>`
+    settings: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-settings"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>`,
+    loader: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-loader-4"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 21v-3m6.36 .36l-2.12 -2.12m4.76 -4.24h-3m.36 -6.36l-2.12 2.12m-4.24 -4.76v3m-6.36 -.36l2.12 2.12m-3.76 4.24h2m1 4.95l.71 -.71" /></svg>`,
+    open_folder: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-folder-open"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 19l2.757 -7.351a1 1 0 0 1 .936 -.649h12.307a1 1 0 0 1 .986 1.164l-.996 5.211a2 2 0 0 1 -1.964 1.625h-14.026a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v2" /></svg>`,
+    play: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-player-play"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 4v16l13 -8l-13 -8" /></svg>`,
+    file_download: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-download"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path d="M12 17v-6" /><path d="M9.5 14.5l2.5 2.5l2.5 -2.5" /></svg>`,
+    external_link: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>`,
+    redownload: `<svg   width="24"   height="24"   viewBox="0 0 24 24"   fill="none"   stroke="currentColor"   stroke-width="2"   stroke-linecap="round"   stroke-linejoin="round"   class="icon icon-tabler icons-tabler-outline icon-tabler-reload"   version="1.1"   id="svg3"   sodipodi:docname="reload.svg"   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"   xmlns="http://www.w3.org/2000/svg"   xmlns:svg="http://www.w3.org/2000/svg">  <path     stroke="none"     d="M0 0h24v24H0z"     fill="none"     id="path1" />  <path     d="M 15.868967,4.9731044 A 8,8 0 1 1 4.0605195,10.997649 C 4.5553828,7.0029885 7.8991256,3.9802863 11.924958,3.9609419"     id="path2" />  <path     d="M 15.516153,11.959628 11.980619,15.495162 8.4450854,11.959628"     id="path3"     sodipodi:nodetypes="ccc" />  <path     d="m 11.924958,3.9609419 0.05566,9.7781221"     id="path1-3"     sodipodi:nodetypes="cc" /></svg>`,
+    sort_alphabetically: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-sort-ascending-letters"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 10v-5c0 -1.38 .62 -2 2 -2s2 .62 2 2v5m0 -3h-4" /><path d="M19 21h-4l4 -7h-4" /><path d="M4 15l3 3l3 -3" /><path d="M7 6v12" /></svg>`
 }

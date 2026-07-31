@@ -1,5 +1,6 @@
 import time
 import re
+import traceback
 
 from SomeDL.utils.config import config
 from SomeDL.utils.utils import clean_song_title, checkIfFileExists
@@ -24,12 +25,10 @@ def fetch_metadata(metadata, known_metadata: list = []):
     start = time.time()
     console.info(f'Start fetching metadata', metadata.get("label"))
 
-    if checkIfFileExists(metadata["artist_name"], metadata["song_title"], metadata["song_id"]):
+    if (result := checkIfFileExists(metadata["artist_name"], metadata["song_title"], metadata["song_id"])):
         console.info(f'[green]Song does already exist. Skipping download.[/]', metadata.get("label"))
+        return {"already_downloaded": True, "path": result}
 
-        return "already_downloaded"
-
-    
 
     # === Guess album ===           time 0.12 or 0.8-2.0
     console.update(metadata.get("label"), "album", console.Status.ACTIVE, "Fetching album data")
@@ -40,7 +39,7 @@ def fetch_metadata(metadata, known_metadata: list = []):
         console.debug(f'Getting album data from {metadata["album_id"]}', metadata.get("label"))
         album = yt.get_album(metadata["album_id"])
 
-        new_album_id, new_album_name, album = metadata_album_check(metadata["artist_name"], metadata["song_title_clean"], metadata["album_id"], metadata["album_name"], album, label=metadata.get("label"))
+        new_album_id, new_album_name, album = metadata_album_check(metadata["artist_name"], metadata["song_title_clean"], metadata["album_id"], metadata["album_name"], album, metadata.get("skip_album_check"), label=metadata.get("label"))
         
         metadata["album_id"] = new_album_id
         metadata["album_name"] = new_album_name
@@ -56,11 +55,10 @@ def fetch_metadata(metadata, known_metadata: list = []):
     # timerend("guess_album")
 
     # === Second check if exists ===
-    if checkIfFileExists(metadata["artist_name"], metadata["song_title"], metadata["song_id"], metadata["album_artist"]):
+    if (result := checkIfFileExists(metadata["artist_name"], metadata["song_title"], metadata["song_id"], metadata["album_artist"])):
         # --- Second check, neccessary if only album_artist is set
         console.info(f'[green]Song does already exist. Skipping download. (2)[/]', metadata.get("label"))
-        return "already_downloaded"
-
+        return {"already_downloaded": True, "path": result}
     
     
     # === Get lyrics ===
@@ -187,7 +185,8 @@ def fetch_albums(songs_list):
 
             # === Choose album if present ===
             album = yt.get_album(song["album_id"])
-            new_album_id, new_album_name, album = metadata_album_check(song["artist_name"], song["song_title_clean"], song["album_id"], song["album_name"], album)
+            # TODO: Maybe change skip_album_check to reflect if it actually needs to be done? I think it should always be done, you only use it when manually downloading songs/playlists in the WebUI. If searching via yt-search, the user just has to click download on the album.
+            new_album_id, new_album_name, album = metadata_album_check(song["artist_name"], song["song_title_clean"], song["album_id"], song["album_name"], album, skip_album_check=False)
             song["album_id"] = new_album_id
             song["album_name"] = new_album_name     
             song.update(metadata_get_album_data(song["song_title"], album))
@@ -199,6 +198,7 @@ def fetch_albums(songs_list):
         except Exception as e:
             songname = song.get("text_query", f'{song.get("artist_name")} - {song.get("song_title")}')
             console.error(f'Failed to fetch album for \"{songname}\"')
+            traceback.print_exc()
             continue
     
     index = 0
@@ -212,9 +212,13 @@ def fetch_albums(songs_list):
 
 
 # === Album Check ===
-def metadata_album_check(artist_name: str, song_title: str, album_id: str, album_name: str, album: dict, label: str = None):
+def metadata_album_check(artist_name: str, song_title: str, album_id: str, album_name: str, album: dict, skip_album_check: bool, label: str = None):
     
     console.debug(f'Album type is: {album.get("type", "")}', label)
+
+    if skip_album_check:
+        console.debug("Album-check: skip_album_check is set, no check required as download comes directly from WebUI YouTube search.", label)
+        return album_id, album_name, album
 
     if album.get("type") not in ("Single", "EP"):
         console.debug("Album-check: Is album, no check required", label)
