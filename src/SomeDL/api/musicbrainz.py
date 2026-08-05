@@ -29,13 +29,13 @@ def musicBrainzGetSongByName(artist: str, song: str, label: str = None):
                 return
             else:
                 console.warning(f"The MusicBrainz server (genre data) is currently busy! Retrying shortly.", label)
-                thime.sleep(2) # Additional 2 seconds of waiting
-                raise Exception("MusicBrainz server is busy") # Jump in exception
+                time.sleep(2) # Additional 2 seconds of waiting
+                raise requests.exceptions.RequestException("MusicBrainz server is busy")
         
         global_retry_counter = 0
         return response
 
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         # print("ERROR: Musicbrainz GetSongByName Request failed. Retrying after 5 seconds.", config["global_retry_max"] - global_retry_counter, "attempts left.", e)
         retry_timeout = 5 + global_retry_counter * global_retry_counter
         console.notice(f'Musicbrainz GetSongByName Request failed. Retrying after {retry_timeout} seconds. {config["api"]["max_retry"] - global_retry_counter} attempts left. {e}', label)
@@ -60,7 +60,7 @@ def musicBrainzGetArtistByMBID(mbid: str, label: str = None):
             else:
                 console.warning(f"The MusicBrainz server (genre data) is currently busy! Retrying shortly.", label)
                 time.sleep(2) # Additional 2 seconds of waiting
-                raise Exception("MusicBrainz server is busy") # Jump in exception
+                raise requests.exceptions.RequestException("MusicBrainz server is busy")
 
         global_retry_counter = 0
         return response

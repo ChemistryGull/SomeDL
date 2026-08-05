@@ -19,6 +19,7 @@ def setlistfm_get_artist(artist_name):
 
     except Exception as e:
         traceback.print_exc()
+        return None
 
     return response
 
@@ -46,6 +47,7 @@ def setlistfm_get_setlist(mbid, page):
     except Exception as e:
         # print("Error wh")
         traceback.print_exc()
+        return None
 
 
     return response

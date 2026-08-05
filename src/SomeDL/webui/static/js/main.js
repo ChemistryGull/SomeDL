@@ -64,7 +64,10 @@ function load_page(page) {
         el.classList.remove('active-page');
     });
 
-    document.getElementById("navbar-" + page).classList.add('active-page');
+    // document.getElementById("navbar-" + page).classList.add('active-page');
+    document.querySelectorAll(".navbar-" + page).forEach((el) => {
+        el.classList.add('active-page');
+    })
 
 
     if (page == "download") {
@@ -85,7 +88,7 @@ load_page("download")
 
 // === Help screen ===
 function display_help() {
-    alert_box('SomeDL WebUI Guide<button class="popup-close">✖</button>', `
+    alert_box('SomeDL WebUI Guide<button class="popup-close">✕</button>', `
         <div class="help-info-wrapper">
             Disclaimer: This WebUI is still very new, so there may be bugs and inconsistencies. Please report bugs and suggest changes on <a href="https://github.com/ChemistryGull/SomeDL" target="_blank">GitHub</a>.
             <h3>${icons.download()}Download</h3>
@@ -150,6 +153,12 @@ function display_help() {
 }
 
 
+// === Show sidebar on mobile ===
+function display_sidebar() {
+    document.querySelector(".sidebar-download-tracker").classList.toggle("visible");
+}
+
+
 // === Loader function ===
 var loader = {
     counter: 0,
@@ -196,7 +205,13 @@ function flying_download_button(target) {
     if (!original_img) {
         original_img = target.parentNode.querySelector(".yt-search-tracknumber");
     }
-    var sidebar_download_tracker = document.querySelector(".sidebar-download-tracker")
+
+    if (window.matchMedia("(max-width: 768px)").matches) {
+        // Go to download navbar button on mobile
+        var sidebar_download_tracker = document.querySelector(".navbar-download.mobile")
+    } else {
+        var sidebar_download_tracker = document.querySelector(".sidebar-download-tracker")
+    }
 
     var cloned_img = original_img.cloneNode(true);    
     const cloned_pos = original_img.getBoundingClientRect();
@@ -209,10 +224,11 @@ function flying_download_button(target) {
 
     var distance = Math.sqrt((cloned_pos.left - cloned_target_pos.left)**2 + (cloned_pos.top - cloned_target_pos.top)**2)
     var SPEED = 800; // px/s
-    var animation_time = Math.round(10 * distance / SPEED) / 10
+    var animation_time = Math.max(Math.round(10 * distance / SPEED) / 10, 0.4)
     var random_angle = Math.floor(Math.random() * 90) - 45;
-    
+
     console.log(distance);
+    console.log(animation_time);
     console.log(random_angle);
     console.log(Math.round(10 * distance / SPEED) / 10);
     
@@ -336,6 +352,6 @@ var icons = {
     play: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-player-play"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 4v16l13 -8l-13 -8" /></svg>`,
     file_download: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-download"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path d="M12 17v-6" /><path d="M9.5 14.5l2.5 2.5l2.5 -2.5" /></svg>`,
     external_link: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>`,
-    redownload: `<svg   width="24"   height="24"   viewBox="0 0 24 24"   fill="none"   stroke="currentColor"   stroke-width="2"   stroke-linecap="round"   stroke-linejoin="round"   class="icon icon-tabler icons-tabler-outline icon-tabler-reload"   version="1.1"   id="svg3"   sodipodi:docname="reload.svg"   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"   xmlns="http://www.w3.org/2000/svg"   xmlns:svg="http://www.w3.org/2000/svg">  <path     stroke="none"     d="M0 0h24v24H0z"     fill="none"     id="path1" />  <path     d="M 15.868967,4.9731044 A 8,8 0 1 1 4.0605195,10.997649 C 4.5553828,7.0029885 7.8991256,3.9802863 11.924958,3.9609419"     id="path2" />  <path     d="M 15.516153,11.959628 11.980619,15.495162 8.4450854,11.959628"     id="path3"     sodipodi:nodetypes="ccc" />  <path     d="m 11.924958,3.9609419 0.05566,9.7781221"     id="path1-3"     sodipodi:nodetypes="cc" /></svg>`,
+    redownload: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-circle-open-arrow-down"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15.998 3.934a9 9 0 1 1 -3.998 -.934v13" /><path d="M16 12l-4 4l-4 -4" /></svg>`,
     sort_alphabetically: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-sort-ascending-letters"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 10v-5c0 -1.38 .62 -2 2 -2s2 .62 2 2v5m0 -3h-4" /><path d="M19 21h-4l4 -7h-4" /><path d="M4 15l3 3l3 -3" /><path d="M7 6v12" /></svg>`
 }

@@ -661,6 +661,10 @@ var settings = {
         this.webui_config_update();
 
     },
+    webui_add_entry (key, val) {
+        this.webui_settings[key] = val;
+        this.webui_config_update();
+    },
     webui_config_update () {
         req_webui_config_save(this.webui_settings)
     },

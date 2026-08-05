@@ -1,4 +1,6 @@
 :root {
+  --max-width-mobile: 768px;
+  --padding-pages: 2rem;
   --theme: light;
   --color-background: #1e1c20;
   --color-background-highlight: #2d2b2f;
@@ -29,6 +31,7 @@ body {
   margin: 0;
   color: var(--color-text);
   background-color: var(--color-background);
+  overflow: hidden;
   /* overflow-x: hidden; */
 }
 
@@ -177,15 +180,12 @@ select {
   background-color: var(--color-main-highlight);
 }
 
-.navbar-item-active {
-  border-left: 3px darkcyan solid;
-}
-
 
 /* === Download tracker === */
 .sidebar-download-tracker {
   text-align: center;
   padding: 1rem;
+  position: relative;
 }
 
 .dl-tracker-row-1 {
@@ -200,6 +200,14 @@ select {
   gap: 0.5rem 1rem;
   /* display: flex;
   justify-content: center; */
+}
+
+#btn-sidebar-download-tracker-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.5rem;
+  display: none;
 }
 
 .shutdown-button {
@@ -254,22 +262,13 @@ select {
   background-color: var(--color-background-highlight);
 }
 
-/* .active-page::before {
-  content: "➤";
-  display: inline-block;
-  height: 1rem;
-  width: 1.25rem;
-  margin-left: -1.25rem;
-} */
-
-
 .content {
   /* padding: 1rem; */
   overflow-y: auto;
 }
 
 .page {
-  padding: 2rem;
+  padding: var(--padding-pages);
   display: none; /* --- Hide all pages on start */
 }
 
@@ -308,4 +307,202 @@ select {
 
 .help-info-wrapper ul {
   margin-left: 2rem;
+}
+
+
+/* === Mobile === */
+
+.mobile-navbar {
+  display: none;
+}
+
+#btn-downloader-sidebar {
+  display: none;
+}
+#btn-downloader-help {
+  display: flex;
+}
+
+
+
+@media (max-width: 768px) {
+  :root {
+    --padding-pages: 1rem;
+  }
+  .main {
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar {
+    display: flex;
+    order: 2;
+    height: auto;
+    padding: 0;
+  }
+  .sidebar>div:not(.sidebar-download-tracker) {
+    display: none;
+  }
+
+  #btn-sidebar-download-tracker-close {
+    display: block;
+  }
+
+  .sidebar-download-tracker:not(.visible) {
+    display: none;
+  }
+  
+
+  .content {
+    flex: 1;
+    order: 1;
+
+  }
+  .page-download-wrapper {
+    height: auto !important;
+  }
+  .page-setlist-wrapper {
+    height: auto !important;
+  }
+
+  .mobile-burger-menu {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 1rem;
+  }
+
+  .mobile-navbar {
+    position: sticky;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-evenly;
+    width: 100vw;
+    bottom: 0;
+    padding: 0rem;
+    padding-bottom: 1rem;
+    padding-top: 0.5rem;
+    background-color: var(--color-main);
+    order: 3;
+  }
+
+  .navbar-item.mobile {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.5rem;
+  }
+
+  .navbar-item.mobile>span {
+    display: none;
+  }
+
+  .active-page:hover {
+    background-color: var(--color-background);
+  }
+
+
+
+  /* DOWNLOAD */
+
+  #btn-downloader-sidebar {
+    display: flex;
+  }
+  #btn-downloader-help {
+    display: none;
+  }
+
+  .dl-item.dl-has-path:hover > .dl-item-open-wrap {
+    display: none;
+  }
+  .dl-item.dl-has-path:hover > .dl-item-status {
+    display: block;
+  }
+
+
+
+  /* History */
+
+  .download-report-table tr:hover>td.dl-hist-btn {
+    display: none;
+  }
+
+
+  /* UI */
+
+  .ui-button {
+    /* padding: 0; */
+    height: auto;
+    min-width: auto;
+  }
+
+  .ui-button:hover {
+    border: 1px solid var(--color-border);
+  }
+
+  .inp-field-text {
+    min-width: 3rem;
+  }
+
+  .inp-field {
+    gap: 0.5rem;
+  }
+
+  .inp-field-option:hover span {
+    border-color: var(--color-border);
+  }
+  
+  .dl-hist-header {
+    gap: 0.5rem;
+  }
+
+
+  .s-control input:not(input[type='checkbox']) {
+    min-width: 3rem;
+  }
+
+
+  /* YTSEARCH */
+  .yt-search-album-header {
+    flex-direction: column;
+    position: relative;
+    padding-bottom: 0.5rem;
+  }
+  .yt-search-album-header>.yt-search-artist-header-back-btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0.5rem;
+  }
+  .yt-search-album-header .yt-search-bottom {
+    justify-content: center;
+  }
+  .yt-search-album-header .yt-search-title {
+    white-space: wrap;
+    text-align: center;
+  }
+  .yt-search-download-btn {
+    opacity: 0.01; /* Neccessary to make it clickable on Mobile (iOS at least). Also no need to show download symbol, just click*/
+  }
+  .yt-search-download-btn:hover {
+    opacity: 0.01;
+  }
+
+
+  /* SETLIST */
+  .setlist_table td:first-child {
+    position: unset;
+  }
+
+  .setlist_table th:first-child {
+    position: unset;
+  }
+
+  .setlist_table {
+    font-size: 0.8rem;
+  }
+
+  .setlist_table th.setlist-tour-cell>div {
+    left: 1em !important;
+    right: 1em !important;
+  }
+
 }

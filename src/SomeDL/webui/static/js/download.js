@@ -26,7 +26,7 @@ var download = {
         alert_box('Shut down SomeDL?', `
         <p>Do you want to turn off the server? Active downloads will be cancelled.</p>
         <div class="popup-button-box">
-            <button class="ui-button ui-button-small popup-exit"" onclick="req_shutdown()">OK</button>
+            <button class="ui-button ui-button-small popup-exit" onclick="req_shutdown()">OK</button>
             <button class="ui-button ui-button-small popup-exit">Cancel</button>
         </div>  
         `)
@@ -141,8 +141,9 @@ async function dl_update_status() {
     // in_queue_nr = Object.keys(data.items_in_queue).length;
     var active_downloads_nr = Object.keys(data.active_items).length;
     var finished_downloads_nr = Object.keys(data.finished_items).length;
-    update_download_tracker(active_downloads_nr + data.items_in_queue, finished_downloads_nr);
 
+    update_download_tracker(active_downloads_nr + data.items_in_queue, finished_downloads_nr);
+    await alert_many_downloads(active_downloads_nr + data.items_in_queue)
     // console.log(data);
     // console.log(data.items_in_queue + " | " + active_downloads_nr);
     
@@ -273,33 +274,59 @@ async function dl_update_status() {
                 });           
                 // const dir = path.substring(0, path.lastIndexOf('/'));
                 const dir = path.substring(0, Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')));
-
-                // dl_bar_play_song.addEventListener("click", () => {
-                //     req_open_file(path);
-                // })
-                // dl_bar_open_folder.addEventListener("click", () => {
-                //     req_open_file(dir);
-                // })
-
-
-                // dl_bar_play_song.dataset.path = path;
-                // dl_bar_open_folder.dataset.dir = dir;
                
                 dl_bar_play_song.dataset.path = path;
                 dl_bar_play_song.setAttribute("onclick", "req_open_file(this.dataset.path);");
 
                 dl_bar_open_folder.dataset.dir = dir;
                 dl_bar_open_folder.setAttribute("onclick", "req_open_file(this.dataset.dir);");
-                
-                // dl_bar_play_song.setAttribute("onclick", `req_open_file('${escape_attr(path)}')`);
-                // dl_bar_open_folder.setAttribute("onclick", `req_open_file('${escape_attr(dir)}')`);
-
 
             }
             
         }
        
     })
+}
+
+// --- Currently unused
+var already_asked_many_downloads = false;
+async function alert_many_downloads(nr) {
+    if (nr < 300) {
+        return;
+    }    
+    if (already_asked_many_downloads) {
+        return;
+    }
+    if (settings.webui_settings.dont_warn_many_downloads == true) {
+        return;
+    }
+    if (settings.current.download.sleep > 0) {
+        return;
+    }
+    already_asked_many_downloads = true;
+    alert_box("Warning: Don't download too fast!", `
+        <p>
+        Songs are downloaded using YT-DLP, which retrieves audio from YouTube. Downloading a large number of songs in a short period may cause YouTube to throttle your connection or temporarily block your IP address (Exact numbers are unknown).</p>
+        
+        <p>It is recommended to set a sleep timer when downloading many songs. Attempting to download ${nr} songs.</p>
+
+        <div class="popup-button-box" style="flex-wrap: wrap; justify-content: center">
+            <button class="ui-button ui-button-small popup-exit" onclick="set_sleep_timer(5)" title="This will also apply all pending setting changes.">Set 5s sleep timer</button>
+            <button class="ui-button ui-button-small" onclick="download.pause()">Pause Download</button>
+            <button class="ui-button ui-button-small popup-exit">Continue anyways</button>
+            <button class="ui-button ui-button-small popup-exit" onclick="settings.webui_add_entry('dont_warn_many_downloads', true)">Don't show this again</button>
+        </div>
+        `)
+
+}
+
+function set_sleep_timer(time) {
+    document.getElementById("s-sleep").value = 5;
+    settings.apply()
+}
+
+function unset_dont_warn_many_downloads () {
+    settings.webui_add_entry('dont_warn_many_downloads', false)
 }
 
 function escape_attr(str) {

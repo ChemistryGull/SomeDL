@@ -2,7 +2,7 @@
 /* === Download === */
 
 #page-download {
-    padding: 0 2rem;
+    padding: 0 var(--padding-pages);
 }
 
 .page-download-wrapper {
@@ -10,7 +10,7 @@
     flex-direction: column;
     height: 100vh;
     /* padding: 2rem; */
-    padding-top: 2rem;
+    padding-top: var(--padding-pages);
     box-sizing: border-box;
 }
 

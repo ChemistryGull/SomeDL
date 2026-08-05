@@ -68,7 +68,10 @@ def build_download_report(data, failed, already_downloaded = []):
                 # --- All items that require special formatting
                 match header[0]:
                     case "No.":
-                        table_success.append(f'<td>{escape(item.get("label").get("text").split("/", 1)[0])}</td>')
+                        if item.get("label"):
+                            table_success.append(f'<td>{escape(item.get("label").get("text").split("/", 1)[0])}</td>')
+                        else:
+                            table_success.append(f"<td></td>")
 
                     case "Input Type":
                         match item.get("inp_type"):
@@ -92,6 +95,9 @@ def build_download_report(data, failed, already_downloaded = []):
                                 table_success.append(f"<td>Fetch Albums</td>")
                                 table_success.append(f"<td><i>{escape(item.get('fetch_album_origin'))}</i></td>")
 
+                            case _:
+                                table_success.append(f"<td></td>")
+                                table_success.append(f"<td></td>")
 
                     case "Lyrics":
                         if item.get("instrumental"):

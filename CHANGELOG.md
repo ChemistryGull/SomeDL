@@ -1,6 +1,23 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
+## [1.7.0] - 05.08.2026
+
+Adding mobile support was easier than expected, so here it is! Also a few bug fixes. Tip: You can use the WebUI as a WebApp by adding it to your home screen. This gets rid of the browser search and navigation bars and makes it look like a mobile app.
+
+### Added
+- Add mobile support for WebUI.
+- Add warning when downloading more than 300 sogns at once, and option to enable 5s sleep timer
+
+### Changed
+- Set min animation time for flying download button to 0.4 (to avoid to fast transition on mobile).
+
+### Fixed
+- Fix error on exception in setlistfm.py by returning none on exception.
+- Fix musicbrainz fail on busy exception.
+- Fix regression in download_report.py that made download report generation fail for somedl new-template.
+
+
 
 ## [1.6.0] - 31.07.2026
 

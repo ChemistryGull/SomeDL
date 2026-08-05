@@ -6,13 +6,13 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    padding: 2rem;
+    padding: var(--padding-pages);
     box-sizing: border-box;
 }
 
 /* === Artist Table === */
 .setlist-artist-table {
-    border-radius: 1rem;
+    border-radius: 1em;
     overflow: auto;
     border: 1px solid var(--color-main);
 }
@@ -26,7 +26,7 @@
     background-color: var(--color-main);
 }
 .setlist-artist-table td, .setlist-artist-table th {
-    padding: 0.5rem 1rem;
+    padding: 0.5em 1em;
 }
 .setlist-artist-table td:first-child {
     cursor: pointer;
@@ -47,7 +47,7 @@
 }
 
 .setlist_table_wrapper {
-    border-radius: 1rem;
+    border-radius: 1em;
     overflow: auto;
     user-select: none;
 }
@@ -68,7 +68,7 @@
 .setlist_table tr:first-child th {
     cursor: pointer;
     vertical-align: top;
-    padding-top: 0.75rem;
+    padding-top: 0.75em;
     background-color: var(--color-main);
 }
 
@@ -86,7 +86,7 @@
 }
 
 .setlist_table th {
-    padding: 0.25rem;
+    padding: 0.25em;
 }
 
 .setlist-venue {
@@ -104,9 +104,9 @@
 .setlist-venue-song-nr {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
-  height: 1.1rem;
+  gap: 0.5em;
+  font-size: 0.8em;
+  height: 1.1em;
   font-weight: 100;
 }
 
@@ -152,12 +152,12 @@
     background-color: var(--color-background);
     text-align: center;
     white-space: nowrap;
-    padding: 0.25rem 1rem;
+    padding: 0.25em 1em;
     /* cursor: grabbing; */
 }
 
 .setlist_table td:not(:first-child) {
-    padding: 0.25rem;
+    padding: 0.25em;
     max-width: 0;
 }
 
@@ -175,7 +175,7 @@
 }
 .setlist-song-index {
     display: none;
-    padding-right: 0.25rem;
+    padding-right: 0.25em;
 }
 
 .setlist_table td:first-child {
@@ -192,7 +192,7 @@
 .song-name-column {
     display: flex;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: 0.5em;
 }
 
 .song-name-column>div:first-child {
@@ -250,7 +250,7 @@ tr.setlist-row.venue-unselected {
 .setlist-settings {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    gap: 1em;
     align-items: center;
 }
 

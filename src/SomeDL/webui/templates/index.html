@@ -2,14 +2,16 @@
 <html>
 <head>
     <title>SomeDL WebUI</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ui.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/download.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ytsearch.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/setlistfm.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='lib/coloris.min.css') }}">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
@@ -18,37 +20,35 @@
 <body>
 
     <div class="main">
-        <!-- <button class="shutdown-button" title="Clear download queue" onclick="download.clear_queue()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-power"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 6a7.75 7.75 0 1 0 10 0" /><path d="M12 4l0 8" /></svg>
-        </button> -->
+
         <div class="sidebar">
-            <div class="sidebar-header sidebar-bg">SomeDL
-                <!-- <div style="font-size: 0.7rem;">v1.4.0</div> -->
-            </div>
+            <div class="sidebar-header sidebar-bg">SomeDL</div>
+            <div class="version"></div>
             <div class="navbar sidebar-bg">
-                <div class="navbar-item" id="navbar-download" onclick="load_page('download')">
+                <div class="navbar-item navbar-download" onclick="load_page('download')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-download"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg>
                     <span>Download</span>
                 </div>
-                <div class="navbar-item" id="navbar-search" onclick="load_page('search')">
+                <div class="navbar-item navbar-search" onclick="load_page('search')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-search"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>
                     <span>YouTube Search</span>
                 </div>
-                <div class="navbar-item" id="navbar-setlist" onclick="load_page('setlist')">
+                <div class="navbar-item navbar-setlist" onclick="load_page('setlist')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-hand-love-you"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M11 11.5v-1a1.5 1.5 0 0 1 3 0v1.5" /><path d="M17 12v-6.5a1.5 1.5 0 0 1 3 0v10.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7a69.74 69.74 0 0 1 -.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47" /><path d="M14 10.5a1.5 1.5 0 0 1 3 0v1.5" /><path d="M8 13v-8.5a1.5 1.5 0 0 1 3 0v7.5" /></svg>
                     <span>Setlist</span>
                 </div>
-                <div class="navbar-item" id="navbar-download-history" onclick="load_page('download-history')">
+                <div class="navbar-item navbar-download-history" onclick="load_page('download-history')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-history"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 8l0 4l2 2" /><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" /></svg>
                     <span>Download History</span>
                 </div>
-                <div class="navbar-item" id="navbar-settings" onclick="load_page('settings')">
+                <div class="navbar-item navbar-settings" onclick="load_page('settings')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-settings"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>
                     <span>Settings</span>
                 </div>
             </div>
-            <!-- <div class="flex-expander"></div> -->
+
             <div class="sidebar-download-tracker sidebar-bg">
+                <div id="btn-sidebar-download-tracker-close" onclick="display_sidebar()">✕</div>
                 <div class="dl-tracker-row-1">
                     <div class="dl-tracker-item">
                         <div class="dl-tracker-num" id="dl-tracker-queue">0</div>
@@ -61,34 +61,6 @@
                     </div>
                 </div>
                 <div class="dl-tracker-row-2">
-                    
-                    <!-- <button class="ui-button ui-button-small download-btn-pause" title="Pause download" onclick="download.pause()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-player-pause">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M6 6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -12" />
-                            <path d="M14 6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -12" />
-                        </svg>
-                    </button>
-                    <button class="ui-button ui-button-small download-btn-resume" title="Resume download" onclick="download.resume()" style="display: none;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-player-play">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M7 4v16l13 -8l-13 -8" />
-                        </svg>
-                    </button>
-                    <button class="ui-button ui-button-small" title="Clear download queue" onclick="download.clear_queue()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M4 7l16 0" />
-                            <path d="M10 11l0 6" />
-                            <path d="M14 11l0 6" />
-                            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                        </svg>
-                    </button>
-                    <button class="ui-button ui-button-small" title="Clear download queue" onclick="download.clear_queue()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-power"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 6a7.75 7.75 0 1 0 10 0" /><path d="M12 4l0 8" /></svg>
-                    </button>
-                    <button class="ui-button-small ui-button" onclick="display_help()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-question-mark"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 8a3.5 3 0 0 1 3.5 -3h1a3.5 3 0 0 1 3.5 3a3 3 0 0 1 -2 3a3 4 0 0 0 -2 4" /><path d="M12 19l0 .01" /></svg></button> -->
                     <button class="ui-button ui-button-small btn-left" title="Power off SomeDL WebUI server" onclick="download.shutdown()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-power"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 6a7.75 7.75 0 1 0 10 0" /><path d="M12 4l0 8" /></svg>
                     </button>
@@ -117,12 +89,8 @@
                     </button>
                     <button class="btn-right ui-button-small ui-button" onclick="display_help()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-question-mark"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 8a3.5 3 0 0 1 3.5 -3h1a3.5 3 0 0 1 3.5 3a3 3 0 0 1 -2 3a3 4 0 0 0 -2 4" /><path d="M12 19l0 .01" /></svg></button>
 
-                </div>
-                <!-- <div>⇥</div> -->
-                
+                </div>                
             </div>
-            <!-- <div>v1.4.0</div> -->
-             
         </div>
 
         <div class="content">
@@ -137,7 +105,8 @@
                     <div class="inp-field">
                         <input class="inp-field-text inp-left" onkeypress="if(event.key === 'Enter') add_item()" id="inp-downloader" placeholder="Enter URL or search query seperated by commas">
                         <!-- <button class="inp-field-button ui-button" onclick="load_page('settings')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-settings"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg></button> -->
-                        <button class="inp-field-button ui-button" onclick="display_help()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-question-mark"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 8a3.5 3 0 0 1 3.5 -3h1a3.5 3 0 0 1 3.5 3a3 3 0 0 1 -2 3a3 4 0 0 0 -2 4" /><path d="M12 19l0 .01" /></svg></button>
+                        <button class="inp-field-button ui-button" id="btn-downloader-sidebar" onclick="display_sidebar()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-2"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 6l16 0" /><path d="M4 12l16 0" /><path d="M4 18l16 0" /></svg></button>
+                        <button class="inp-field-button ui-button" id="btn-downloader-help" onclick="display_help()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-question-mark"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 8a3.5 3 0 0 1 3.5 -3h1a3.5 3 0 0 1 3.5 3a3 3 0 0 1 -2 3a3 4 0 0 0 -2 4" /><path d="M12 19l0 .01" /></svg></button>
                         <button class="inp-field-button ui-button" id="btn-downloader-download" onclick="add_item()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-download"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg></button>
                     </div>
 
@@ -164,7 +133,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Output directory<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Output directory<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "." (folder command is called from)</i><p>Directory to save downloaded songs to. Always use forward slashes <code>/</code>, even on Windows.</p><p>Example: <code>C:/Users/you/Music</code></p></div>
                                     </div>
                                 </div>
@@ -178,7 +147,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">File naming template<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">File naming template<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "{artist} - {song}"</i>
                                             <p>Use forward slashes to sort into subfolders. Examples:</p>
                                             <ul>
@@ -207,6 +176,7 @@
                     <div id="downloader-field" class="downloader-field">
 
                     </div>
+
 
 
                 </div>
@@ -435,7 +405,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Download format<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Download format<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "mp3" - Recommended: "best", "best/opus", or "m4a"</i>
                                             <table>
                                             <tbody><tr><td><code>best</code></td><td>Highest quality, no reencoding (usually opus or m4a)</td></tr>
@@ -461,7 +431,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Transcoding quality<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Transcoding quality<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: 5 (0 = best / larger, 9 = worst / smallest)</i><p>Only affects formats that require transcoding: mp3, ogg/vorbis, flac always; opus and m4a only when transcoded. Lower number = better quality and larger file size.</p></div>
                                     </div>
                                 </div>
@@ -478,7 +448,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">ID3 tag version<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">ID3 tag version<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: 3 (ID3v2.3) - only applies to mp3</i>
                                             <table>
                                             <tbody><tr><td><code>v2.3</code></td><td>Best compatibility - works with virtually all music players</td></tr>
@@ -498,7 +468,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Output directory<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Output directory<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "." (folder command is called from)</i><p>Directory to save downloaded songs to. Always use forward slashes <code>/</code>, even on Windows.</p><p>Example: <code>C:/Users/you/Music</code></p></div>
                                     </div>
                                 </div>
@@ -512,7 +482,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">File naming template<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">File naming template<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "{artist} - {song}"</i>
                                             <p>Use forward slashes to sort into subfolders. Examples:</p>
                                             <ul>
@@ -545,7 +515,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Concurrent downloaders<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Concurrent downloaders<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: 2 - Options: 1-10</i><p>Number of parallel yt-dlp download workers. Too many concurrent downloads on large libraries may trigger rate limiting, IP blocks, or account bans when using cookies. For large downloads keep at 1-2. Is reduced to 1 when sleep timer is set.</p></div>
                                     </div>
                                 </div>
@@ -560,7 +530,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Prefetch queue size<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Prefetch queue size<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: 2 - Options: 0-10</i><p>Size of the queue holding prefetched metadata. Total songs visible in the downloader window = queue size + downloaders + 1. Setting this above the number of downloaders rarely improves speed.</p></div>
                                     </div>
                                 </div>
@@ -574,7 +544,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Sleep timer between downloads in seconds<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Sleep timer between downloads in seconds<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: 0 (deactivated)</i><p>Fast downloading of a large number of songs may lead to your IP being blocked by YouTube. To avoid that, set a sleep timer when downloading a large amount of songs at once. (the exact limit is unknown, it is recommended when downloading over 100 and highly recommended when downloading over 300 songs at once). Setting sleep to a number higher than 0 lowers the number of downloaders to 1. The sleep timer is randomized, e.g. for sleep = 5 the timer will be 5-9 seconds long. You can also set a temporary sleep timer with the <code>--sleep</code> flag. <a target="_blank" href="https://github.com/yt-dlp/yt-dlp/wiki/Extractors#common-youtube-errors">More info here.</a></p></div>
                                     </div>
                                 </div>
@@ -588,7 +558,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Cookies file path<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Cookies file path<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "" (disabled)</i><p>Path to a Netscape-format cookies file. Needed for age-restricted content. It is recommended to use the <code>--cookies-from-browser firefox</code> flag instead of setting this permanently.</p></div>
                                     </div>
                                 </div>
@@ -602,7 +572,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Cookies from browser<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Cookies from browser<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "" (disabled)</i><p>Pull cookies directly from a browser (e.g. <code>firefox</code>). Needed for age-restricted content. Logging into YouTube with an age-verified Firefox account works best.</p></div>
                                     </div>
                                 </div>
@@ -616,7 +586,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Prefer playlist<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Prefer playlist<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: false</i><p>When a URL contains both a song (<code>v=</code>) and playlist (<code>list=</code>) ID, download the full playlist instead of only the single video.</p></div>
                                     </div>
                                 </div>
@@ -630,7 +600,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Fetch albums<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Fetch albums<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: false</i><p>Always download the full album for each song. Equivalent to the <code>--fetch-albums</code> flag.</p></div>
                                     </div>
                                 </div>
@@ -644,7 +614,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Skip existing files<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Skip existing files<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Skip songs already present in the output location (checked by artist name and song title). Set to false if you want duplicates (e.g. single &amp; album versions). Re-downloaded files will be overwritten when false. Can be temporarily disabled with <code>--skip-file-check</code>.</p></div>
                                     </div>
                                 </div>
@@ -658,7 +628,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Download archive<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Download archive<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "" (disabled)</i><p>Path to an archive file. Song IDs are added after download so they are never downloaded again. The filename and extension do not matter.</p></div>
                                     </div>
                                 </div>
@@ -672,7 +642,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Sync files<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Sync files<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: empty</i><p>Full file paths to sync JSON files, comma-separated. Each filename must be unique even across different folders. Use forward slashes on all platforms.</p><p>Example: <code>/path/to/playlist1_sync.json, /path/to/playlist2_sync.json</code></p></div>
                                     </div>
                                 </div>
@@ -690,7 +660,7 @@
                                 <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Lyrics metadata<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Lyrics metadata<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Enable or disable embedding lyrics as a metadata field. Changes apply to all songs downloaded after saving.</p></div>   
                                     </div>
                                 </div>
@@ -704,7 +674,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Copyright metadata<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Copyright metadata<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Embed copyright/music label info in metadata. Sourced from the Deezer API.</p></div>
                                     </div>
                                 </div>
@@ -718,7 +688,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">ISRC metadata<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">ISRC metadata<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Embed the International Standard Recording Code (ISRC) in metadata. Sourced from the Deezer API.</p></div>
                                     </div>
                                 </div>
@@ -732,7 +702,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Genre metadata<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Genre metadata<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Embed genre in metadata. Sourced from the MusicBrainz API.</p></div>
                                     </div>
                                 </div>
@@ -746,7 +716,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Album artist metadata<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Album artist metadata<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Embed the album artist field. It is strongly recommended to keep this enabled.</p></div>
                                     </div>
                                 </div>
@@ -760,7 +730,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Multiple artists<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Multiple artists<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: false</i><p>Puts all involved artists/bands in the artist data field. The <code>{artist}</code> placeholder in the output template will still only contain the primary artist.</p></div>
                                     </div>
                                 </div>
@@ -783,7 +753,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Artist separator<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Artist separator<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: ";_" (Underscore is space)</i><p>Separator used to join multiple artists in a single metadata field. Options: <code>;</code> or <code>/</code> variants. Do not use <code>+</code>, <code>&amp;</code>, or <code>|</code>.</p><p>Only applies to mp3 and m4a. Opus, ogg, and FLAC support multiple separate artist fields.</p></div>
                                     </div>
                                 </div>
@@ -797,7 +767,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">ffmpeg metadata<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">ffmpeg metadata<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: false</i><p>Keep the metadata set by ffmpeg (usually just encoding information, not used by most music players). Set to true only if you need this data.</p></div>
                                     </div>
                                 </div>
@@ -811,7 +781,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Cover art file<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Cover art file<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: false</i><p>Download a <code>cover.jpg</code> file in the same folder as the song. Only one cover is created per folder, separation by album is recommended if you want to use this setting.</p></div>
                                     </div>
                                 </div>
@@ -831,7 +801,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Resolution of the embedded cover art<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Resolution of the embedded cover art<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "<code>l</code>"</i>
                                             <table>
                                             <tbody>
@@ -860,7 +830,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Lyrics type<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Lyrics type<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "plain"</i>
                                             <table>
                                             <tbody><tr><td><code>synced</code></td><td>Timed/karaoke-style synced lyrics</td></tr>
@@ -882,7 +852,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Synced lyrics in metadata<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Synced lyrics in metadata<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Store synced lyrics in the metadata of the audio file in addition to any sidecar files.</p></div>
                                     </div>
                                 </div>
@@ -896,7 +866,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">.lrc sidecar file<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">.lrc sidecar file<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: false</i><p>Generate a <code>.lrc</code> file containing synced lyrics alongside each downloaded song.</p></div>
                                     </div>
                                 </div>
@@ -910,7 +880,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Synced lyrics USLT fallback<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Synced lyrics USLT fallback<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: false</i><p>Writes synced lyrics into the unsynced (USLT) lyrics field for mp3. Workaround to make synced lyrics work in some media players. Only affects mp3 files.</p></div>
                                     </div>
                                 </div>
@@ -927,7 +897,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Lyrics source<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Lyrics source<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "lrclib"</i>
                                             <table>
                                             <tbody><tr><td><code>lrclib</code></td><td>Great free source with synced lyrics for many songs. Keep this if you need synced lyrics!</td></tr>
@@ -950,7 +920,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Lyrics fallback source<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Lyrics fallback source<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "youtube"</i><p>Source used if the primary lyrics source returns no results. Use <code>none</code> if you only want synced lyrics and don't want the extra lookup delay.</p><p>Do not use the same source as the primary source.</p></div>
                                     </div>
                                 </div>
@@ -967,7 +937,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">MusicBrainz API<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">MusicBrainz API<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Disabling will result in missing metadata. Used for genre data and artist MBIDs.</p></div>
                                     </div>
                                 </div>
@@ -981,7 +951,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Genius API<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Genius API<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Disabling will result in missing metadata. Used for album info for certain songs.</p></div>
                                     </div>
                                 </div>
@@ -995,7 +965,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Genius album check<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Genius album check<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Improves album metadata accuracy by cross-checking YouTube's album info with Genius. YouTube sometimes marks songs as singles even when they belong to an album. When enabled, SomeDL queries Genius for the actual album name.</p></div>
                                     </div>
                                 </div>
@@ -1009,7 +979,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Deezer API<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Deezer API<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Disabling will result in missing metadata. Used for music label (copyright) and ISRC data.</p></div>
                                     </div>
                                 </div>
@@ -1023,7 +993,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Max retry<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Max retry<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: 3</i><p>Maximum number of retry attempts. Currently only affects MusicBrainz API retries.</p></div>
                                     </div>
                                 </div>
@@ -1046,7 +1016,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Log level<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Log level<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: 4 (warning). All messages at or below the chosen level are shown.</i>
                                             <table>
                                             <tbody><tr><td><code>2</code> </td><td>critical</td><td>Unhandled exceptions only</td></tr>
@@ -1069,7 +1039,7 @@
                             <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Download report threshold<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Download report threshold<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: 2</i><p>Minimum number of songs in a session before a download report is generated. Set to 1 to always show a report (or use the <code>-R</code> flag). Set to a very large number (e.g. 1000000) to disable reports entirely. Only applies for downloads made with the CLI. When using the WebUI, the downloads of the current session can be seen in the Download Histroy tab.</p></div>
                                     </div>
                                 </div>
@@ -1086,7 +1056,7 @@
                                 <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Host<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Host<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: 127.0.0.1</i><p>127.0.0.1 lets you access the application only on your local machine. Set the host to 0.0.0.0 to access the application from other devices on the same network (you will need to allow access to this port in your firewall).</p></div>
                                     </div>
                                 </div>
@@ -1100,7 +1070,7 @@
                                 <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Port<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Port<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: 5000</i></div>
                                     </div>
                                 </div>
@@ -1114,7 +1084,7 @@
                                 <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Browser<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Browser<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: "" (empty)</i><p>Opens in default browser if left empty. Enter the name of the browser to open when the WebUI starts.</p></div>
                                     </div>
                                 </div>
@@ -1128,7 +1098,7 @@
                                 <button class="settings-help-btn">?</button>
                                 <div class="popup-box">
                                     <div class="popup">
-                                        <div class="popup-hdr">Open browser<button class="popup-close">✖</button></div>
+                                        <div class="popup-hdr">Open browser<button class="popup-close">✕</button></div>
                                         <div class="popup-body"><i>Default: true</i><p>Automatically opens a webbrowser tab with the WebUI when the WebUI is started.</p></div>
                                     </div>
                                 </div>
@@ -1188,7 +1158,7 @@
 
             <div class="popup-box" id="alert-box">
                 <div class="popup">
-                    <div class="popup-hdr">Alert<button class="popup-close">✖</button></div>
+                    <div class="popup-hdr">Alert<button class="popup-close">✕</button></div>
                     <!-- <div class="popup-body">box</div> -->
                     <div class="popup-body">
                         <p>Do you want to revert all settings to the default values?</p>
@@ -1206,9 +1176,38 @@
 
         </div>
 
+        <div class="mobile-navbar">
+            <div class="navbar-item mobile navbar-download" onclick="load_page('download')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-download"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg>
+                <span>Download</span>
+            </div>
+            <div class="navbar-item mobile navbar-search" onclick="load_page('search')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-search"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>
+                <span>Search</span>
+            </div>
+            <div class="navbar-item mobile navbar-setlist" onclick="load_page('setlist')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-hand-love-you"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M11 11.5v-1a1.5 1.5 0 0 1 3 0v1.5" /><path d="M17 12v-6.5a1.5 1.5 0 0 1 3 0v10.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7a69.74 69.74 0 0 1 -.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47" /><path d="M14 10.5a1.5 1.5 0 0 1 3 0v1.5" /><path d="M8 13v-8.5a1.5 1.5 0 0 1 3 0v7.5" /></svg>
+                <span>Setlist</span>
+            </div>
+            <div class="navbar-item mobile navbar-download-history" onclick="load_page('download-history')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-history"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 8l0 4l2 2" /><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" /></svg>
+                <span>History</span>
+            </div>
+            <div class="navbar-item mobile navbar-settings" onclick="load_page('settings')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-settings"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>
+                <span>Settings</span>
+            </div>
+        </div>
+        
     </div>
 
-    <div class="version"></div>
+
+    <!-- <div class="mobile-burger-menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-2"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 6l16 0" /><path d="M4 12l16 0" /><path d="M4 18l16 0" /></svg>
+    </div> -->
+    
+
+    
 
     <script src="{{ url_for('static', filename='lib/coloris.min.js') }}"></script>
 

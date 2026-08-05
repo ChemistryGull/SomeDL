@@ -405,7 +405,7 @@ async function yt_get_album(browse_id) {
 
 
     album_string = `
-        <div class="yt-search-item">
+        <div class="yt-search-item yt-search-album-header">
             <button class="yt-search-artist-header-back-btn ui-button" onclick="yt_search_return_btn('yt-search-results-field-history-${old_history_number}')">${icons.chevron_left}</button>
             <div class="yt-search-coverart large">
                 <img src="${album_art_url}" alt="Coverart" loading="lazy">
