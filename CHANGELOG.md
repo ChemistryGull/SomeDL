@@ -1,6 +1,13 @@
 # Changelog
 https://keepachangelog.com/en/1.1.0/
 
+
+## [1.7.1] - 05.08.2026
+
+### Fixed
+- Fix download report generation for somedl new-template when songs are already present.
+
+
 ## [1.7.0] - 05.08.2026
 
 Adding mobile support was easier than expected, so here it is! Also a few bug fixes. Tip: You can use the WebUI as a WebApp by adding it to your home screen. This gets rid of the browser search and navigation bars and makes it look like a mobile app.

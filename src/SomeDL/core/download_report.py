@@ -160,7 +160,10 @@ def build_download_report(data, failed, already_downloaded = []):
 
     for item in failed:
         table_failed.append("<tr>")
-        table_failed.append(f'<td>{escape(item.get("label").get("text").split("/", 1)[0])}</td>')
+        if item.get("label"):
+            table_failed.append(f'<td>{escape(item.get("label").get("text").split("/", 1)[0])}</td>')
+        else:
+            table_failed.append(f'<td></td>')
         table_failed.append(f'<td>{escape(str(item.get("text_query", "-")))}</td>')
         table_failed.append(f'<td>{escape(str(item.get("artist_name", "-")))}</td>')
         table_failed.append(f'<td>{escape(str(item.get("song_title", "-")))}</td>')
@@ -194,7 +197,10 @@ def build_download_report(data, failed, already_downloaded = []):
 
     for item in already_downloaded:
         table_already.append("<tr>")
-        table_already.append(f'<td>{escape(item.get("label").get("text").split("/", 1)[0])}</td>')
+        if item.get("label"):
+            table_already.append(f'<td>{escape(item.get("label").get("text").split("/", 1)[0])}</td>')
+        else:
+            table_already.append(f'<td></td>')
         table_already.append(f'<td>{escape(str(item.get("text_query", "-")))}</td>')
         table_already.append(f'<td>{escape(str(item.get("artist_name", "-")))}</td>')
         table_already.append(f'<td>{escape(str(item.get("song_title", "-")))}</td>')
