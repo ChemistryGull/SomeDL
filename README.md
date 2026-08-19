@@ -27,6 +27,9 @@ The audio is downloaded using yt-dlp. SomeDL accepts text queries, YouTube URLs 
 
 For more information, visit the [SomeDL ReadTheDocs page](https://somedl.readthedocs.io/en/latest/index.html).
 
+> [!WARNING]
+> If you can't download any songs because of `HTTP Error: 403 Forbidden`, upgrade yt-dlp to nightly. Use `python -m pip install -U --pre "yt-dlp[default]"` if you have installed yt-dlp with pip, or if you have just installed SomeDL on its own. Use `yt-dlp --upgrade-to nighly` if you have installed yt-dlp manually. Alternatively you can use `--cookies-from-browser firefox`, this should do it as a temporary workaround until yt-dlp pushes the newest updates to the sable release (do not download to excessively with cookies-from-browser set)
+
 # Usage
 ## CLI
 Simply type `somedl` followed by your search query in quotes.
