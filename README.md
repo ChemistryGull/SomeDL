@@ -79,10 +79,9 @@ Song title | Artist name | Album name | High quality cover art (544x544) | Relea
 
 ## Proposed Features
 
-- [x] Web-UI (*NEW in 1.5.0*)
-- [x] Download songs based on concert setlists, part of the new web UI (*NEW in 1.5.0*)
-- [ ] Improvements to the WebUI (*Working on, hopefully released soon*)
-- [ ] Mobile support for WebUI - will still require SomeDL running on a PC, Server or in termux (*Currently working out feasability*)
+- [ ] Option to download a selection of the most listened to songs by an artist
+- [ ] Configurable metadata (*Checking feasibility*)
+- [ ] Spotify URL support (*Checking feasibility*)
 
 # Installation
 This utility can be installed using pip. Also confirm that you meet all the installation [requirements](https://github.com/ChemistryGull/SomeDL#requirements)!
@@ -102,6 +101,11 @@ This software is currently not packaged in any repository. Install it using your
 ```
 pipx install somedl
 ```
+
+## Docker (unofficial)
+
+See [this](https://github.com/FaNt4zMa/SomeDL-Docker) repository for instructions on setting up SomeDL on a server using Docker. This third-party Docker image is not maintained by me, so use it at your own risk.
+
 ## Requirements
 ### Python (REQUIRED)
 SomeDL is developed and tested on the newest version of Python (currently 3.14). Python 3.10 or newer is required. Visit [How to install python](https://github.com/ChemistryGull/SomeDL/blob/main/docs/how_to_install_python.md)  for a short guide.
